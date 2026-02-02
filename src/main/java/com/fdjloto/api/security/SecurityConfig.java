@@ -82,12 +82,12 @@ public class SecurityConfig {
                     // ✅ évite de casser login/register au début
                     // (tu peux ensuite décider de les protéger aussi, mais d’abord: stable)
                     .ignoringRequestMatchers(
-                        // "/api/auth/csrf",          // ✅ AJOUT IMPORTANT
-                        "/api/auth/refresh",       // ✅ recommandé
+                        "/api/auth/csrf",          // ✅ AJOUT IMPORTANT
+                        // "/api/auth/refresh",       // ✅ recommandé
                         "/api/auth/logout",   // ✅ AJOUTE ÇA
                         "/api/auth/login3",
                         "/api/auth/register",
-                        "/api/auth/login4",
+                        // "/api/auth/login4",
                         "/api/health",
                         "/api/hello",
                         "/swagger-ui/**",
@@ -136,6 +136,7 @@ public class SecurityConfig {
                             "/api/health",
                             "/api/hello"
                         ).permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/auth/refresh").permitAll()
 
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/visits/**").permitAll()

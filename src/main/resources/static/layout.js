@@ -48,10 +48,17 @@
     }
 
     try {
+      // const res = await (window.__ORIGINAL_FETCH__ || fetch)(`${baseUrl}${CSRF_PATH}`, {
+      //   method: "GET",
+      //   credentials: "include",
+      //   cache: "no-store"
+      // });
+
       const res = await (window.__ORIGINAL_FETCH__ || fetch)(`${baseUrl}${CSRF_PATH}`, {
-        method: "GET",
+        method: "POST",
         credentials: "include",
-        cache: "no-store"
+        cache: "no-store",
+        headers: { "Accept": "application/json" }
       });
 
       if (res.ok) {

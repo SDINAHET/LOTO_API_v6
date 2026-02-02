@@ -61,8 +61,10 @@ public class SwaggerConfig {
                                         .scheme("bearer")
                                         .bearerFormat("JWT")
                         ))
-                .addServersItem(new Server().url("http://localhost:8082").description("Serveur local"));
-    }
+                // .addServersItem(new Server().url("http://localhost:8082").description("Serveur local"));
+                // .addServersItem(new Server().url("/").description("Serveur local"));
+                .addServersItem(new Server().url("/api").description("Production"));
+   }
 
     @Bean
     public WebMvcConfigurer corsConfigurer() {
@@ -70,7 +72,7 @@ public class SwaggerConfig {
             @Override
             public void addCorsMappings(@NonNull CorsRegistry registry) {
                 registry.addMapping("/**")
-                        .allowedOrigins("http://127.0.0.1:5500", "http://localhost:8082")
+                        .allowedOrigins("https://stephanedinahet.fr", "http://127.0.0.1:5500", "http://localhost:8082", "http://127.0.0.1:8082")
                         .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
                         .allowedHeaders("*")
                         .exposedHeaders("Authorization")
