@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Ajouter un ticket — Loto Tracker</title>
+
+  <link rel="icon" type="image/png" href="loto_tracker.png" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    body{
+      margin:0;
+      min-height:100vh;
+      background:
+        radial-gradient(1200px 600px at 20% 20%, rgba(37,99,235,.28), transparent 60%),
+        radial-gradient(1000px 700px at 80% 30%, rgba(168,85,247,.22), transparent 60%),
+        rgba(6,10,18,1);
+      color: rgba(255,255,255,.92);
+    }
+
+    /* ===== Layout (comme tickets.html) ===== */
+    .app-shell{
+      display: grid;
+      grid-template-columns: 280px 1fr;
+      gap: 18px;
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 24px 16px 86px;
+    }
+
+    .glass-panel{
+      border-radius: 18px;
+      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(15,23,42,.55);
+      backdrop-filter: blur(12px);
+      box-shadow: 0 18px 50px rgba(0,0,0,.45);
+      padding: 22px;
+    }
+
+    .panel-title{
+      font-weight: 950;
+      letter-spacing: .2px;
+      margin: 0 0 8px;
+      font-size: 2.1rem;
+    }
+    .muted{ color: rgba(255,255,255,.65); }
+
+    /* ===== Sidebar ===== */
+    .sidebar{
+      border-radius: 18px;
+      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(15,23,42,.55);
+      backdrop-filter: blur(12px);
+      box-shadow: 0 18px 50px rgba(0,0,0,.35);
+      overflow: hidden;
+    }
+    .sidebar-inner{ padding: 14px; }
+    .sidebar-title{
+      font-weight: 950;
+      letter-spacing: .2px;
+      color: rgba(255,255,255,.75);
+      margin: 6px 8px 10px;
+      font-size: .92rem;
+      text-transform: uppercase;
+    }
+    .side-link{
+      display:flex;
+      align-items:center;
+      gap: 10px;
+      padding: 11px 12px;
+      border-radius: 12px;
+      color: rgba(255,255,255,.86);
+      text-decoration:none;
+      font-weight: 850;
+      background: rgba(255,255,255,.04);
+      border: 1px solid rgba(255,255,255,.08);
+      margin: 8px 0;
+    }
+    .side-link:hover{ background: rgba(255,255,255,.06); }
+    .side-link.active{
+      background: rgba(59,130,246,.18);
+      border-color: rgba(59,130,246,.25);
+    }
+
+    @media (min-width: 992px){
+      .sidebar{
+        position: sticky;
+        top: calc(var(--topbar-h) + 16px);
+        align-self: start;
+      }
+    }
+
+    /* ===== Overlay mobile ===== */
+    #overlay{
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,.55);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .2s ease;
+      z-index: 80;
+    }
+    #overlay.show{
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    @media (max-width: 991px){
+      .app-shell{ grid-template-columns: 1fr; }
+      .sidebar{
+        position: fixed;
+        top: var(--topbar-h);
+        left: 0;
+        height: calc(100vh - var(--topbar-h));
+        width: 300px;
+        transform: translateX(-105%);
+        transition: transform .2s ease;
+        z-index: 90;
+        border-radius: 0 18px 18px 0;
+      }
+      .sidebar.open{ transform: translateX(0); }
+    }
+
+    /* ===== Inputs ===== */
+    .form-control{
+      background: rgba(255,255,255,.06);
+      border: 1px solid rgba(255,255,255,.12);
+      color: rgba(255,255,255,.92);
+      border-radius: 12px;
+    }
+    .form-control:focus{
+      background: rgba(255,255,255,.08);
+      border-color: rgba(96,165,250,.55);
+      box-shadow: 0 0 0 .2rem rgba(96,165,250,.12);
+      color: rgba(255,255,255,.92);
+    }
+
+    /* ===== Boutons ===== */
+    .btn-soft{
+      border-radius: 12px;
+      font-weight: 900;
+      border: 1px solid rgba(255,255,255,.12);
+      background: rgba(255,255,255,.06);
+      color: rgba(255,255,255,.92);
+    }
+    .btn-soft:hover{ background: rgba(255,255,255,.08); }
+
+    .btn-primary{
+      border-radius: 12px;
+      font-weight: 950;
+    }
+
+    /* ===== Alerts ===== */
+    .alert{
+      border-radius: 12px;
+      border: 1px solid rgba(255,255,255,.12);
+      background: rgba(255,255,255,.05);
+      color: rgba(255,255,255,.92);
+    }
+    .alert-success{
+      border-color: rgba(34,197,94,.25);
+      background: rgba(34,197,94,.10);
+    }
+    .alert-danger{
+      border-color: rgba(239,68,68,.25);
+      background: rgba(239,68,68,.10);
+    }
+
+    .sub-card{
+      border-radius: 16px;
+      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(2,6,23,.22);
+      padding: 16px;
+      box-shadow: 0 18px 50px rgba(0,0,0,.25);
+    }
+
+    /* ===== Sélecteurs numéros ===== */
+    .pick-grid{
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: center;
+      padding: 10px 0;
+    }
+
+    .pick-ball{
+      width: 46px;
+      height: 46px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 999px;
+      font-weight: 950;
+      cursor: pointer;
+      user-select: none;
+      border: 1px solid rgba(255,255,255,.12);
+      background: rgba(59,130,246,.16);
+      color: rgba(255,255,255,.92);
+      transition: transform .08s ease, background .15s ease, border-color .15s ease;
+    }
+    .pick-ball:hover{ transform: translateY(-1px); }
+
+    .pick-ball.selected{
+      background: rgba(59,130,246,.78);
+      border-color: rgba(59,130,246,.90);
+      color: #fff;
+    }
+
+    .pick-ball.chance{
+      background: rgba(239,68,68,.14);
+      border-color: rgba(239,68,68,.20);
+    }
+    .pick-ball.chance.selected{
+      background: rgba(239,68,68,.86);
+      border-color: rgba(239,68,68,.95);
+      color:#fff;
+    }
+
+
+    /* === HOVER = comme "selected" (uniquement si pas disabled) === */
+    .pick-ball:hover:not(.selected):not(.disabled){
+      background: rgba(59,130,246,.78);
+      border-color: rgba(59,130,246,.90);
+      color: #fff;
+      transform: translateY(-1px);
+    }
+
+    /* Hover rouge "comme selected" pour Chance */
+    .pick-ball.chance:hover:not(.selected):not(.disabled){
+      background: rgba(239,68,68,.86);
+      border-color: rgba(239,68,68,.95);
+      color: #fff;
+      transform: translateY(-1px);
+    }
+
+    /* === Etat désactivé (quand 5 numéros déjà choisis) === */
+    .pick-ball.disabled{
+      opacity: .35;
+      cursor: not-allowed;
+      transform: none !important;
+    }
+
+    /* Empêche le hover d'ajouter un effet quand disabled */
+    .pick-ball.disabled:hover{
+      background: rgba(59,130,246,.16);
+      border-color: rgba(255,255,255,.12);
+      color: rgba(255,255,255,.92);
+    }
+    .pick-ball.chance.disabled:hover{
+      background: rgba(239,68,68,.14);
+      border-color: rgba(239,68,68,.20);
+    }
+
+  </style>
+</head>
+
+<body>
+  <!-- Header injecté -->
+  <div id="appHeader"></div>
+
+  <div class="app-shell">
+    <!-- Sidebar -->
+    <aside id="sidebar" class="sidebar">
+      <div class="sidebar-inner">
+        <div class="sidebar-title">Dashboard</div>
+        <a class="side-link" href="index.html"><i class="fa-solid fa-chart-line"></i> Résultats</a>
+        <a class="side-link active" href="tickets.html"><i class="fa-solid fa-ticket"></i> Tickets</a>
+        <a class="side-link" href="statistiques.html"><i class="fa-solid fa-chart-column"></i> Statistiques</a>
+        <a class="side-link" href="profil.html"><i class="fa-solid fa-user-gear"></i> Mon profil</a>
+        <hr style="border-color: rgba(255,255,255,.10); margin: 12px 0;">
+
+        <div class="sidebar-title">Jouer</div>
+        <a class="side-link" href="loto.html"><i class="fa-solid fa-clover"></i> Loto</a>
+        <a class="side-link" href="euromillions.html"><i class="fa-solid fa-star"></i> Euromillions</a>
+      </div>
+    </aside>
+
+    <!-- Main -->
+    <main>
+      <section class="glass-panel">
+        <div class="d-flex align-items-start justify-content-between flex-wrap gap-2">
+          <div>
+            <h1 class="panel-title">Ajouter un ticket</h1>
+            <p class="muted mb-0">Sélectionne 5 numéros + 1 chance, puis enregistre.</p>
+          </div>
+          <a class="btn btn-soft px-3" href="tickets.html">
+            <i class="fa-solid fa-arrow-left me-2"></i>Retour
+          </a>
+        </div>
+
+        <!-- Alerts (pas d'alert JS) -->
+        <div class="alert alert-success d-none mt-3" id="okBox">
+          <i class="fa-solid fa-circle-check me-2"></i>
+          <span id="okText">OK</span>
+        </div>
+        <div class="alert alert-danger d-none mt-3" id="errBox">
+          <i class="fa-solid fa-triangle-exclamation me-2"></i>
+          <span id="errText">Erreur</span>
+        </div>
+
+        <div class="sub-card mt-3">
+          <form id="ticketForm">
+            <div class="row g-3 align-items-end">
+              <div class="col-md-6">
+                <label for="drawDate" class="form-label fw-bold">Date du tirage</label>
+                <input type="date" class="form-control" id="drawDate" required>
+                <div class="muted mt-2" style="font-weight:800; font-size:.92rem;">
+                  Tirages Loto : lundi, mercredi, samedi
+                </div>
+              </div>
+              <div class="col-md-6 text-md-end">
+                <button type="submit" class="btn btn-primary px-4" id="submitBtn">
+                  <i class="fa-solid fa-plus me-2"></i>Enregistrer
+                </button>
+              </div>
+            </div>
+
+            <hr style="border-color: rgba(255,255,255,.10); margin: 18px 0;">
+
+            <div class="mb-2 fw-bold">Choisissez 5 numéros</div>
+            <div id="numberSelection" class="pick-grid"></div>
+
+            <hr style="border-color: rgba(255,255,255,.10); margin: 18px 0;">
+
+            <div class="mb-2 fw-bold">Choisissez 1 numéro chance</div>
+            <div id="chanceSelection" class="pick-grid"></div>
+
+            <div class="muted mt-3" id="selectionHint" style="font-weight:850;">
+              Sélection : <span id="pickedCount">0</span>/5 — Chance : <span id="pickedChance">—</span>
+            </div>
+          </form>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- overlay -->
+  <div id="overlay"></div>
+
+  <!-- Footer injecté -->
+  <div id="appFooter"></div>
+
+  <!-- Layout global -->
+  <script src="layout.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+  <script>
+    (function(){
+
+      /* =========================
+        CSRF helpers (À AJOUTER ICI)
+      ========================= */
+      function getCookie(name){
+        const m = document.cookie.match(new RegExp("(^|;\\s*)" + name + "=([^;]*)"));
+        return m ? decodeURIComponent(m[2]) : null;
+      }
+
+      axios.defaults.withCredentials = true;
+
+
+      async function ensureCsrf(base){
+        // si layout.js expose ensureCsrfToken, on l’utilise
+        if (window.ensureCsrfToken) {
+          await window.ensureCsrfToken(base);
+        }
+      }
+
+      // ===== API
+      const API_BASE =
+        window.__API_BASE_ACTIVE__ ||
+        ((location.hostname === "localhost" || location.hostname === "127.0.0.1")
+          ? `http://${location.hostname}:8082`
+          : "https://stephanedinahet.fr");
+
+      //const API_BASE =
+      //  (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1")
+      //    ? "http://localhost:8082"
+      //    : "https://stephanedinahet.fr";
+
+      const ME_URL      = `${API_BASE}/api/auth/me`;
+      const API_TICKETS = `${API_BASE}/api/tickets`;
+
+      // ===== DOM
+      const okBox  = document.getElementById("okBox");
+      const okText = document.getElementById("okText");
+      const errBox = document.getElementById("errBox");
+      const errText= document.getElementById("errText");
+
+      const drawDate = document.getElementById("drawDate");
+      const numberSelection = document.getElementById("numberSelection");
+      const chanceSelection = document.getElementById("chanceSelection");
+      const pickedCount = document.getElementById("pickedCount");
+      const pickedChance = document.getElementById("pickedChance");
+      const submitBtn = document.getElementById("submitBtn");
+      const form = document.getElementById("ticketForm");
+
+      // ===== State
+      let selectedNumbers = new Set(); // 5 numbers
+      let selectedChance = null;       // 1..10
+      let userId = null;
+
+      // ===== UI helpers
+      function showOk(msg){
+        errBox.classList.add("d-none");
+        okText.textContent = msg || "OK.";
+        okBox.classList.remove("d-none");
+        setTimeout(() => okBox.classList.add("d-none"), 2500);
+      }
+      function showErr(msg){
+        okBox.classList.add("d-none");
+        errText.textContent = msg || "Erreur.";
+        errBox.classList.remove("d-none");
+      }
+
+      function setLoading(isLoading){
+        submitBtn.disabled = isLoading;
+        submitBtn.innerHTML = isLoading
+          ? `<span class="spinner-border spinner-border-sm me-2"></span>Enregistrement…`
+          : `<i class="fa-solid fa-plus me-2"></i>Enregistrer`;
+      }
+
+      function updateHint(){
+        pickedCount.textContent = String(selectedNumbers.size);
+        pickedChance.textContent = selectedChance != null ? String(selectedChance) : "—";
+      }
+
+      // ===== Auth
+      async function ensureAuth(){
+        try{
+          const res = await axios.get(ME_URL, { withCredentials: true });
+          userId = res?.data?.id || null;
+          if (!userId) throw new Error("Missing user id");
+          return true;
+        }catch(e){
+          showErr("Session expirée. Redirection vers la connexion…");
+          setTimeout(() => window.location.href = "login.html", 900);
+          return false;
+        }
+      }
+
+      function updateDisabledNumbers(){
+        const maxReached = selectedNumbers.size >= 5;
+
+        numberSelection.querySelectorAll(".pick-ball").forEach(el => {
+          const n = Number(el.textContent);
+          const isSelected = selectedNumbers.has(n);
+
+          // Si 5 atteints : on disable tous les non-sélectionnés
+          if (maxReached && !isSelected) el.classList.add("disabled");
+          else el.classList.remove("disabled");
+        });
+      }
+
+
+      // ===== Build pickers
+      function buildNumberButtons(){
+        numberSelection.innerHTML = "";
+        for (let i = 1; i <= 49; i++){
+          const el = document.createElement("span");
+          el.className = "pick-ball";
+          el.textContent = i;
+
+          if (selectedNumbers.has(i)) el.classList.add("selected");
+
+          //el.addEventListener("click", () => {
+          //  if (selectedNumbers.has(i)){
+          //    selectedNumbers.delete(i);
+          //    el.classList.remove("selected");
+          //    updateHint();
+          //    return;
+          //  }
+          //  if (selectedNumbers.size >= 5){
+              // showErr("Maximum 5 numéros."); // optionnel
+          //    return;
+          //  }
+          //  selectedNumbers.add(i);
+          //  el.classList.add("selected");
+          //  updateHint();
+          //});
+
+          el.addEventListener("click", () => {
+            if (el.classList.contains("disabled")) return;
+
+            if (selectedNumbers.has(i)){
+              selectedNumbers.delete(i);
+              el.classList.remove("selected");
+              updateHint();
+              updateDisabledNumbers();
+              return;
+            }
+
+            if (selectedNumbers.size >= 5){
+              return;
+            }
+
+            selectedNumbers.add(i);
+            el.classList.add("selected");
+            updateHint();
+            updateDisabledNumbers();
+          });
+
+
+          numberSelection.appendChild(el);
+        }
+      }
+
+      function buildChanceButtons(){
+        chanceSelection.innerHTML = "";
+        for (let i = 1; i <= 10; i++){
+          const el = document.createElement("span");
+          el.className = "pick-ball chance";
+          el.textContent = i;
+
+          if (selectedChance === i) el.classList.add("selected");
+
+          el.addEventListener("click", () => {
+            setChance(i);
+          });
+
+          chanceSelection.appendChild(el);
+        }
+      }
+
+      updateDisabledNumbers();
+
+
+      function setChance(i){
+        selectedChance = i;
+
+        chanceSelection.querySelectorAll(".pick-ball.chance")
+          .forEach(x => x.classList.remove("selected"));
+
+        const match = [...chanceSelection.querySelectorAll(".pick-ball.chance")]
+          .find(x => Number(x.textContent) === i);
+
+        if (match) match.classList.add("selected");
+        updateHint();
+      }
+
+      function resetSelections(){
+        selectedNumbers = new Set();
+        selectedChance = null;
+        buildNumberButtons();
+        buildChanceButtons();
+        updateHint();
+      }
+
+      updateDisabledNumbers();
+
+
+      // ===== Init
+      document.addEventListener("DOMContentLoaded", async () => {
+        const auth = await ensureAuth();
+        if (!auth) return;
+
+        buildNumberButtons();
+        buildChanceButtons();
+        updateHint();
+      });
+
+      // ===== Submit (POST)
+      form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        errBox.classList.add("d-none");
+        okBox.classList.add("d-none");
+
+        const dateVal = drawDate.value;
+
+        if (!dateVal){
+          showErr("Veuillez choisir une date de tirage.");
+          return;
+        }
+        if (selectedNumbers.size !== 5 || selectedChance == null){
+          showErr("Vous devez choisir 5 numéros et 1 numéro chance.");
+          return;
+        }
+
+        const numbersSorted = [...selectedNumbers].sort((a,b) => a-b);
+
+        const payload = {
+          userId,
+          drawDate: dateVal,
+          numbers: numbersSorted.join("-"),
+          chanceNumber: selectedChance
+        };
+
+        try{
+          setLoading(true);
+
+          // 🔐 s'assurer que le cookie CSRF existe
+          await ensureCsrf(API_BASE);
+
+          const xsrf = getCookie("XSRF-TOKEN");
+
+          await axios.post(API_TICKETS, payload, {
+            withCredentials: true,
+            headers: {
+              "Content-Type": "application/json",
+              "Accept": "application/json",
+              ...(xsrf ? { "X-XSRF-TOKEN": xsrf } : {})
+            }
+          });
+
+
+          //await axios.post(API_TICKETS, payload, {
+          //  withCredentials: true,
+          //  headers: {
+          //    "Content-Type": "application/json",
+          //    "Accept": "application/json"
+          //  }
+          //});
+
+          //showOk("Ticket ajouté avec succès. Redirection…");
+          //setTimeout(() => window.location.href = "tickets.html", 900);
+          //setTimeout(() => window.location.href = "tickets.html?burst=1", 1000);
+          //window.location.href = `tickets.html?burst=1&ts=${Date.now()}`;
+          showOk("Ticket mis à jour avec succès — Redirection…");
+            setTimeout(() => {
+              window.location.href = `tickets.html?burst=1&ts=${Date.now()}`;
+            }, 800);
+
+          resetSelections();
+        }catch(err){
+          console.error(err);
+          const msg =
+            err?.response?.data?.message ||
+            err?.response?.data?.error ||
+            err?.message ||
+            "Erreur lors de l'ajout du ticket.";
+          showErr(msg);
+        }finally{
+          setLoading(false);
+        }
+      });
+    })();
+  </script>
+
+  <script src="cookies.js"></script>
+  <!-- IA (si tu l'utilises) -->
+  <script src="ai-loader.js"></script>
+</body>
+</html>

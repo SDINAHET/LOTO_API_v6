@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Conditions Générales d’Utilisation – Loto Tracker</title>
+
+  <link rel="icon" type="image/png" href="loto_tracker.png">
+
+  <!-- Bootstrap + Font Awesome -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+  <!-- Layout global -->
+  <script defer src="layout.js"></script>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    :root{
+      --bg0:#0b1220;
+      --bg1:#0f1b2d;
+      --stroke: rgba(255,255,255,.12);
+      --text: rgba(255,255,255,.92);
+      --muted: rgba(255,255,255,.65);
+      --primary:#3b82f6;
+      --primary2:#60a5fa;
+      --radius:18px;
+      --shadow:0 16px 45px rgba(0,0,0,.35);
+      --topbar-h:72px;
+      --footer-h:56px;
+      --sidebar-w: 280px;
+
+    }
+
+    body{
+      margin:0;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      background:
+        radial-gradient(1200px 600px at 20% 10%, rgba(59,130,246,.22), transparent 60%),
+        radial-gradient(900px 500px at 90% 25%, rgba(239,68,68,.14), transparent 55%),
+        linear-gradient(180deg, var(--bg0), var(--bg1));
+      color:var(--text);
+      min-height:100vh;
+      padding-top: var(--topbar-h);
+      padding-bottom: var(--footer-h);
+    }
+
+    main{
+      max-width: 1150px;
+      margin: 0 auto;
+      padding: 20px 16px 32px;
+    }
+
+    .panel{
+      background: rgba(255,255,255,.05);
+      border:1px solid var(--stroke);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 22px;
+    }
+
+    h1{
+      font-size: clamp(1.35rem, 2.6vw, 1.7rem);
+      font-weight: 950;
+    }
+
+    h2{
+      font-size: 1.05rem;
+      font-weight: 900;
+      margin-top: 20px;
+      display:flex;
+      gap:10px;
+      align-items:center;
+    }
+
+    p, li{
+      color: rgba(255,255,255,.82);
+      font-weight: 700;
+      line-height: 1.7;
+    }
+
+    ul{
+      padding-left: 18px;
+      margin-top: 6px;
+    }
+
+    .muted{ color: var(--muted); font-weight:700; }
+
+    .alert-legal{
+      border:1px solid rgba(239,68,68,.35);
+      background: rgba(239,68,68,.12);
+      border-radius: 14px;
+      padding: 14px;
+      font-weight: 800;
+      margin: 14px 0;
+    }
+
+    .alert-info{
+      border:1px solid rgba(59,130,246,.35);
+      background: rgba(59,130,246,.12);
+      border-radius: 14px;
+      padding: 14px;
+      font-weight: 800;
+      margin: 14px 0;
+    }
+
+    .actions{
+      display:flex;
+      gap:10px;
+      flex-wrap: wrap;
+      margin-top: 14px;
+    }
+
+    .btn-ghost{
+      border:1px solid var(--stroke);
+      background: rgba(255,255,255,.06);
+      color:var(--text);
+      padding:12px 14px;
+      border-radius:14px;
+      font-weight:900;
+      text-decoration:none;
+      display:inline-flex;
+      gap:8px;
+      align-items:center;
+    }
+
+    .btn-primary{
+      border:0;
+      background: linear-gradient(135deg, var(--primary), var(--primary2));
+      color:white;
+      padding:12px 14px;
+      border-radius:14px;
+      font-weight:900;
+      text-decoration:none;
+      display:inline-flex;
+      gap:8px;
+      align-items:center;
+    }
+
+    a.link{
+      color: rgba(96,165,250,.95);
+      font-weight:900;
+      text-decoration:none;
+    }
+    a.link:hover{ text-decoration:underline; }
+
+
+    /* ===== Layout like index.html ===== */
+    .no-scroll { overflow: hidden; }
+
+    .shell{
+      display:grid;
+      grid-template-columns: var(--sidebar-w) 1fr;
+      gap: 16px;
+      max-width: 1500px;
+      margin: 0 auto;
+      padding: 16px;
+      align-items: start;
+    }
+
+    .main{
+      min-width: 0;
+      display:flex;
+      flex-direction:column;
+      gap: 16px;
+    }
+
+    .panel{
+      border-radius: var(--radius);
+      border: 1px solid var(--stroke);
+      background: rgba(255,255,255,.05);
+      box-shadow: var(--shadow);
+      padding: 16px;
+    }
+
+    /* ===== Sidebar ===== */
+    .sidebar{
+      position: sticky;
+      top: calc(var(--topbar-h) + 16px);
+      max-height: calc(100vh - var(--topbar-h) - 32px);
+      border-radius: var(--radius);
+      border: 1px solid var(--stroke);
+      background: rgba(10,16,28,.65);
+      backdrop-filter: blur(12px);
+      box-shadow: var(--shadow);
+      padding: 12px;
+      overflow: auto;
+      align-self: start;
+    }
+
+    .nav-title{
+      font-size:.85rem;
+      color: var(--muted);
+      font-weight:800;
+      margin: 10px 10px 6px;
+      letter-spacing:.4px;
+      text-transform: uppercase;
+    }
+
+    .nav-item{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      padding:12px 12px;
+      border-radius: 14px;
+      border: 1px solid transparent;
+      text-decoration:none;
+      background: transparent;
+      color: var(--text);
+      font-weight:750;
+    }
+    .nav-item i{ width:18px; text-align:center; opacity:.9; }
+
+    .nav-item:hover{
+      background: rgba(255,255,255,.06);
+      border-color: var(--stroke);
+    }
+
+    .nav-item.active{
+      background: rgba(59,130,246,.18);
+      border-color: rgba(59,130,246,.35);
+    }
+
+    .nav-sep{
+      height:1px;
+      background: var(--stroke);
+      margin: 10px 8px;
+    }
+
+    /* ===== Overlay ===== */
+    .overlay{
+      position:fixed; inset:0;
+      background: rgba(0,0,0,.55);
+      opacity:0;
+      pointer-events:none;
+      transition: opacity .22s ease;
+      z-index:60;
+    }
+    .overlay.show{ opacity:1; pointer-events:auto; }
+
+    /* ===== Mobile burger offcanvas ===== */
+    @media (max-width: 991px){
+      .shell{ grid-template-columns: 1fr; padding: 14px; }
+      .sidebar{
+        position:fixed;
+        top: var(--topbar-h);
+        left: 0;
+        height: calc(100vh - var(--topbar-h));
+        width: min(320px, 92vw);
+        transform: translateX(-110%);
+        transition: transform .22s ease;
+        z-index:70;
+        border-radius: 0 18px 18px 0;
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+      }
+      .sidebar.open{ transform: translateX(0); }
+    }
+
+
+
+  </style>
+</head>
+
+<body class="has-fixed-footer">
+
+  <!-- Header injecté -->
+  <div id="appHeader"></div>
+  <div id="overlay" class="overlay"></div>
+  <div class="shell">
+    <div id="appSidebar"></div>
+
+
+  <main>
+    <section class="panel">
+
+      <h1><i class="fa-solid fa-scale-balanced"></i> Conditions Générales d’Utilisation</h1>
+      <p class="muted">
+        Application web <b>Loto Tracker – Tracker du Loto Français</b><br>
+        Version conforme RNCP6 (niveau Licence/Bachelor) – Mise à jour 2026
+      </p>
+
+      <div class="actions">
+        <button class="btn-ghost" onclick="history.length>1?history.back():location.href='index.html'">
+          <i class="fa-solid fa-arrow-left"></i> Retour
+        </button>
+        <a href="index.html" class="btn-primary">
+          <i class="fa-solid fa-house"></i> Accueil
+        </a>
+        <a href="mentions_legales.html" class="btn-ghost">
+          <i class="fa-solid fa-file-signature"></i> Mention Légales
+        </a>
+        <a href="politique_confidentialite.html" class="btn-ghost">
+          <i class="fa-solid fa-user-shield"></i> Confidentialité
+        </a>
+      </div>
+
+      <div class="alert-legal">
+        <i class="fa-solid fa-triangle-exclamation"></i>
+        Le Site est un projet indépendant, non affilié à la Française des Jeux (FDJ).
+        Les informations présentées ne constituent ni un conseil financier,
+        ni une incitation au jeu.
+      </div>
+
+      <h2><i class="fa-solid fa-diagram-project"></i> 1. Périmètre et nature du service</h2>
+      <p>
+        Le Site fournit un service de consultation, d’analyse et de visualisation
+        de données relatives aux tirages du Loto français.
+        Il s’agit d’un service numérique expérimental à vocation informative,
+        pédagogique et démonstrative.
+      </p>
+
+      <h2><i class="fa-solid fa-check-double"></i> 2. Acceptation contractuelle</h2>
+      <p>
+        L’utilisation du Site vaut acceptation pleine et entière des présentes CGU.
+        Toute utilisation non conforme pourra entraîner une suspension ou un blocage
+        sans préavis.
+      </p>
+
+      <h2><i class="fa-solid fa-network-wired"></i> 3. Accès, disponibilité et architecture</h2>
+      <p>
+        Le Site repose sur une architecture web distribuée (frontend, API, bases de données).
+        L’éditeur s’efforce d’assurer une continuité de service sans garantir
+        une disponibilité permanente.
+      </p>
+
+      <h2><i class="fa-solid fa-user-shield"></i> 4. Comptes, authentification et sécurité</h2>
+      <p>
+        L’accès à certaines fonctionnalités nécessite une authentification sécurisée.
+        Les sessions peuvent reposer sur des cookies sécurisés (HttpOnly, SameSite)
+        et des mécanismes de contrôle d’accès.
+      </p>
+
+      <h2><i class="fa-solid fa-ban"></i> 5. Usages interdits et responsabilité utilisateur</h2>
+      <ul>
+        <li>Toute tentative d’intrusion, d’altération ou d’exploitation de vulnérabilités</li>
+        <li>L’accès non autorisé à des données ou services protégés</li>
+        <li>La surcharge volontaire de l’API ou du serveur</li>
+        <li>L’utilisation du Site à des fins frauduleuses ou illicites</li>
+      </ul>
+
+      <h2><i class="fa-solid fa-database"></i> 6. Données, sources et limites</h2>
+      <p>
+        Les données proviennent de sources publiques ou ouvertes.
+        L’éditeur ne garantit ni leur exhaustivité, ni leur exactitude absolue,
+        ni leur mise à jour en temps réel.
+      </p>
+
+      <h2><i class="fa-solid fa-lock"></i> 7. Données personnelles & conformité RGPD</h2>
+      <p>
+        Le traitement des données personnelles est conforme au
+        <b>Règlement (UE) 2016/679 (RGPD)</b>.
+      </p>
+      <ul>
+        <li>Données traitées : identifiants, email, tickets utilisateur, journaux techniques</li>
+        <li>Finalités : authentification, sécurité, traçabilité, fonctionnement du service</li>
+        <li>Principe de minimisation et durée de conservation limitée</li>
+      </ul>
+      <p>
+        Les droits des personnes concernées sont détaillés dans la
+        <a class="link" href="politique_confidentialite.html">Politique de Confidentialité</a>.
+      </p>
+
+      <h2><i class="fa-solid fa-triangle-exclamation"></i> 8. Limitation de responsabilité</h2>
+      <p>
+        L’utilisateur reconnaît utiliser le Site sous sa seule responsabilité.
+        L’éditeur décline toute responsabilité concernant les décisions,
+        interprétations ou conséquences financières liées à l’usage du Site.
+      </p>
+
+      <h2><i class="fa-solid fa-copyright"></i> 9. Propriété intellectuelle</h2>
+      <p>
+        Le code source, l’architecture logicielle, l’interface utilisateur
+        et les contenus sont protégés par le droit d’auteur.
+        Toute reproduction ou exploitation non autorisée est interdite.
+      </p>
+
+      <h2><i class="fa-solid fa-pen-to-square"></i> 10. Évolution du service et des CGU</h2>
+      <p>
+        L’éditeur se réserve le droit de modifier, suspendre ou faire évoluer
+        le service et les présentes CGU à tout moment, sans obligation de notification individuelle.
+      </p>
+
+      <h2><i class="fa-solid fa-scale-balanced"></i> 11. Droit applicable et juridiction</h2>
+      <p>
+        Les présentes CGU sont soumises au droit français.
+        Tout litige relèvera de la compétence exclusive des juridictions françaises.
+      </p>
+
+      <h2><i class="fa-solid fa-envelope"></i> 12. Contact et gouvernance</h2>
+      <p>
+        Pour toute question juridique, technique ou relative à la protection des données :<br>
+        <b>stephane.dinahet@gmail.com</b>
+      </p>
+
+    </section>
+  </main>
+  <div id="appSidebar"></div>
+
+  <!-- Footer injecté -->
+  <div id="appFooter"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+  <script src="cookies.js"></script>
+  <!-- IA (si tu l'utilises) -->
+  <script src="ai-loader.js"></script>
+<script>
+  (function () {
+    const API_BASE =
+      (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1")
+        ? "http://localhost:8082"
+        : "https://stephanedinahet.fr";
+
+    function renderSidebar() {
+      const path = (window.location.pathname || "").toLowerCase();
+      const active = (name) => path.endsWith(name) ? " active" : "";
+
+      return `
+        <aside class="sidebar" id="sidebar">
+          <div class="nav-title">Dashboard</div>
+
+          <a class="nav-item${active("index.html") || (path.endsWith("/") ? " active" : "")}" href="index.html">
+            <i class="fa-solid fa-chart-line"></i><span>Résultats</span>
+          </a>
+
+          <a class="nav-item auth-only${active("tickets.html")}" href="tickets.html" style="display:none;">
+            <i class="fa-solid fa-ticket"></i><span>Tickets</span>
+          </a>
+          <a class="nav-item auth-only${active("statistiques.html")}" href="statistiques.html" style="display:none;">
+            <i class="fa-solid fa-signal"></i><span>Statistiques</span>
+          </a>
+          <a class="nav-item auth-only${active("profil.html")}" href="profil.html" style="display:none;">
+            <i class="fa-solid fa-user-gear"></i><span>Compte</span>
+          </a>
+
+          <div class="nav-sep"></div>
+
+          <div class="nav-title">Pages</div>
+          <a class="nav-item${active("mentions_legales.html")}" href="mentions_legales.html">
+            <i class="fa-solid fa-file-signature"></i><span>Mentions légales</span>
+          </a>
+          <a class="nav-item${active("conditions_utilisation.html")}" href="conditions_utilisation.html">
+            <i class="fa-solid fa-scale-balanced"></i><span>Conditions</span>
+          </a>
+          <a class="nav-item${active("politique_confidentialite.html")}" href="politique_confidentialite.html">
+            <i class="fa-solid fa-user-shield"></i><span>Confidentialité</span>
+          </a>
+        </aside>
+      `;
+    }
+
+    async function fetchUserInfo() {
+      const res = await fetch(`${API_BASE}/api/protected/userinfo`, {
+        method: "GET",
+        credentials: "include",
+        cache: "no-store"
+      });
+      if (!res.ok) throw new Error("Not authenticated");
+      return await res.json();
+    }
+
+    async function applyAuthOnly() {
+      let logged = false;
+      try { await fetchUserInfo(); logged = true; } catch { logged = false; }
+      document.querySelectorAll(".auth-only").forEach((el) => {
+        el.style.display = logged ? "" : "none";
+      });
+    }
+
+    document.addEventListener("layout:ready", () => {
+      const mount = document.getElementById("appSidebar");
+      if (mount) mount.innerHTML = renderSidebar();
+
+      // le burger est déjà bind dans layout.js (bindBurgerGlobal) :contentReference[oaicite:3]{index=3}
+      // donc pas besoin de re-binder ici
+
+      setTimeout(applyAuthOnly, 80);
+      setTimeout(applyAuthOnly, 800);
+    });
+  })();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,516 @@
+<!-- <!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Euromillions — En construction</title>
+  <link rel="icon" type="image/png" href="loto_tracker.png"/>
+  <link rel="stylesheet" href="styles.css">
+  <script defer src="layout.js"></script>
+  <script defer src="dashboard.js"></script>
+
+  <style>
+    body{
+      margin:0;
+      min-height:100vh;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      color: rgba(255,255,255,.92);
+      background:
+        radial-gradient(1200px 600px at 20% 10%, rgba(59,130,246,.22), transparent 60%),
+        radial-gradient(900px 500px at 90% 25%, rgba(239,68,68,.14), transparent 55%),
+        linear-gradient(135deg, #000428, #004e92);
+    }
+    .wrap{
+      min-height: calc(100vh - 72px);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding: 24px;
+      text-align:center;
+    }
+    .card{
+      max-width: 620px;
+      background: rgba(0,0,0,.75);
+      border: 1px solid rgba(255,255,255,.12);
+      border-radius: 18px;
+      padding: 28px;
+    }
+    h1{ margin:0 0 10px; font-weight:950; }
+    p{ margin:0; opacity:.8; font-weight:700; }
+
+
+    /* ===== CONSTRUCTION ANIMATION ===== */
+
+    .construction {
+    animation: fadeInUp .8s ease-out;
+    }
+
+    .icon {
+    font-size: 56px;
+    margin-bottom: 12px;
+    animation: bounce 1.6s infinite;
+    }
+
+    .status {
+    font-size: 16px;
+    margin: 10px 0 20px;
+    letter-spacing: .3px;
+    }
+
+    /* Points animés */
+    .dots span {
+    animation: blink 1.4s infinite both;
+    font-weight: 900;
+    }
+
+    .dots span:nth-child(2) { animation-delay: .2s; }
+    .dots span:nth-child(3) { animation-delay: .4s; }
+
+    /* Barre de progression */
+    .progress {
+    position: relative;
+    height: 8px;
+    width: 100%;
+    background: rgba(255,255,255,.15);
+    border-radius: 10px;
+    overflow: hidden;
+    margin: 18px 0;
+    }
+
+    .progress .bar {
+    position: absolute;
+    height: 100%;
+    width: 40%;
+    background: linear-gradient(90deg, #3b82f6, #60a5fa);
+    animation: loading 1.6s infinite ease-in-out;
+    border-radius: 10px;
+    }
+
+    /* Texte secondaire */
+    .hint {
+    display: block;
+    margin-top: 10px;
+    font-size: 13px;
+    opacity: .7;
+    }
+
+    /* ===== KEYFRAMES ===== */
+
+    @keyframes loading {
+    0%   { left: -40%; }
+    50%  { left: 30%; }
+    100% { left: 100%; }
+    }
+
+    @keyframes blink {
+    0% { opacity: .2; }
+    20% { opacity: 1; }
+    100% { opacity: .2; }
+    }
+
+    @keyframes bounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-6px); }
+    }
+
+    @keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(14px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+    }
+
+  </style>
+</head>
+<body>
+  <div id="appHeader"></div>
+
+    <div class="wrap">
+    <div class="card construction">
+        <div class="icon">🚧</div>
+
+        <h1>EuroMillions</h1>
+
+        <p class="status">
+        Page en cours de développement
+        <span class="dots">
+            <span>.</span><span>.</span><span>.</span>
+        </span>
+        </p>
+
+        <div class="progress">
+        <div class="bar"></div>
+        </div>
+
+        <small class="hint">
+        Cette fonctionnalité sera disponible prochainement.
+        </small>
+    </div>
+    </div>
+
+
+  <div id="appFooter"></div>
+
+<script src="cookies.js"></script>
+</body>
+</html> -->
+
+
+
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>EuroMillions — Loto Tracker</title>
+
+  <link rel="icon" type="image/png" href="loto_tracker.png">
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="styles.css">
+
+  <!-- ✅ Layout (header/footer) -->
+  <script src="layout.js"></script>
+
+  <style>
+    :root{
+      --bg0:#0b1220;
+      --bg1:#0f1b2d;
+      --stroke: rgba(255,255,255,.12);
+      --text: rgba(255,255,255,.92);
+      --muted: rgba(255,255,255,.65);
+      --shadow: 0 16px 45px rgba(0,0,0,.35);
+      --radius: 18px;
+      --topbar-h: 72px;
+      --sidebar-w: 280px;
+    }
+
+    body{
+      margin:0;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      color:var(--text);
+      background:
+        radial-gradient(1200px 600px at 20% 10%, rgba(59,130,246,.22), transparent 60%),
+        radial-gradient(900px 500px at 90% 25%, rgba(239,68,68,.14), transparent 55%),
+        linear-gradient(180deg, var(--bg0), var(--bg1));
+      min-height:100vh;
+    }
+
+    a{ color:inherit; }
+    .no-scroll{ overflow:hidden; }
+
+    .shell{
+      display:grid;
+      grid-template-columns: var(--sidebar-w) 1fr;
+      gap: 16px;
+      max-width: 1500px;
+      margin: 0 auto;
+      padding: 16px;
+      align-items: start;
+    }
+
+    .sidebar{
+      position: sticky;
+      top: calc(var(--topbar-h) + 16px);
+      max-height: calc(100vh - var(--topbar-h) - 32px);
+      border-radius: var(--radius);
+      border: 1px solid var(--stroke);
+      background: rgba(10,16,28,.65);
+      backdrop-filter: blur(12px);
+      box-shadow: var(--shadow);
+      padding: 12px;
+      overflow: auto;
+      align-self: start;
+    }
+
+    .nav-title{
+      font-size:.85rem;
+      color: var(--muted);
+      font-weight:800;
+      margin: 10px 10px 6px;
+      letter-spacing:.4px;
+      text-transform: uppercase;
+    }
+    .nav-item{
+      display:flex; align-items:center; gap:10px;
+      padding:12px 12px;
+      border-radius: 14px;
+      border: 1px solid transparent;
+      text-decoration:none;
+      background: transparent;
+      color: var(--text);
+      font-weight:750;
+    }
+    .nav-item i{ width:18px; text-align:center; opacity:.9; }
+    .nav-item:hover{
+      background: rgba(255,255,255,.06);
+      border-color: var(--stroke);
+    }
+    .nav-item.active{
+      background: rgba(59,130,246,.18);
+      border-color: rgba(59,130,246,.35);
+    }
+    .nav-sep{
+      height:1px;
+      background: var(--stroke);
+      margin: 10px 8px;
+    }
+
+    .main{ min-width: 0; }
+
+    .panel{
+      border-radius: var(--radius);
+      border: 1px solid var(--stroke);
+      background: rgba(255,255,255,.05);
+      box-shadow: var(--shadow);
+      padding: 16px;
+    }
+
+    /* Overlay + offcanvas */
+    .overlay{
+      position:fixed; inset:0;
+      background: rgba(0,0,0,.55);
+      opacity:0;
+      pointer-events:none;
+      transition: opacity .22s ease;
+      z-index:60;
+    }
+    .overlay.show{ opacity:1; pointer-events:auto; }
+
+    @media (max-width: 991px){
+      .shell{ grid-template-columns: 1fr; padding: 14px; }
+      .sidebar{
+        position:fixed;
+        top: var(--topbar-h);
+        left: 0;
+        height: calc(100vh - var(--topbar-h));
+        width: min(320px, 92vw);
+        transform: translateX(-110%);
+        transition: transform .22s ease;
+        z-index:70;
+        border-radius: 0 18px 18px 0;
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+      }
+      .sidebar.open{ transform: translateX(0); }
+    }
+
+    /* Bloc "en construction" */
+    .wrap{
+      min-height: calc(100vh - var(--topbar-h) - 120px);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      text-align:center;
+    }
+    .card-construct{
+      max-width: 620px;
+      background: rgba(0,0,0,.55);
+      border: 1px solid rgba(255,255,255,.12);
+      border-radius: 18px;
+      padding: 28px;
+      box-shadow: var(--shadow);
+    }
+    .icon{ font-size: 56px; margin-bottom: 12px; animation: bounce 1.6s infinite; }
+    .dots span{ animation: blink 1.4s infinite both; font-weight: 900; }
+    .dots span:nth-child(2){ animation-delay:.2s; }
+    .dots span:nth-child(3){ animation-delay:.4s; }
+    .progress{
+      position: relative;
+      height: 8px;
+      width: 100%;
+      background: rgba(255,255,255,.15);
+      border-radius: 10px;
+      overflow: hidden;
+      margin: 18px 0;
+    }
+    .progress .bar{
+      position: absolute;
+      height: 100%;
+      width: 40%;
+      background: linear-gradient(90deg, #3b82f6, #60a5fa);
+      animation: loading 1.6s infinite ease-in-out;
+      border-radius: 10px;
+    }
+    @keyframes loading{ 0%{left:-40%} 50%{left:30%} 100%{left:100%} }
+    @keyframes blink{ 0%{opacity:.2} 20%{opacity:1} 100%{opacity:.2} }
+    @keyframes bounce{ 0%,100%{transform:translateY(0)} 50%{transform:translateY(-6px)} }
+  </style>
+</head>
+
+<body>
+  <div id="appHeader"></div>
+
+  <div class="overlay" id="overlay"></div>
+
+  <div class="shell">
+    <!-- ✅ Sidebar injectée -->
+    <div id="appSidebar"></div>
+
+    <main class="main">
+      <section class="panel">
+        <div class="wrap">
+          <div class="card-construct">
+            <div class="icon">🚧</div>
+            <h1 style="font-weight:950; margin:0 0 10px;">EuroMillions</h1>
+            <p style="margin:0; opacity:.8; font-weight:800;">
+              Page en cours de développement
+              <span class="dots"><span>.</span><span>.</span><span>.</span></span>
+            </p>
+            <div class="progress"><div class="bar"></div></div>
+            <small style="opacity:.7; font-weight:700;">
+              Cette fonctionnalité sera disponible prochainement.
+            </small>
+          </div>
+        </div>
+      </section>
+
+      <div id="appFooter"></div>
+    </main>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+  <!-- ✅ Sidebar + Auth-only + Burger (copie de index.html) -->
+  <script>
+    (function () {
+      const API_BASE =
+        (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1")
+          ? "http://localhost:8082"
+          : "https://stephanedinahet.fr";
+
+      function renderSidebar() {
+        const path = (window.location.pathname || "").toLowerCase();
+        const active = (name) => path.endsWith(name) ? " active" : "";
+
+        return `
+          <aside class="sidebar" id="sidebar">
+            <div class="nav-title">Dashboard</div>
+
+            <a class="nav-item${active("index.html") || (path.endsWith("/") ? " active" : "")}" href="index.html">
+              <i class="fa-solid fa-chart-line"></i><span>Résultats</span>
+            </a>
+
+            <a class="nav-item auth-only${active("tickets.html")}" href="tickets.html" data-auth="required" style="display:none;">
+              <i class="fa-solid fa-ticket"></i><span>Tickets</span>
+            </a>
+            <a class="nav-item auth-only${active("statistiques.html")}" href="statistiques.html" data-auth="required" style="display:none;">
+              <i class="fa-solid fa-signal"></i><span>Statistiques</span>
+            </a>
+            <a class="nav-item auth-only${active("profil.html")}" href="profil.html" data-auth="required" style="display:none;">
+              <i class="fa-solid fa-user-gear"></i><span>Compte</span>
+            </a>
+
+            <div class="nav-sep"></div>
+
+            <div class="nav-title">Jouer</div>
+            <a class="nav-item" href="index.html">
+              <i class="fa-solid fa-clover"></i><span>Loto</span>
+            </a>
+            <a class="nav-item${active("euromillions.html")}" href="euromillions.html">
+              <i class="fa-solid fa-star"></i><span>Euromillions</span>
+            </a>
+          </aside>
+        `;
+      }
+
+      function closeSidebarIfMobile() {
+        const sidebar = document.getElementById("sidebar");
+        const overlay = document.getElementById("overlay");
+        if (!sidebar || !overlay) return;
+        if (window.matchMedia("(max-width: 991px)").matches) {
+          sidebar.classList.remove("open");
+          overlay.classList.remove("show");
+          document.body.classList.remove("no-scroll");
+        }
+      }
+
+      function bindBurger() {
+        if (document.documentElement.dataset.burgerDelegation === "1") return;
+        document.documentElement.dataset.burgerDelegation = "1";
+
+        document.addEventListener("click", (e) => {
+          const isBurger = e.target.closest("#burgerBtn");
+          if (!isBurger) return;
+
+          const sidebar = document.getElementById("sidebar");
+          const overlay = document.getElementById("overlay");
+          if (!sidebar || !overlay) return;
+
+          const open = sidebar.classList.toggle("open");
+          overlay.classList.toggle("show", open);
+          document.body.classList.toggle("no-scroll", open);
+        });
+
+        document.addEventListener("click", (e) => {
+          if (e.target.id !== "overlay") return;
+          const sidebar = document.getElementById("sidebar");
+          const overlay = document.getElementById("overlay");
+          if (!sidebar || !overlay) return;
+
+          sidebar.classList.remove("open");
+          overlay.classList.remove("show");
+          document.body.classList.remove("no-scroll");
+        });
+
+        document.addEventListener("keydown", (e) => {
+          if (e.key !== "Escape") return;
+          const sidebar = document.getElementById("sidebar");
+          const overlay = document.getElementById("overlay");
+          if (!sidebar || !overlay) return;
+
+          sidebar.classList.remove("open");
+          overlay.classList.remove("show");
+          document.body.classList.remove("no-scroll");
+        });
+      }
+
+      async function fetchUserInfo() {
+        const res = await fetch(`${API_BASE}/api/protected/userinfo`, {
+          method: "GET",
+          credentials: "include",
+          cache: "no-store"
+        });
+        if (!res.ok) throw new Error("Not authenticated");
+        return await res.json();
+      }
+
+      async function applyAuthOnly() {
+        let logged = false;
+        try { await fetchUserInfo(); logged = true; } catch { logged = false; }
+
+        document.querySelectorAll(".auth-only").forEach((el) => {
+          el.style.display = logged ? "" : "none";
+        });
+
+        if (!logged) {
+          document.querySelectorAll(".auth-only").forEach((a) => {
+            a.addEventListener("click", (e) => {
+              e.preventDefault();
+              closeSidebarIfMobile();
+              window.location.href = "login.html";
+            });
+          });
+        }
+      }
+
+      document.addEventListener("layout:ready", () => {
+        const mount = document.getElementById("appSidebar");
+        if (mount) mount.innerHTML = renderSidebar();
+
+        bindBurger();
+
+        setTimeout(applyAuthOnly, 80);
+        setTimeout(applyAuthOnly, 800);
+      });
+    })();
+  </script>
+
+  <script src="cookies.js"></script>
+</body>
+</html>

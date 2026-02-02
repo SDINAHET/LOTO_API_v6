@@ -1,0 +1,772 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mon profil — Loto Tracker</title>
+
+  <link rel="icon" type="image/png" href="loto_tracker.png" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+
+  <link rel="stylesheet" href="styles.css">
+
+  <style>
+    body{
+      margin:0;
+      min-height:100vh;
+      background:
+        radial-gradient(1200px 600px at 20% 20%, rgba(37,99,235,.28), transparent 60%),
+        radial-gradient(1000px 700px at 80% 30%, rgba(168,85,247,.22), transparent 60%),
+        rgba(6,10,18,1);
+      color: rgba(255,255,255,.92);
+    }
+
+    /* ===== Layout (comme index) ===== */
+    .app-shell{
+      display: grid;
+      grid-template-columns: 280px 1fr;
+      gap: 18px;
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 24px 16px 86px; /* place pour footer fixed */
+    }
+
+    .glass-panel{
+      border-radius: 18px;
+      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(15,23,42,.55);
+      backdrop-filter: blur(12px);
+      box-shadow: 0 18px 50px rgba(0,0,0,.45);
+      padding: 22px;
+    }
+
+    .panel-title{
+      font-weight: 950;
+      letter-spacing: .2px;
+      margin: 0 0 8px;
+      font-size: 2.1rem;
+    }
+
+    .muted{ color: rgba(255,255,255,.65); }
+
+    /* ===== Form ===== */
+    .form-label{ font-weight: 850; }
+    .form-control{
+      background: rgba(255,255,255,.06);
+      border: 1px solid rgba(255,255,255,.12);
+      color: rgba(255,255,255,.92);
+      border-radius: 12px;
+      padding: 12px 12px;
+    }
+    .form-control:focus{
+      background: rgba(255,255,255,.08);
+      border-color: rgba(96,165,250,.55);
+      box-shadow: 0 0 0 .2rem rgba(96,165,250,.12);
+      color: rgba(255,255,255,.92);
+    }
+    .form-control:disabled{
+      opacity: .7;
+      cursor:not-allowed;
+      background: rgba(255,255,255,.30);
+      border-color: rgba(96,165,250,.55);
+      color: rgba(255,255,255,.92);
+    }
+
+    .btn-primary{
+      border-radius: 12px;
+      font-weight: 950;
+      padding: 12px 14px;
+    }
+
+    .danger-note{
+      border: 1px solid rgba(239,68,68,.25);
+      background: rgba(239,68,68,.08);
+      border-radius: 12px;
+      padding: 12px;
+      color: rgba(255,255,255,.85);
+    }
+
+    /* ===== Sidebar ===== */
+    .sidebar{
+      border-radius: 18px;
+      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(15,23,42,.55);
+      backdrop-filter: blur(12px);
+      box-shadow: 0 18px 50px rgba(0,0,0,.35);
+      overflow: hidden;
+    }
+    .sidebar-inner{ padding: 14px; }
+
+    .sidebar-title{
+      font-weight: 950;
+      letter-spacing: .2px;
+      color: rgba(255,255,255,.75);
+      margin: 6px 8px 10px;
+      font-size: .92rem;
+      text-transform: uppercase;
+    }
+
+    .side-link{
+      display:flex;
+      align-items:center;
+      gap: 10px;
+      padding: 11px 12px;
+      border-radius: 12px;
+      color: rgba(255,255,255,.86);
+      text-decoration:none;
+      font-weight: 850;
+      background: rgba(255,255,255,.04);
+      border: 1px solid rgba(255,255,255,.08);
+      margin: 8px 0;
+    }
+    .side-link:hover{ background: rgba(255,255,255,.06); }
+    .side-link.active{
+      background: rgba(59,130,246,.18);
+      border-color: rgba(59,130,246,.25);
+    }
+
+    /* Desktop sticky sous le header fixed (layout.js gère --topbar-h) */
+    @media (min-width: 992px){
+      .sidebar{
+        position: sticky;
+        top: calc(var(--topbar-h) + 16px);
+        align-self: start;
+      }
+    }
+
+    /* ===== Overlay mobile (sidebar offcanvas) ===== */
+    #overlay{
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,.55);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .2s ease;
+      z-index: 80;
+    }
+    #overlay.show{
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    /* Mobile : sidebar offcanvas sous le header */
+    @media (max-width: 991px){
+      .app-shell{ grid-template-columns: 1fr; }
+
+      .sidebar{
+        position: fixed;
+        top: var(--topbar-h);
+        left: 0;
+        height: calc(100vh - var(--topbar-h));
+        width: 300px;
+        transform: translateX(-105%);
+        transition: transform .2s ease;
+        z-index: 90;
+        border-radius: 0 18px 18px 0;
+      }
+      .sidebar.open{ transform: translateX(0); }
+    }
+
+    .password-wrap{ position: relative; }
+    .password-wrap .form-control{ padding-right: 50px; }
+
+    /* bouton œil */
+    .pw-toggle{
+      position: absolute;
+      top: 50%;
+      right: 10px;
+      transform: translateY(-50%);
+      width: 38px;
+      height: 38px;
+      border-radius: 12px;
+      border: none;
+      background: transparent;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      color: #22c55e;
+    }
+    .pw-toggle svg{
+      width: 20px;
+      height: 20px;
+      stroke: currentColor;
+      fill: none;
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+    .pw-eye-off{ display: none; }
+    .pw-toggle.is-on .pw-eye{ display: none; }
+    .pw-toggle.is-on .pw-eye-off{ display: block; }
+
+    /* Modal bootstrap (fond harmonisé) */
+    .modal-backdrop.show{ opacity: .65; }
+
+    /* ✅ Fix empilement (évite overlay/chat au-dessus) */
+    .modal { z-index: 2000 !important; }
+    .modal-backdrop { z-index: 1990 !important; }
+
+    /*.danger-note {
+      transition: opacity 0.5s ease, transform 0.5s ease;
+    }
+
+    .danger-note.fade-out {
+      opacity: 0;
+      transform: translateY(-5px);
+      pointer-events: none;
+    }*/
+
+    .info-note{
+      border: 1px solid rgba(59,130,246,.25);
+      background: rgba(59,130,246,.10);
+      border-radius: 12px;
+      padding: 12px;
+      color: rgba(255,255,255,.85);
+
+      transition: opacity .5s ease, transform .5s ease;
+    }
+
+    .info-note.fade-out{
+      opacity: 0;
+      transform: translateY(-5px);
+      pointer-events: none;
+    }
+
+    /* Force le champ password à garder le style dark */
+    input:-webkit-autofill,
+    input:-webkit-autofill:hover,
+    input:-webkit-autofill:focus,
+    textarea:-webkit-autofill,
+    textarea:-webkit-autofill:hover,
+    textarea:-webkit-autofill:focus,
+    select:-webkit-autofill,
+    select:-webkit-autofill:hover,
+    select:-webkit-autofill:focus{
+      -webkit-text-fill-color: rgba(255,255,255,.92) !important;
+      -webkit-box-shadow: 0 0 0px 1000px rgba(255,255,255,.06) inset !important;
+      transition: background-color 9999s ease-in-out 0s;
+    }
+
+    /* Optionnel : quand il est focus, éviter le "bleu clair" */
+    input.form-control:focus{
+      background: rgba(255,255,255,.08) !important;
+      color: rgba(255,255,255,.92) !important;
+    }
+
+
+
+
+  </style>
+</head>
+
+<body>
+  <!-- Header injecté -->
+  <div id="appHeader"></div>
+
+  <div class="app-shell">
+    <!-- Sidebar (ID requis pour burger layout.js) -->
+    <aside id="sidebar" class="sidebar">
+      <div class="sidebar-inner">
+        <div class="sidebar-title">Dashboard</div>
+        <a class="side-link" href="index.html"><i class="fa-solid fa-chart-line"></i> Résultats</a>
+        <a class="side-link" href="tickets.html"><i class="fa-solid fa-ticket"></i> Tickets</a>
+        <a class="side-link" href="statistiques.html"><i class="fa-solid fa-chart-column"></i> Statistiques</a>
+        <a class="side-link active" href="profil.html"><i class="fa-solid fa-user-gear"></i> Mon profil</a>
+        <hr style="border-color: rgba(255,255,255,.10); margin: 12px 0;">
+
+        <div class="sidebar-title">Jouer</div>
+        <a class="side-link" href="index.html"><i class="fa-solid fa-clover"></i> Loto</a>
+        <a class="side-link" href="euromillions.html"><i class="fa-solid fa-star"></i> Euromillions</a>
+      </div>
+    </aside>
+
+    <!-- Contenu -->
+    <main>
+      <section class="glass-panel">
+        <h1 class="panel-title">Modifier mon profil</h1>
+        <p class="muted mb-4">Modifie ton prénom/nom, puis confirme avec ton mot de passe actuel.</p>
+
+        <!-- <div class="danger-note mb-3"> -->
+        <!-- <div class="info-note mb-3" id="emailNote"> -->
+        <div class="info-note mb-3" id="emailNote">
+          <i class="fa-solid fa-circle-info me-2"></i>
+          L’email n’est pas modifiable (pour l’instant).
+        </div>
+
+        <!-- ✅ Alerts propres (IDs uniques) -->
+        <div class="alert alert-success d-none" id="okBox">
+          <i class="fa-solid fa-circle-check me-2"></i>
+          <span id="okText">Modifications enregistrées.</span>
+        </div>
+
+        <div class="alert alert-danger d-none" id="errBox">
+          <i class="fa-solid fa-triangle-exclamation me-2"></i>
+          <span id="errText">Erreur.</span>
+        </div>
+
+        <form id="profileForm" class="mt-3">
+          <div class="row g-3">
+            <div class="col-12">
+              <label for="email" class="form-label">Email</label>
+              <input type="email" class="form-control" id="email" disabled>
+            </div>
+
+            <div class="col-md-6">
+              <label for="firstName" class="form-label">Prénom</label>
+              <input type="text" class="form-control" id="firstName" autocomplete="given-name">
+            </div>
+
+            <div class="col-md-6">
+              <label for="lastName" class="form-label">Nom</label>
+              <input type="text" class="form-control" id="lastName" autocomplete="family-name">
+            </div>
+
+            <div class="col-12">
+              <label for="currentPassword" class="form-label">Mot de passe actuel</label>
+
+              <div class="password-wrap">
+                <input
+                  type="password"
+                  class="form-control"
+                  id="currentPassword"
+                  required
+                  autocomplete="current-password"
+                />
+
+                <button
+                  type="button"
+                  class="pw-toggle"
+                  id="togglePassword"
+                  aria-label="Afficher le mot de passe"
+                >
+                  <!-- 👁️ œil ouvert -->
+                  <svg class="pw-eye" viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z"></path>
+                    <circle cx="12" cy="12" r="3"></circle>
+                  </svg>
+
+                  <!-- 🙈 œil barré -->
+                  <svg class="pw-eye-off" viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M17.94 17.94A10.94 10.94 0 0 1 12 20C5.5 20 2 12 2 12a21.8 21.8 0 0 1 5.06-6.94"></path>
+                    <path d="M9.9 4.24A10.94 10.94 0 0 1 12 4c6.5 0 10 8 10 8a21.9 21.9 0 0 1-4.06 5.94"></path>
+                    <path d="M14.12 14.12A3 3 0 1 1 9.88 9.88"></path>
+                    <line x1="1" y1="1" x2="23" y2="23"></line>
+                  </svg>
+                </button>
+              </div>
+            </div>
+
+            <!-- <div class="col-md-6">
+              <label for="newPassword" class="form-label">Nouveau mot de passe</label>
+              <input type="password" class="form-control" id="newPassword" autocomplete="new-password">
+            </div>
+
+            <div class="col-md-6">
+              <label for="confirmPassword" class="form-label">Confirmer le nouveau mot de passe</label>
+              <input type="password" class="form-control" id="confirmPassword" autocomplete="new-password">
+            </div> -->
+
+
+            <div class="col-12">
+              <button type="submit" class="btn btn-primary w-100" id="saveChanges">
+                Enregistrer les modifications
+              </button>
+            </div>
+          </div>
+        </form>
+
+        <!-- ===== Zone sensible : suppression compte RGPD ===== -->
+        <hr style="border-color: rgba(255,255,255,.10); margin: 18px 0;">
+
+        <div class="danger-note">
+          <div class="d-flex align-items-start gap-3">
+            <i class="fa-solid fa-triangle-exclamation mt-1"></i>
+            <div class="flex-grow-1">
+              <h5 class="mb-1" style="font-weight:950;">Zone sensible</h5>
+              <p class="mb-2 muted">
+                Supprimer ton compte anonymise tes données (RGPD) et te déconnecte immédiatement.
+              </p>
+              <button class="btn btn-danger" id="btnDeleteAccount" type="button">
+                <i class="fa-solid fa-user-slash me-2"></i> Supprimer mon compte
+              </button>
+            </div>
+          </div>
+        </div>
+
+      </section>
+    </main>
+  </div>
+
+  <!-- overlay requis pour fermer le menu mobile -->
+  <div id="overlay"></div>
+
+  <!-- Footer injecté -->
+  <div id="appFooter"></div>
+
+  <!-- Layout global -->
+  <script src="layout.js"></script>
+
+  <!-- Bootstrap bundle requis pour la modal -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+  <!-- ===== Zone Modal en FIN de body (✅ recommandé) ===== -->
+  <div class="modal fade" id="deleteModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content" style="background: rgba(15,23,42,.95); border:1px solid rgba(255,255,255,.10); border-radius:18px;">
+        <div class="modal-header" style="border-color: rgba(255,255,255,.10);">
+          <h5 class="modal-title" style="font-weight:950;">Confirmer la suppression</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fermer"></button>
+        </div>
+
+        <div class="modal-body">
+          <p class="muted mb-2">
+            Cette action est <strong>irréversible</strong>. Ton compte sera anonymisé (RGPD).
+          </p>
+
+          <label for="deletePassword" class="form-label">Mot de passe actuel</label>
+          <input type="password" id="deletePassword" class="form-control" autocomplete="current-password" required>
+
+          <div class="alert alert-danger d-none mt-3" id="delErrBox">
+            <i class="fa-solid fa-triangle-exclamation me-2"></i>
+            <span id="delErrText">Erreur.</span>
+          </div>
+        </div>
+
+        <div class="modal-footer" style="border-color: rgba(255,255,255,.10);">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+          <button type="button" class="btn btn-danger" id="confirmDeleteBtn">
+            Oui, supprimer
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- ===== /Modal ===== -->
+
+  <!-- ====== JS Profil ====== -->
+  <script>
+    let userInfo = {};
+
+    const API_BASE =
+      window.__API_BASE_ACTIVE__ ||
+      ((location.hostname === "localhost" || location.hostname === "127.0.0.1")
+        ? `http://${location.hostname}:8082`
+        : "https://stephanedinahet.fr");
+
+    //const API_BASE =
+    //  (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1")
+    //    ? "http://localhost:8082"
+    //    : "https://stephanedinahet.fr";
+
+    const ME_URL = `${API_BASE}/api/auth/me`;
+    const TOKEN_URL = `${API_BASE}/api/auth/token`; // optionnel
+    const USERS_URL = `${API_BASE}/api/users`;
+
+    // RGPD delete account
+    const DELETE_ME_URL = `${API_BASE}/api/users/me`;
+    const LOGOUT_URL = `${API_BASE}/api/auth/logout`;
+
+    const emailEl = document.getElementById("email");
+    const firstEl = document.getElementById("firstName");
+    const lastEl  = document.getElementById("lastName");
+    const pwdEl   = document.getElementById("currentPassword");
+    //const confirmPwdEl = document.getElementById("confirmPassword");
+    //const newPwdEl = document.getElementById("newPassword");
+    const formEl  = document.getElementById("profileForm");
+    const btnEl   = document.getElementById("saveChanges");
+
+    const okBox  = document.getElementById("okBox");
+    const okText = document.getElementById("okText");
+    const errBox = document.getElementById("errBox");
+    const errText= document.getElementById("errText");
+
+    // --- CSRF (comme POST/PUT tickets) ---
+    axios.defaults.withCredentials = true;
+    // (optionnel mais propre)
+    axios.defaults.xsrfCookieName = "XSRF-TOKEN";
+    axios.defaults.xsrfHeaderName = "X-XSRF-TOKEN";
+
+    function getCookie(name) {
+      const m = document.cookie.match(new RegExp("(^| )" + name + "=([^;]+)"));
+      return m ? decodeURIComponent(m[2]) : null;
+    }
+
+    async function ensureCsrf(baseUrl) {
+      try {
+        // force Spring à générer / renvoyer le cookie XSRF-TOKEN
+        await axios.get(`${baseUrl}/api/auth/csrf`, { withCredentials: true });
+      } catch (e) {
+        // si ça échoue, on laisse le delete gérer l'erreur
+        console.warn("CSRF init failed:", e?.message || e);
+      }
+    }
+
+    function showOk(msg){
+      errBox.classList.add("d-none");
+      okText.textContent = msg || "Modifications enregistrées.";
+      okBox.classList.remove("d-none");
+    }
+
+    function showErr(msg){
+      okBox.classList.add("d-none");
+      errText.textContent = msg || "Erreur lors de la mise à jour.";
+      errBox.classList.remove("d-none");
+    }
+
+    function setLoading(on){
+      btnEl.disabled = on;
+      btnEl.innerHTML = on
+        ? `<span class="spinner-border spinner-border-sm me-2"></span>Enregistrement...`
+        : `Enregistrer les modifications`;
+    }
+
+    // optionnel (si ton backend l’exige)
+    async function getJwtToken(){
+      try{
+        const res = await axios.get(TOKEN_URL, { withCredentials: true });
+        return res.data?.jwtToken || null;
+      }catch(e){
+        return null;
+      }
+    }
+
+    async function loadUserProfile(){
+      try{
+        const res = await axios.get(ME_URL, { withCredentials: true });
+        userInfo = res.data || {};
+
+        emailEl.value = userInfo.email || "";
+        firstEl.value = userInfo.first_name || userInfo.firstName || "";
+        lastEl.value  = userInfo.last_name  || userInfo.lastName  || "";
+
+        if (userInfo.id) formEl.setAttribute("data-user-id", userInfo.id);
+      }catch(e){
+        console.error("Erreur /api/auth/me:", e);
+        showErr("Session expirée. Merci de te reconnecter.");
+        setTimeout(() => window.location.href = "login.html", 900);
+      }
+    }
+
+    formEl.addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      okBox.classList.add("d-none");
+      errBox.classList.add("d-none");
+
+      const userId = formEl.getAttribute("data-user-id");
+      if (!userId) return showErr("ID utilisateur introuvable.");
+
+      const password = pwdEl.value?.trim();
+      if (!password) return showErr("Merci de saisir ton mot de passe actuel.");
+
+    //const payload = {
+    //  id: userId,
+    //  email: userInfo.email,                 // ⚠️ obligatoire sinon setEmail(null)
+    //  firstName: firstEl.value.trim(),
+    //  lastName:  lastEl.value.trim(),
+
+
+      // ⚠️ TON controller encode user.password -> donc il faut l’envoyer
+    //  password: password
+    //};
+    const payload = {
+      firstName: firstEl.value.trim(),
+      lastName: lastEl.value.trim(),
+      currentPassword: password
+    };
+    //const payload = {
+    //  id: userId,
+    //  email: userInfo.email,        // ⚠️ souvent obligatoire côté JPA
+    //  firstName: firstEl.value.trim(),
+    //  lastName: lastEl.value.trim(),
+    //  password: password            // ✅ NOM ATTENDU
+    //};
+
+      try {
+        setLoading(true);
+
+        const jwt = await getJwtToken();
+        const headers = { "Content-Type": "application/json" };
+        if (jwt) headers["Authorization"] = `Bearer ${jwt}`;
+
+        //await axios.put(`${USERS_URL}/${userId}`, payload, {
+        //  withCredentials: true,
+        //  headers
+        //});
+
+        const res = await fetchWithRefresh(`${USERS_URL}/${userId}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
+        });
+
+        if (!res.ok) {
+          const txt = await res.text().catch(() => "");
+          throw { response: { status: res.status, data: { message: txt } } };
+        }
+
+
+        showOk("Profil mis à jour avec succès. Redirection…");
+        pwdEl.value = "";
+
+        setTimeout(() => {
+          window.location.href = "index.html";
+        }, 1000);
+
+      } catch (err) {
+        console.error("Erreur PUT:", err?.response?.data || err.message);
+
+        if (err?.response?.status === 401) {
+          showErr("Session expirée. Merci de te reconnecter.");
+        } else if (err?.response?.status === 400) {
+          showErr("Mot de passe actuel incorrect.");
+        } else {
+          showErr(err?.response?.data?.message || "Erreur lors de l’enregistrement.");
+        }
+      } finally {
+        setLoading(false);
+      }
+    });
+
+
+    document.addEventListener("DOMContentLoaded", loadUserProfile);
+
+    // toggle password
+    (function(){
+      const input = document.getElementById("currentPassword");
+      const btn = document.getElementById("togglePassword");
+      if (!input || !btn) return;
+
+      btn.addEventListener("click", () => {
+        const show = input.type === "password";
+        input.type = show ? "text" : "password";
+        btn.classList.toggle("is-on", show);
+      });
+    })();
+
+    // ✅ Fix overlay + modal (évite impression "figé" si overlay reste actif)
+    (function fixOverlayWithModal(){
+      const overlay = document.getElementById("overlay");
+      const modalEl = document.getElementById("deleteModal");
+      if (!overlay || !modalEl) return;
+
+      modalEl.addEventListener("show.bs.modal", () => {
+        overlay.classList.remove("show");
+      });
+    })();
+
+    // --- Suppression de compte (RGPD) ---
+    (function setupDeleteAccount(){
+      const btnOpen = document.getElementById("btnDeleteAccount");
+      const modalEl = document.getElementById("deleteModal");
+      const pwd = document.getElementById("deletePassword");
+      const btnConfirm = document.getElementById("confirmDeleteBtn");
+
+      const delErrBox = document.getElementById("delErrBox");
+      const delErrText = document.getElementById("delErrText");
+
+      if (!btnOpen || !modalEl || !pwd || !btnConfirm) return;
+
+      const modal = new bootstrap.Modal(modalEl);
+
+      function showDelErr(msg){
+        delErrText.textContent = msg || "Erreur lors de la suppression.";
+        delErrBox.classList.remove("d-none");
+      }
+      function clearDelErr(){
+        delErrBox.classList.add("d-none");
+        delErrText.textContent = "";
+      }
+
+      btnOpen.addEventListener("click", () => {
+        clearDelErr();
+        pwd.value = "";
+        modal.show();
+        setTimeout(() => pwd.focus(), 250);
+      });
+
+      btnConfirm.addEventListener("click", async () => {
+        clearDelErr();
+
+        const currentPassword = pwd.value?.trim();
+        if (!currentPassword) return showDelErr("Merci de saisir ton mot de passe.");
+
+        btnConfirm.disabled = true;
+        btnConfirm.innerHTML = `<span class="spinner-border spinner-border-sm me-2"></span>Suppression...`;
+
+        try {
+          // ✅ Utilise fetch() patché par layout.js (CSRF + credentials + refresh)
+          const res = await fetch(DELETE_ME_URL, {
+            method: "DELETE",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ currentPassword })
+          });
+
+          if (!res.ok) {
+            const txt = await res.text().catch(() => "");
+            const msg = txt || `Erreur HTTP ${res.status}`;
+
+            if (res.status === 401) throw { status: 401, msg };
+            if (res.status === 400) throw { status: 400, msg };
+            if (res.status === 403) throw { status: 403, msg };
+
+            throw { status: res.status, msg };
+          }
+
+          // Tentative de logout (optionnel)
+          try { await fetch(LOGOUT_URL, { method: "POST" }); } catch(e){}
+
+          // Nettoyage front
+          try { localStorage.removeItem("token"); } catch(e){}
+          try { sessionStorage.clear(); } catch(e){}
+
+          modal.hide();
+          showOk("Compte supprimé. Déconnexion…");
+
+          setTimeout(() => {
+            window.location.href = "login.html";
+          }, 900);
+
+        } catch (err) {
+          console.error("Erreur DELETE /me:", err);
+
+          if (err?.status === 401) {
+            showDelErr("Session expirée. Merci de te reconnecter.");
+          } else if (err?.status === 400) {
+            showDelErr("Mot de passe incorrect.");
+          } else if (err?.status === 403) {
+            showDelErr("CSRF refusé (403). Vérifie que /api/auth/csrf répond bien et que le cookie XSRF-TOKEN est présent.");
+          } else {
+            showDelErr("Impossible de supprimer le compte. Réessaie.");
+          }
+        } finally {
+          btnConfirm.disabled = false;
+          btnConfirm.innerHTML = `Oui, supprimer`;
+        }
+      });
+    })();
+
+
+    document.addEventListener("DOMContentLoaded", () => {
+      const note = document.getElementById("emailNote");
+      if (!note) return;
+
+      setTimeout(() => {
+        note.classList.add("fade-out");
+
+        // optionnel : retirer complètement du DOM après l’animation
+        setTimeout(() => {
+          note.remove();
+        }, 600);
+      }, 3000); // ⏱️ 3 secondes
+    });
+
+  </script>
+
+  <script src="cookies.js"></script>
+  <script src="ai-loader.js"></script>
+</body>
+</html>

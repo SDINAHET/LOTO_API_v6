@@ -1,0 +1,639 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Loto Tracker - Connexion</title>
+
+  <link rel="icon" type="image/png" href="loto_tracker.png" />
+
+  <!-- (Optionnel) Font Awesome pour le header comme index -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+
+  <link rel="stylesheet" href="styles.css">
+
+  <style>
+    :root{
+      --bg0:#0b1220;
+      --bg1:#0f1b2d;
+      --stroke: rgba(255,255,255,.12);
+      --text: rgba(255,255,255,.92);
+      --muted: rgba(255,255,255,.65);
+
+      --card: rgba(0,0,0,.88);
+      --input:#1a1a1a;
+
+      --blue:#0b66b3;
+      --blue2:#0d78d1;
+      --green:#2ecc71;
+      --red:#e74c3c;
+
+      --shadow: 0 18px 45px rgba(0,0,0,.55);
+
+      --topbar-h: 72px;
+    }
+
+    *{box-sizing:border-box}
+
+    body{
+      margin:0;
+      min-height:100vh;
+      font-family: Arial, sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(1200px 600px at 20% 10%, rgba(59,130,246,.22), transparent 60%),
+        radial-gradient(900px 500px at 90% 25%, rgba(239,68,68,.14), transparent 55%),
+        linear-gradient(180deg, var(--bg0), var(--bg1));
+      overflow:hidden;
+      /*overflow:auto; */
+    }
+
+
+    /* ====== TOPBAR + FOOTER (styles proches index) ====== */
+    .topbar{
+      position: sticky; top: 0; z-index: 50;
+      height: var(--topbar-h);
+      display:flex; align-items:center; gap:14px;
+      padding: 12px 16px;
+      background: rgba(10,16,28,.82);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--stroke);
+    }
+    .brand{
+      display:flex; align-items:center; gap:12px;
+      text-decoration:none;
+      color: var(--text);
+      min-width: 0;
+    }
+    .brand-logo{ width:44px; height:44px; object-fit:contain; }
+    .brand-title{ font-weight:900; letter-spacing:.2px; line-height:1.1; white-space:nowrap; }
+    .brand-sub{ font-size:.9rem; color:var(--muted); margin-top:2px; }
+
+    .topbar-actions{
+      margin-left:auto;
+      display:flex; align-items:center; gap:10px;
+    }
+
+    .btn-ghost{
+      display:inline-flex; align-items:center; gap:8px;
+      padding:10px 12px;
+      border-radius: 12px;
+      border:1px solid var(--stroke);
+      background: rgba(255,255,255,.06);
+      color: var(--text);
+      text-decoration:none;
+      font-weight:700;
+    }
+    .btn-ghost:hover{ background: rgba(255,255,255,.08); }
+
+    .chip{
+      display:inline-flex; align-items:center; gap:10px;
+      padding:10px 12px;
+      border-radius: 12px;
+      border:1px solid var(--stroke);
+      background: rgba(255,255,255,.06);
+    }
+    .btn-danger-soft{
+      border:0;
+      background: rgba(239,68,68,.18);
+      color: #fff;
+      padding:10px 12px;
+      border-radius: 12px;
+      cursor:pointer;
+      border: 1px solid rgba(239,68,68,.35);
+      font-weight:800;
+    }
+    .btn-danger-soft:hover{ background: rgba(239,68,68,.25); }
+
+    .footer{
+      position: fixed;
+      left: 0; right: 0; bottom: 0;
+      display:flex;
+      flex-wrap:wrap;
+      justify-content:center;
+      gap: 14px;
+      padding: 10px 16px 14px;
+      color: var(--muted);
+      font-weight:800;
+      font-size:.9rem;
+      background: rgba(10,16,28,.55);
+      backdrop-filter: blur(10px);
+      border-top: 1px solid var(--stroke);
+      z-index: 20;
+    }
+    .footer a{ text-decoration:none; color: var(--muted); }
+    .footer a:hover{ color: var(--text); }
+
+    /* ====== LOGIN CENTER ====== */
+    .page{
+      min-height: calc(100vh - var(--topbar-h));
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding: 22px 18px 88px; /* place footer */
+    }
+
+    /* Fix autofill (Chrome/Edge) */
+    input:-webkit-autofill,
+    input:-webkit-autofill:hover,
+    input:-webkit-autofill:focus,
+    input:-webkit-autofill:active {
+      -webkit-text-fill-color: #fff !important;
+      -webkit-box-shadow: 0 0 0 1000px var(--input) inset !important;
+      box-shadow: 0 0 0 1000px var(--input) inset !important;
+      transition: background-color 999999s ease-in-out 0s;
+      caret-color: #fff;
+    }
+
+    .container{
+      width: 420px;
+      max-width: calc(100vw - 36px);
+      background: var(--card);
+      border: 1px solid rgba(255,255,255,.08);
+      border-radius: 18px;
+      box-shadow: var(--shadow);
+      padding: 42px 44px 34px;
+      position: relative;
+      z-index: 2;
+    }
+
+    h2{
+      margin: 0 0 26px;
+      font-size: 28px;
+      text-align:center;
+      letter-spacing:.2px;
+      color: #fff;
+    }
+
+    .input-group{
+      width:100%;
+      margin-bottom: 18px;
+    }
+
+    label{
+      display:block;
+      color: #d7d7d7;
+      font-size: 15px;
+      margin-bottom: 8px;
+    }
+
+    .field{
+      position:relative;
+      width:100%;
+    }
+
+    .field input{
+      width:100%;
+      height:44px;
+      border-radius: 10px;
+      background: var(--input);
+      color: #fff;
+      border: 1px solid rgba(255,255,255,.08);
+      padding: 10px 92px 10px 12px;
+      outline: none;
+      transition: box-shadow .2s ease, border-color .2s ease;
+    }
+
+    /* Glow focus */
+    .field input:focus{
+      border-color: rgba(79,163,209,.7);
+      box-shadow: 0 0 0 4px rgba(79,163,209,.22), 0 10px 22px rgba(0,0,0,.35);
+    }
+
+    /* Encadré UNIQUEMENT au submit */
+    .field.valid input{
+      border-color: rgba(46,204,113,.9);
+      box-shadow: 0 0 0 4px rgba(46,204,113,.18);
+    }
+    .field.invalid input{
+      border-color: rgba(231,76,60,.9);
+      box-shadow: 0 0 0 4px rgba(231,76,60,.15);
+    }
+
+    .right-icons{
+      position:absolute;
+      right:10px;
+      top:50%;
+      transform: translateY(-50%);
+      display:flex;
+      align-items:center;
+      gap:10px;
+    }
+
+    .icon-btn{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      padding:0;
+      margin:0;
+      border:none;
+      background: transparent;
+      cursor:pointer;
+      opacity:.95;
+      transition: opacity .15s ease, transform .15s ease;
+    }
+    .icon-btn:hover{ opacity:1; transform: translateY(-1px); }
+    .icon-btn:active{ transform: translateY(0px); }
+
+    .status-icon{
+      width: 20px;
+      height: 20px;
+      fill: none;
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      opacity: 0;
+      transform: scale(.92);
+      transition: opacity .18s ease, transform .18s ease;
+    }
+    .status-icon.ok{ stroke: var(--green); }
+    .status-icon.bad{ stroke: var(--red); }
+    .status-icon.show{ opacity:1; transform: scale(1); }
+    .hidden{ display:none; }
+
+    .eye-icon{
+      width: 28px;
+      height: 28px;
+      fill:none;
+      stroke: var(--green);
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .hint{
+      margin-top:8px;
+      font-size:12px;
+      color: #ffb3ad;
+      display:none;
+    }
+    .hint.show{ display:block; }
+
+    .forgot-password{
+      text-align:center;
+      margin-top: 6px;
+    }
+    .forgot-password a{
+      color:#4fa3d1;
+      font-size:14px;
+      text-decoration:none;
+    }
+    .forgot-password a:hover{ text-decoration:underline; }
+
+    .btn{
+      width:100%;
+      height:48px;
+      border:none;
+      border-radius: 10px;
+      background: var(--blue);
+      color:#fff;
+      font-size: 16px;
+      font-weight: 800;
+      cursor:pointer;
+      margin-top: 14px;
+      transition: background .2s ease, transform .15s ease;
+    }
+    .btn:hover{ background: var(--blue2); transform: translateY(-1px); }
+    .btn:active{ transform: translateY(0); }
+    .btn:disabled{ opacity:.65; cursor:not-allowed; }
+
+    .msg{
+      margin-top: 14px;
+      padding: 10px 12px;
+      border-radius: 10px;
+      font-size: 13px;
+      display:none;
+      border: 1px solid transparent;
+      background: rgba(255,255,255,.04);
+      color: #eaeaea;
+    }
+    .msg.show{ display:block; }
+    .msg.ok{
+      border-color: rgba(46,204,113,.35);
+      background: rgba(46,204,113,.10);
+      color: #c8f7da;
+    }
+    .msg.bad{
+      border-color: rgba(231,76,60,.35);
+      background: rgba(231,76,60,.10);
+      color: #ffd1cc;
+    }
+
+    .register-link{
+      text-align:center;
+      margin-top: 18px;
+      color:#fff;
+      font-size: 15px;
+    }
+    .register-link a{
+      color:#4fa3d1;
+      text-decoration:none;
+    }
+    .register-link a:hover{ text-decoration:underline; }
+
+    /* ====== LOTO BALLS SUCCESS TRANSITION ====== */
+    .balls{
+      position: fixed;
+      inset: 0;
+      pointer-events:none;
+      overflow:hidden;
+      z-index: 10;
+      opacity: 0;
+      transition: opacity .25s ease;
+    }
+    .balls.show{ opacity: 1; }
+
+    .ball{
+      position:absolute;
+      top: -80px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 30% 30%, rgba(255,255,255,.95), rgba(255,255,255,.35) 35%, rgba(0,0,0,.12) 70%);
+      border: 2px solid rgba(255,255,255,.55);
+      box-shadow: 0 18px 35px rgba(0,0,0,.35);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-weight: 900;
+      color: #0a2a4a;
+      text-shadow: 0 1px 0 rgba(255,255,255,.7);
+      animation: fall var(--dur) linear forwards, spin var(--spin) linear infinite;
+      transform: translateY(0);
+      width: var(--size);
+      height: var(--size);
+      left: var(--left);
+      animation-delay: var(--delay);
+    }
+    @keyframes fall{
+      to { transform: translateY(120vh); }
+    }
+    @keyframes spin{
+      to { rotate: 360deg; }
+    }
+  </style>
+</head>
+
+<body>
+  <!-- Injecté par layout.js -->
+  <div id="appHeader"></div>
+
+  <div class="page">
+    <div class="container">
+      <h2>Loto Tracker - Connexion</h2>
+
+      <form id="loginForm" novalidate>
+        <!-- EMAIL -->
+        <div class="input-group">
+          <label for="email">Email</label>
+          <div class="field" id="emailField">
+            <input type="email" id="email" required placeholder="email">
+            <div class="right-icons" aria-hidden="true">
+              <svg id="emailOkIcon" viewBox="0 0 24 24" class="status-icon ok hidden">
+                <circle cx="12" cy="12" r="10"></circle>
+                <path d="M8 12.5l2.5 2.5L16 9"></path>
+              </svg>
+
+              <svg id="emailBadIcon" viewBox="0 0 24 24" class="status-icon bad hidden">
+                <circle cx="12" cy="12" r="10"></circle>
+                <path d="M9 9l6 6"></path>
+                <path d="M15 9l-6 6"></path>
+              </svg>
+            </div>
+          </div>
+          <div class="hint" id="emailHint">Email invalide (ex: nom@domaine.fr)</div>
+        </div>
+
+        <!-- PASSWORD -->
+        <div class="input-group">
+          <label for="password">Mot de passe</label>
+          <div class="field" id="passwordField">
+            <input type="password" id="password" required placeholder="••••••••">
+            <div class="right-icons">
+              <button type="button" class="icon-btn" id="togglePassword" title="Afficher / Masquer" aria-label="Afficher / Masquer">
+                <svg id="eyeOpen" class="eye-icon hidden" viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"/>
+                  <path d="M12 9a3 3 0 100 6 3 3 0 000-6z"/>
+                </svg>
+                <svg id="eyeClosed" class="eye-icon" viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"/>
+                  <path d="M12 9a3 3 0 100 6 3 3 0 000-6z"/>
+                  <path d="M4 4l16 16"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="forgot-password">
+          <a href="#">Mot de passe oublié ?</a>
+        </div>
+
+        <button type="submit" class="btn" id="submitBtn">Se connecter</button>
+        <div class="msg" id="loginMsg"></div>
+      </form>
+
+      <div class="register-link">
+        <p>Pas encore inscrit ? <a href="register.html" id="registerLink">Créer un compte</a></p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Injecté par layout.js -->
+  <div id="appFooter"></div>
+
+  <!-- Transition balls -->
+  <div class="balls" id="ballsLayer" aria-hidden="true"></div>
+
+  <!-- Injection header/footer -->
+  <script src="layout.js"></script>
+
+  <script src="cookies.js"></script>
+
+
+  <script>
+    const API_BASE =
+      (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1")
+        ? "http://localhost:8082"
+        : "https://stephanedinahet.fr";
+
+    function getCookie(name) {
+      const value = `; ${document.cookie}`;
+      const parts = value.split(`; ${name}=`);
+      if (parts.length === 2) return parts.pop().split(";").shift();
+      return null;
+    }
+
+    function checkAuth() {
+      const tokenCookie = getCookie("jwtToken");
+      const tokenLS = localStorage.getItem("jwtToken");
+      /* if (tokenCookie || tokenLS) window.location.href = "index_connexion.html"; */
+      if (tokenCookie || tokenLS) window.location.href = "index.html";
+    }
+    document.addEventListener("DOMContentLoaded", checkAuth);
+
+    // Email UI: icons during typing, border only on submit
+    const emailInput = document.getElementById("email");
+    const emailField = document.getElementById("emailField");
+    const emailHint = document.getElementById("emailHint");
+    const emailOkIcon = document.getElementById("emailOkIcon");
+    const emailBadIcon = document.getElementById("emailBadIcon");
+    let hasSubmitted = false;
+
+    function isValidEmail(email) {
+      return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(String(email).trim());
+    }
+
+    emailInput.addEventListener("input", () => {
+      const v = emailInput.value.trim();
+      emailHint.classList.remove("show");
+
+      if (!hasSubmitted) {
+        emailField.classList.remove("valid", "invalid");
+      }
+
+      if (!v) {
+        emailOkIcon.classList.add("hidden");
+        emailBadIcon.classList.add("hidden");
+        emailOkIcon.classList.remove("show");
+        emailBadIcon.classList.remove("show");
+        return;
+      }
+
+      if (isValidEmail(v)) {
+        emailBadIcon.classList.add("hidden");
+        emailBadIcon.classList.remove("show");
+        emailOkIcon.classList.remove("hidden");
+        emailOkIcon.classList.add("show");
+      } else {
+        emailOkIcon.classList.add("hidden");
+        emailOkIcon.classList.remove("show");
+        emailBadIcon.classList.remove("hidden");
+        emailBadIcon.classList.add("show");
+      }
+    });
+
+    function validateEmailOnSubmit() {
+      const v = emailInput.value.trim();
+      if (!v) {
+        emailField.classList.add("invalid");
+        emailField.classList.remove("valid");
+        emailHint.textContent = "Email requis.";
+        emailHint.classList.add("show");
+        return false;
+      }
+      if (isValidEmail(v)) {
+        emailField.classList.add("valid");
+        emailField.classList.remove("invalid");
+        emailHint.classList.remove("show");
+        return true;
+      }
+      emailField.classList.add("invalid");
+      emailField.classList.remove("valid");
+      emailHint.textContent = "Email invalide (ex: nom@domaine.fr)";
+      emailHint.classList.add("show");
+      return false;
+    }
+
+    // Toggle password
+    const passInput = document.getElementById("password");
+    const togglePassword = document.getElementById("togglePassword");
+    const eyeOpen = document.getElementById("eyeOpen");
+    const eyeClosed = document.getElementById("eyeClosed");
+
+    togglePassword.addEventListener("click", () => {
+      const hidden = passInput.type === "password";
+      passInput.type = hidden ? "text" : "password";
+      eyeOpen.classList.toggle("hidden", !hidden);
+      eyeClosed.classList.toggle("hidden", hidden);
+      passInput.focus();
+    });
+
+    // Message no alert
+    const loginMsg = document.getElementById("loginMsg");
+    const submitBtn = document.getElementById("submitBtn");
+
+    function showMsg(type, text){
+      loginMsg.classList.remove("ok","bad","show");
+      loginMsg.classList.add("show", type);
+      loginMsg.textContent = text;
+    }
+    function clearMsg(){
+      loginMsg.classList.remove("ok","bad","show");
+      loginMsg.textContent = "";
+    }
+
+    // Loto balls transition
+    const ballsLayer = document.getElementById("ballsLayer");
+    function rand(min, max){ return Math.random() * (max - min) + min; }
+
+    function startLotoBallsTransition(){
+      ballsLayer.innerHTML = "";
+      ballsLayer.classList.add("show");
+
+      const count = 24;
+      for(let i=0;i<count;i++){
+        const ball = document.createElement("div");
+        ball.className = "ball";
+
+        ball.style.setProperty("--left", `${rand(0, 100)}vw`);
+        ball.style.setProperty("--size", `${rand(38, 62)}px`);
+        ball.style.setProperty("--dur", `${rand(1.6, 2.6)}s`);
+        ball.style.setProperty("--spin", `${rand(0.7, 1.4)}s`);
+        ball.style.setProperty("--delay", `${rand(0, 0.7)}s`);
+
+        ball.textContent = String(Math.floor(rand(1, 50)));
+        ballsLayer.appendChild(ball);
+      }
+
+      setTimeout(() => {
+        ballsLayer.classList.remove("show");
+        ballsLayer.innerHTML = "";
+      }, 3200);
+    }
+
+    // Submit login
+    document.getElementById("loginForm").addEventListener("submit", async (event) => {
+      event.preventDefault();
+      clearMsg();
+
+      hasSubmitted = true;
+
+      const okEmail = validateEmailOnSubmit();
+      const email = emailInput.value.trim();
+      const password = passInput.value;
+
+      if (!okEmail) return showMsg("bad", "❌ Email invalide.");
+      if (!password || password.length < 4) return showMsg("bad", "❌ Mot de passe invalide.");
+
+      submitBtn.disabled = true;
+      submitBtn.textContent = "Connexion...";
+
+      try {
+        const response = await fetch(`${API_BASE}/api/auth/login3`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email, password }),
+          credentials: "include"
+        });
+
+        if (!response.ok) throw new Error();
+
+        showMsg("ok", "✅ Login OK ! Redirection...");
+        startLotoBallsTransition();
+
+        setTimeout(() => {
+          /* window.location.href = "index_connexion.html"; */
+          window.location.href = "index.html";
+        }, 1600);
+
+      } catch (e) {
+        showMsg("bad", "❌ Login NOK : identifiants incorrects ou serveur indisponible.");
+      } finally {
+        setTimeout(() => {
+          submitBtn.disabled = false;
+          submitBtn.textContent = "Se connecter";
+        }, 800);
+      }
+    });
+  </script>
+</body>
+</html>

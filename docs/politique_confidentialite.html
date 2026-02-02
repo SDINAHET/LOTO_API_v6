@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Politique de Confidentialité – Loto Tracker</title>
+
+  <link rel="icon" type="image/png" href="loto_tracker.png">
+
+  <!-- Bootstrap + Font Awesome -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+  <link rel="stylesheet" href="styles.css">
+  <!-- ✅ Layout global (header/footer injectés) -->
+  <script defer src="layout.js"></script>
+  <style>
+    :root{
+      --bg0:#0b1220;
+      --bg1:#0f1b2d;
+      --stroke: rgba(255,255,255,.12);
+      --text: rgba(255,255,255,.92);
+      --muted: rgba(255,255,255,.65);
+      --primary:#3b82f6;
+      --primary2:#60a5fa;
+      --radius:18px;
+      --shadow:0 16px 45px rgba(0,0,0,.35);
+      --topbar-h:72px;
+      --footer-h:56px;
+      --sidebar-w: 280px;
+
+    }
+
+    body{
+      margin:0;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      background:
+        radial-gradient(1200px 600px at 20% 10%, rgba(59,130,246,.22), transparent 60%),
+        radial-gradient(900px 500px at 90% 25%, rgba(239,68,68,.14), transparent 55%),
+        linear-gradient(180deg, var(--bg0), var(--bg1));
+      color:var(--text);
+      min-height:100vh;
+      padding-top: var(--topbar-h);
+      padding-bottom: var(--footer-h);
+    }
+
+    main{
+      max-width: 1150px;
+      margin: 0 auto;
+      padding: 20px 16px 32px;
+    }
+
+    .panel{
+      background: rgba(255,255,255,.05);
+      border:1px solid var(--stroke);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 22px;
+    }
+
+    h1{
+      font-size: clamp(1.35rem, 2.6vw, 1.7rem);
+      font-weight: 950;
+      margin-bottom: 6px;
+    }
+
+    .meta{
+      color: var(--muted);
+      font-weight: 750;
+      line-height: 1.6;
+      margin-bottom: 14px;
+    }
+
+    h2{
+      font-size: 1.05rem;
+      font-weight: 900;
+      margin-top: 20px;
+      display:flex;
+      gap:10px;
+      align-items:center;
+    }
+
+    p, li{
+      color: rgba(255,255,255,.82);
+      font-weight: 700;
+      line-height: 1.7;
+    }
+
+    ul{ padding-left: 18px; margin-top: 6px; }
+
+    .actions{
+      display:flex;
+      gap:10px;
+      flex-wrap: wrap;
+      margin: 12px 0 6px;
+    }
+
+    .btn-ghost{
+      border:1px solid var(--stroke);
+      background: rgba(255,255,255,.06);
+      color:var(--text);
+      padding:12px 14px;
+      border-radius:14px;
+      font-weight:900;
+      text-decoration:none;
+      display:inline-flex;
+      gap:8px;
+      align-items:center;
+    }
+
+    .btn-primary{
+      border:0;
+      background: linear-gradient(135deg, var(--primary), var(--primary2));
+      color:white;
+      padding:12px 14px;
+      border-radius:14px;
+      font-weight:900;
+      text-decoration:none;
+      display:inline-flex;
+      gap:8px;
+      align-items:center;
+    }
+
+    .notice{
+      border:1px solid rgba(245,158,11,.35);
+      background: rgba(245,158,11,.12);
+      border-radius: 14px;
+      padding: 14px;
+      font-weight: 800;
+      margin: 12px 0;
+    }
+
+    .info{
+      border:1px solid rgba(59,130,246,.35);
+      background: rgba(59,130,246,.12);
+      border-radius: 14px;
+      padding: 14px;
+      font-weight: 800;
+      margin: 12px 0;
+    }
+
+    .danger{
+      border:1px solid rgba(239,68,68,.35);
+      background: rgba(239,68,68,.12);
+      border-radius: 14px;
+      padding: 14px;
+      font-weight: 850;
+      margin: 12px 0;
+    }
+
+    a.link{
+      color: rgba(96,165,250,.95);
+      font-weight: 900;
+      text-decoration:none;
+    }
+    a.link:hover{ text-decoration: underline; }
+
+    .table-like{
+      border:1px solid rgba(255,255,255,.12);
+      border-radius: 14px;
+      overflow:hidden;
+      margin-top: 10px;
+    }
+    .rowx{
+      display:grid;
+      grid-template-columns: 260px 1fr;
+      gap: 0;
+      border-top:1px solid rgba(255,255,255,.10);
+    }
+    .rowx:first-child{ border-top:0; }
+    .cell{
+      padding: 12px 12px;
+      background: rgba(255,255,255,.04);
+      font-weight: 800;
+      color: rgba(255,255,255,.86);
+    }
+    .cell.key{
+      background: rgba(255,255,255,.07);
+      color: rgba(255,255,255,.92);
+      font-weight: 950;
+    }
+
+    @media (max-width: 768px){
+      .rowx{ grid-template-columns: 1fr; }
+      .cell.key{ border-bottom:1px solid rgba(255,255,255,.10); }
+    }
+
+    /* Overlay */
+    .overlay{
+      position:fixed; inset:0;
+      background: rgba(0,0,0,.55);
+      opacity:0;
+      pointer-events:none;
+      transition: opacity .22s ease;
+      z-index:60;
+    }
+    .overlay.show{ opacity:1; pointer-events:auto; }
+
+    /* Sidebar */
+    /*.sidebar{
+      position:fixed;
+      top: var(--topbar-h);
+      left: 0;
+      height: calc(100vh - var(--topbar-h));
+      width: min(320px, 92vw);
+      transform: translateX(-110%);
+      transition: transform .22s ease;
+      z-index:70;
+      border-radius: 0 18px 18px 0;
+      background: rgba(10,16,28,.65);
+      border: 1px solid rgba(255,255,255,.12);
+      padding: 12px;
+      overflow-y: auto;
+    }
+    .sidebar.open{ transform: translateX(0); }
+    .no-scroll{ overflow:hidden; }*/
+
+
+        /* ===== Layout like index.html ===== */
+    .no-scroll { overflow: hidden; }
+
+    .shell{
+      display:grid;
+      grid-template-columns: var(--sidebar-w) 1fr;
+      gap: 16px;
+      max-width: 1500px;
+      margin: 0 auto;
+      padding: 16px;
+      align-items: start;
+    }
+
+    .main{
+      min-width: 0;
+      display:flex;
+      flex-direction:column;
+      gap: 16px;
+    }
+
+    .panel{
+      border-radius: var(--radius);
+      border: 1px solid var(--stroke);
+      background: rgba(255,255,255,.05);
+      box-shadow: var(--shadow);
+      padding: 16px;
+    }
+
+    /* ===== Sidebar ===== */
+    .sidebar{
+      position: sticky;
+      top: calc(var(--topbar-h) + 16px);
+      max-height: calc(100vh - var(--topbar-h) - 32px);
+      border-radius: var(--radius);
+      border: 1px solid var(--stroke);
+      background: rgba(10,16,28,.65);
+      backdrop-filter: blur(12px);
+      box-shadow: var(--shadow);
+      padding: 12px;
+      overflow: auto;
+      align-self: start;
+    }
+
+    .nav-title{
+      font-size:.85rem;
+      color: var(--muted);
+      font-weight:800;
+      margin: 10px 10px 6px;
+      letter-spacing:.4px;
+      text-transform: uppercase;
+    }
+
+    .nav-item{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      padding:12px 12px;
+      border-radius: 14px;
+      border: 1px solid transparent;
+      text-decoration:none;
+      background: transparent;
+      color: var(--text);
+      font-weight:750;
+    }
+    .nav-item i{ width:18px; text-align:center; opacity:.9; }
+
+    .nav-item:hover{
+      background: rgba(255,255,255,.06);
+      border-color: var(--stroke);
+    }
+
+    .nav-item.active{
+      background: rgba(59,130,246,.18);
+      border-color: rgba(59,130,246,.35);
+    }
+
+    .nav-sep{
+      height:1px;
+      background: var(--stroke);
+      margin: 10px 8px;
+    }
+
+    /* ===== Overlay ===== */
+    .overlay{
+      position:fixed; inset:0;
+      background: rgba(0,0,0,.55);
+      opacity:0;
+      pointer-events:none;
+      transition: opacity .22s ease;
+      z-index:60;
+    }
+    .overlay.show{ opacity:1; pointer-events:auto; }
+
+    /* ===== Mobile burger offcanvas ===== */
+    @media (max-width: 991px){
+      .shell{ grid-template-columns: 1fr; padding: 14px; }
+      .sidebar{
+        position:fixed;
+        top: var(--topbar-h);
+        left: 0;
+        height: calc(100vh - var(--topbar-h));
+        width: min(320px, 92vw);
+        transform: translateX(-110%);
+        transition: transform .22s ease;
+        z-index:70;
+        border-radius: 0 18px 18px 0;
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+      }
+      .sidebar.open{ transform: translateX(0); }
+    }
+
+    /* Desktop */
+    .sidebar{
+      position: sticky;
+      top: calc(var(--topbar-h) + 16px);
+      max-height: calc(100vh - var(--topbar-h) - 32px);
+      border-radius: var(--radius);
+      border: 1px solid var(--stroke);
+      background: rgba(10,16,28,.65);
+      backdrop-filter: blur(12px);
+      box-shadow: var(--shadow);
+      padding: 12px;
+      overflow: auto;
+      align-self: start;
+
+      transform: none; /* ✅ important (optionnel mais safe) */
+    }
+
+    /* Mobile */
+    @media (max-width: 991px){
+      .sidebar{
+        position:fixed;
+        top: var(--topbar-h);
+        left:0;
+        height: calc(100vh - var(--topbar-h));
+        width: min(320px, 92vw);
+        transform: translateX(-110%);
+        transition: transform .22s ease;
+        z-index:70;
+        border-radius: 0 18px 18px 0;
+        overflow-y:auto;
+      }
+      .sidebar.open{ transform: translateX(0); }
+    }
+
+
+  </style>
+</head>
+
+<body class="has-fixed-footer">
+
+  <!-- Header injecté -->
+  <div id="appHeader"></div>
+  <div id="overlay" class="overlay"></div>
+  <div class="shell">
+    <div id="appSidebar"></div>
+
+  <main>
+    <section class="panel">
+
+      <h1><i class="fa-solid fa-user-shield"></i> Politique de Confidentialité</h1>
+      <div class="meta">
+        Version RNCP6 (niveau Licence/Bachelor) – conformité <b>RGPD (UE 2016/679)</b><br>
+        Dernière mise à jour : <b>2026</b>
+      </div>
+
+      <div class="actions">
+        <button class="btn-ghost" onclick="history.length>1?history.back():location.href='index.html'">
+          <i class="fa-solid fa-arrow-left"></i> Retour
+        </button>
+        <a href="index.html" class="btn-primary">
+          <i class="fa-solid fa-house"></i> Accueil
+        </a>
+        <a href="mentions_legales.html" class="btn-ghost">
+          <i class="fa-solid fa-file-signature"></i> Mention Légales
+        </a>
+        <a href="conditions_utilisation.html" class="btn-ghost">
+          <i class="fa-solid fa-file-signature"></i> Conditions d’utilisation
+        </a>
+      </div>
+
+      <div class="notice">
+        <i class="fa-solid fa-circle-exclamation"></i>
+        Cette politique décrit les traitements de données réalisés par le site <b>Loto Tracker</b>.
+        Elle est structurée pour répondre aux exigences attendues dans un dossier RNCP6 :
+        gouvernance des données, bases légales, sécurité, droits des personnes, traçabilité.
+      </div>
+
+      <h2><i class="fa-solid fa-building-shield"></i> 1. Responsable de traitement</h2>
+      <p>
+        Le responsable de traitement est l’éditeur du Site (projet Loto Tracker / SDINAHET).
+        Pour toute question : <b>stephane.dinahet@gmail.com</b>.
+      </p>
+
+      <!-- <div class="info">
+        <i class="fa-solid fa-circle-info"></i>
+        Si tu veux un rendu “production”, remplace l’email par ton contact réel et ajoute les éléments d’identification
+        dans <b>mentions_legales.html</b> (éditeur, hébergeur, coordonnées).
+      </div> -->
+
+      <h2><i class="fa-solid fa-list-check"></i> 2. Données personnelles traitées</h2>
+      <p>Selon les fonctionnalités utilisées, le Site peut traiter :</p>
+      <ul>
+        <li><b>Données d’identification</b> : adresse email (et éventuellement nom/prénom si ton formulaire l’ajoute).</li>
+        <li><b>Données de compte</b> : identifiants techniques (UUID), rôles, état de session.</li>
+        <li><b>Données utilisateur</b> : tickets saisis, historique de tickets.</li>
+        <li><b>Données techniques</b> : adresse IP, user-agent, journaux (logs) de sécurité et d’accès.</li>
+        <li><b>Données de navigation</b> : pages consultées / événements techniques (dans la limite de la configuration).</li>
+      </ul>
+
+      <h2><i class="fa-solid fa-bullseye"></i> 3. Finalités des traitements</h2>
+      <ul>
+        <li>Fournir le service (affichage résultats, historique, statistiques).</li>
+        <li>Créer et gérer les comptes utilisateurs (inscription, login, session, logout).</li>
+        <li>Permettre la gestion des tickets utilisateur (CRUD).</li>
+        <li>Assurer la sécurité (détection fraude, prévention abus, journalisation).</li>
+        <li>Améliorer la qualité et la performance du service (diagnostic, monitoring).</li>
+        <li>Respecter les obligations légales (le cas échéant).</li>
+      </ul>
+
+      <h2><i class="fa-solid fa-scale-balanced"></i> 4. Bases légales (RGPD)</h2>
+      <p>
+        Les traitements reposent, selon le cas, sur :
+      </p>
+      <ul>
+        <li><b>Exécution du contrat</b> (art. 6.1.b) : création/gestion de compte, accès aux services authentifiés.</li>
+        <li><b>Intérêt légitime</b> (art. 6.1.f) : sécurité, prévention des abus, journalisation, performance.</li>
+        <li><b>Obligation légale</b> (art. 6.1.c) : si une conservation est requise par la loi (rare ici).</li>
+        <li><b>Consentement</b> (art. 6.1.a) : uniquement si des traceurs non essentiels sont activés.</li>
+      </ul>
+
+      <h2><i class="fa-solid fa-hourglass-half"></i> 5. Durées de conservation</h2>
+      <p>
+        Les durées suivantes sont recommandées (bon niveau RNCP6) :
+      </p>
+
+      <div class="table-like">
+        <div class="rowx">
+          <div class="cell key">Comptes utilisateurs</div>
+          <div class="cell">Durée du compte + suppression à la demande (sauf obligations légales).</div>
+        </div>
+        <div class="rowx">
+          <div class="cell key">Tickets utilisateur</div>
+          <div class="cell">Jusqu’à suppression par l’utilisateur ou fermeture du compte.</div>
+        </div>
+        <div class="rowx">
+          <div class="cell key">Logs sécurité / accès</div>
+          <div class="cell">Durée limitée (ex : 30 à 90 jours), prolongée en cas d’incident.</div>
+        </div>
+        <div class="rowx">
+          <div class="cell key">Cookies de session</div>
+          <div class="cell">Temps de session / expiration définie par la configuration serveur.</div>
+        </div>
+      </div>
+
+      <h2><i class="fa-solid fa-share-nodes"></i> 6. Destinataires et sous-traitants</h2>
+      <p>
+        Les données ne sont ni vendues ni louées. Elles peuvent être accessibles :
+      </p>
+      <ul>
+        <li>à l’éditeur du Site (administration et maintenance),</li>
+        <li>aux prestataires techniques strictement nécessaires (hébergeur, base de données, logs/monitoring),
+            agissant comme <b>sous-traitants</b> au sens du RGPD.</li>
+      </ul>
+      <p>
+        En cas d’obligation légale, certaines données peuvent être communiquées aux autorités compétentes.
+      </p>
+
+      <h2><i class="fa-solid fa-globe"></i> 7. Transferts hors Union Européenne</h2>
+      <p>
+        Par défaut, le Site vise un hébergement et des traitements au sein de l’Union Européenne.
+        Si un transfert hors UE devait exister (CDN, outils externes), il serait encadré par des garanties appropriées
+        (clauses contractuelles types, décision d’adéquation, etc.).
+      </p>
+
+      <h2><i class="fa-solid fa-shield-halved"></i> 8. Sécurité (mesures techniques & organisationnelles)</h2>
+      <p>
+        Le Site met en œuvre des mesures de sécurité adaptées au risque, notamment :
+      </p>
+      <ul>
+        <li>Contrôles d’accès (routes protégées, rôles).</li>
+        <li>Sessions sécurisées (cookies <b>HttpOnly</b>, politique SameSite, expiration).</li>
+        <li>Chiffrement TLS/HTTPS (si déployé sur domaine avec certificat).</li>
+        <li>Journalisation (logs) pour la détection d’abus et la traçabilité.</li>
+        <li>Principe de minimisation : collecte limitée au strict nécessaire.</li>
+      </ul>
+
+      <div class="danger">
+        <i class="fa-solid fa-triangle-exclamation"></i>
+        Important : malgré ces mesures, aucun système n’est invulnérable.
+        En cas d’incident avéré, une procédure de gestion d’incident et de notification peut être mise en œuvre
+        conformément aux articles 33 et 34 du RGPD.
+      </div>
+
+      <h2><i class="fa-solid fa-cookie-bite"></i> 9. Cookies et traceurs</h2>
+      <p>
+        Le Site peut utiliser :
+      </p>
+      <ul>
+        <li><b>Cookies strictement nécessaires</b> (ex : cookie de session) : indispensables au fonctionnement.</li>
+        <li><b>Cookies optionnels</b> (statistiques / mesure d’audience) : uniquement si activés et soumis au consentement.</li>
+      </ul>
+      <p>
+        Vous pouvez gérer les cookies via les paramètres de votre navigateur.
+        Pour les cookies non essentiels, un bandeau de consentement est recommandé (niveau RNCP6).
+      </p>
+
+      <h2><i class="fa-solid fa-id-card"></i> 10. Vos droits (RGPD)</h2>
+      <p>
+        Conformément au RGPD, vous disposez des droits suivants :
+      </p>
+      <ul>
+        <li>Droit d’accès</li>
+        <li>Droit de rectification</li>
+        <li>Droit à l’effacement (« droit à l’oubli »)</li>
+        <li>Droit à la limitation du traitement</li>
+        <li>Droit d’opposition (notamment si traitement fondé sur l’intérêt légitime)</li>
+        <li>Droit à la portabilité (lorsque applicable)</li>
+      </ul>
+      <p>
+        Pour exercer vos droits : <b>stephane.dinahet@gmail.com</b>.<br>
+        Une réponse est apportée dans les délais légaux (en principe 1 mois).
+      </p>
+
+      <h2><i class="fa-solid fa-rotate"></i> 11. Mise à jour de la politique</h2>
+      <p>
+        Cette politique peut être modifiée pour refléter les évolutions légales, techniques ou fonctionnelles.
+        La version applicable est celle publiée sur le Site.
+      </p>
+
+      <div class="actions mt-3">
+        <button class="btn-primary" type="button" onclick="window.scrollTo({top:0, behavior:'smooth'})">
+          <i class="fa-solid fa-arrow-up"></i> Retour en haut
+        </button>
+      </div>
+
+    </section>
+  </main>
+  <div id="appSidebar"></div>
+
+  <!-- Footer injecté -->
+  <div id="appFooter"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="cookies.js"></script>
+  <!-- IA (si tu l'utilises) -->
+  <script src="ai-loader.js"></script>
+
+<script>
+  (function () {
+    const API_BASE =
+      (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1")
+        ? "http://localhost:8082"
+        : "https://stephanedinahet.fr";
+
+    function renderSidebar() {
+      const path = (window.location.pathname || "").toLowerCase();
+      const active = (name) => path.endsWith(name) ? " active" : "";
+
+      return `
+        <aside class="sidebar" id="sidebar">
+          <div class="nav-title">Dashboard</div>
+
+          <a class="nav-item${active("index.html") || (path.endsWith("/") ? " active" : "")}" href="index.html">
+            <i class="fa-solid fa-chart-line"></i><span>Résultats</span>
+          </a>
+
+          <a class="nav-item auth-only${active("tickets.html")}" href="tickets.html" style="display:none;">
+            <i class="fa-solid fa-ticket"></i><span>Tickets</span>
+          </a>
+          <a class="nav-item auth-only${active("statistiques.html")}" href="statistiques.html" style="display:none;">
+            <i class="fa-solid fa-signal"></i><span>Statistiques</span>
+          </a>
+          <a class="nav-item auth-only${active("profil.html")}" href="profil.html" style="display:none;">
+            <i class="fa-solid fa-user-gear"></i><span>Compte</span>
+          </a>
+
+          <div class="nav-sep"></div>
+
+          <div class="nav-title">Pages</div>
+          <a class="nav-item${active("mentions_legales.html")}" href="mentions_legales.html">
+            <i class="fa-solid fa-file-signature"></i><span>Mentions légales</span>
+          </a>
+          <a class="nav-item${active("conditions_utilisation.html")}" href="conditions_utilisation.html">
+            <i class="fa-solid fa-scale-balanced"></i><span>Conditions</span>
+          </a>
+          <a class="nav-item${active("politique_confidentialite.html")}" href="politique_confidentialite.html">
+            <i class="fa-solid fa-user-shield"></i><span>Confidentialité</span>
+          </a>
+        </aside>
+      `;
+    }
+
+    async function fetchUserInfo() {
+      const res = await fetch(`${API_BASE}/api/protected/userinfo`, {
+        method: "GET",
+        credentials: "include",
+        cache: "no-store"
+      });
+      if (!res.ok) throw new Error("Not authenticated");
+      return await res.json();
+    }
+
+    async function applyAuthOnly() {
+      let logged = false;
+      try { await fetchUserInfo(); logged = true; } catch { logged = false; }
+      document.querySelectorAll(".auth-only").forEach((el) => {
+        el.style.display = logged ? "" : "none";
+      });
+    }
+
+    document.addEventListener("layout:ready", () => {
+      const mount = document.getElementById("appSidebar");
+      if (mount) mount.innerHTML = renderSidebar();
+
+      // le burger est déjà bind dans layout.js (bindBurgerGlobal) :contentReference[oaicite:3]{index=3}
+      // donc pas besoin de re-binder ici
+
+      setTimeout(applyAuthOnly, 80);
+      setTimeout(applyAuthOnly, 800);
+    });
+  })();
+</script>
+
+
+</body>
+</html>

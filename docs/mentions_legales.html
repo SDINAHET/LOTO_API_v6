@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mentions légales – Loto Tracker</title>
+
+  <link rel="icon" type="image/png" href="loto_tracker.png">
+
+  <!-- Bootstrap + Font Awesome -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+  <link rel="stylesheet" href="styles.css">
+
+  <!-- ✅ Layout global (header/footer injectés) -->
+  <script defer src="layout.js"></script>
+
+  <style>
+    :root{
+      --bg0:#0b1220;
+      --bg1:#0f1b2d;
+      --stroke: rgba(255,255,255,.12);
+      --text: rgba(255,255,255,.92);
+      --muted: rgba(255,255,255,.65);
+      --primary:#3b82f6;
+      --primary2:#60a5fa;
+      --radius:18px;
+      --shadow:0 16px 45px rgba(0,0,0,.35);
+      --topbar-h:72px;
+      --footer-h:56px;
+      --sidebar-w: 280px;
+
+    }
+
+    body{
+      margin:0;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      background:
+        radial-gradient(1200px 600px at 20% 10%, rgba(59,130,246,.22), transparent 60%),
+        radial-gradient(900px 500px at 90% 25%, rgba(239,68,68,.14), transparent 55%),
+        linear-gradient(180deg, var(--bg0), var(--bg1));
+      color:var(--text);
+      min-height:100vh;
+      padding-top: var(--topbar-h);
+      padding-bottom: var(--footer-h);
+    }
+
+    main{
+      max-width: 1150px;
+      margin: 0 auto;
+      padding: 20px 16px 32px;
+    }
+
+    .panel{
+      background: rgba(255,255,255,.05);
+      border:1px solid var(--stroke);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 22px;
+    }
+
+    h1{
+      font-size: clamp(1.35rem, 2.6vw, 1.7rem);
+      font-weight: 950;
+      margin-bottom: 6px;
+    }
+
+    .meta{
+      color: var(--muted);
+      font-weight: 750;
+      line-height: 1.6;
+      margin-bottom: 14px;
+    }
+
+    h2{
+      font-size: 1.05rem;
+      font-weight: 900;
+      margin-top: 20px;
+      display:flex;
+      gap:10px;
+      align-items:center;
+    }
+
+    p, li{
+      color: rgba(255,255,255,.82);
+      font-weight: 700;
+      line-height: 1.7;
+    }
+
+    ul{ padding-left: 18px; margin-top: 6px; }
+
+    .actions{
+      display:flex;
+      gap:10px;
+      flex-wrap: wrap;
+      margin: 12px 0 6px;
+    }
+
+    .btn-ghost{
+      border:1px solid var(--stroke);
+      background: rgba(255,255,255,.06);
+      color:var(--text);
+      padding:12px 14px;
+      border-radius:14px;
+      font-weight:900;
+      text-decoration:none;
+      display:inline-flex;
+      gap:8px;
+      align-items:center;
+    }
+
+    .btn-primary{
+      border:0;
+      background: linear-gradient(135deg, var(--primary), var(--primary2));
+      color:white;
+      padding:12px 14px;
+      border-radius:14px;
+      font-weight:900;
+      text-decoration:none;
+      display:inline-flex;
+      gap:8px;
+      align-items:center;
+    }
+
+    .notice{
+      border:1px solid rgba(245,158,11,.35);
+      background: rgba(245,158,11,.12);
+      border-radius: 14px;
+      padding: 14px;
+      font-weight: 850;
+      margin: 12px 0;
+    }
+
+    .info{
+      border:1px solid rgba(59,130,246,.35);
+      background: rgba(59,130,246,.12);
+      border-radius: 14px;
+      padding: 14px;
+      font-weight: 820;
+      margin: 12px 0;
+    }
+
+    a.link{
+      color: rgba(96,165,250,.95);
+      font-weight: 900;
+      text-decoration:none;
+    }
+    a.link:hover{ text-decoration: underline; }
+
+    .table-like{
+      border:1px solid rgba(255,255,255,.12);
+      border-radius: 14px;
+      overflow:hidden;
+      margin-top: 10px;
+    }
+    .rowx{
+      display:grid;
+      grid-template-columns: 260px 1fr;
+      border-top:1px solid rgba(255,255,255,.10);
+    }
+    .rowx:first-child{ border-top:0; }
+    .cell{
+      padding: 12px 12px;
+      background: rgba(255,255,255,.04);
+      font-weight: 800;
+      color: rgba(255,255,255,.86);
+    }
+    .cell.key{
+      background: rgba(255,255,255,.07);
+      color: rgba(255,255,255,.92);
+      font-weight: 950;
+    }
+
+    @media (max-width: 768px){
+      .rowx{ grid-template-columns: 1fr; }
+      .cell.key{ border-bottom:1px solid rgba(255,255,255,.10); }
+    }
+
+    /* Overlay */
+    .overlay{
+      position:fixed; inset:0;
+      background: rgba(0,0,0,.55);
+      opacity:0;
+      pointer-events:none;
+      transition: opacity .22s ease;
+      z-index:60;
+    }
+    .overlay.show{ opacity:1; pointer-events:auto; }
+
+    /* Sidebar */
+    /*.sidebar{
+      position:fixed;
+      top: var(--topbar-h);
+      left: 0;
+      height: calc(100vh - var(--topbar-h));
+      width: min(320px, 92vw);
+      transform: translateX(-110%);
+      transition: transform .22s ease;
+      z-index:70;
+      border-radius: 0 18px 18px 0;
+      background: rgba(10,16,28,.65);
+      border: 1px solid rgba(255,255,255,.12);
+      padding: 12px;
+      overflow-y: auto;
+    }
+    .sidebar.open{ transform: translateX(0); }
+    .no-scroll{ overflow:hidden; }*/
+
+
+    /* ===== Layout like index.html ===== */
+    .no-scroll { overflow: hidden; }
+
+    .shell{
+      display:grid;
+      grid-template-columns: var(--sidebar-w) 1fr;
+      gap: 16px;
+      max-width: 1500px;
+      margin: 0 auto;
+      padding: 16px;
+      align-items: start;
+    }
+
+    .main{
+      min-width: 0;
+      display:flex;
+      flex-direction:column;
+      gap: 16px;
+    }
+
+    .panel{
+      border-radius: var(--radius);
+      border: 1px solid var(--stroke);
+      background: rgba(255,255,255,.05);
+      box-shadow: var(--shadow);
+      padding: 16px;
+    }
+
+    /* ===== Sidebar ===== */
+    .sidebar{
+      position: sticky;
+      top: calc(var(--topbar-h) + 16px);
+      max-height: calc(100vh - var(--topbar-h) - 32px);
+      border-radius: var(--radius);
+      border: 1px solid var(--stroke);
+      background: rgba(10,16,28,.65);
+      backdrop-filter: blur(12px);
+      box-shadow: var(--shadow);
+      padding: 12px;
+      overflow: auto;
+      align-self: start;
+    }
+
+    .nav-title{
+      font-size:.85rem;
+      color: var(--muted);
+      font-weight:800;
+      margin: 10px 10px 6px;
+      letter-spacing:.4px;
+      text-transform: uppercase;
+    }
+
+    .nav-item{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      padding:12px 12px;
+      border-radius: 14px;
+      border: 1px solid transparent;
+      text-decoration:none;
+      background: transparent;
+      color: var(--text);
+      font-weight:750;
+    }
+    .nav-item i{ width:18px; text-align:center; opacity:.9; }
+
+    .nav-item:hover{
+      background: rgba(255,255,255,.06);
+      border-color: var(--stroke);
+    }
+
+    .nav-item.active{
+      background: rgba(59,130,246,.18);
+      border-color: rgba(59,130,246,.35);
+    }
+
+    .nav-sep{
+      height:1px;
+      background: var(--stroke);
+      margin: 10px 8px;
+    }
+
+    /* ===== Overlay ===== */
+    .overlay{
+      position:fixed; inset:0;
+      background: rgba(0,0,0,.55);
+      opacity:0;
+      pointer-events:none;
+      transition: opacity .22s ease;
+      z-index:60;
+    }
+    .overlay.show{ opacity:1; pointer-events:auto; }
+
+    /* ===== Mobile burger offcanvas ===== */
+    @media (max-width: 991px){
+      .shell{ grid-template-columns: 1fr; padding: 14px; }
+      .sidebar{
+        position:fixed;
+        top: var(--topbar-h);
+        left: 0;
+        height: calc(100vh - var(--topbar-h));
+        width: min(320px, 92vw);
+        transform: translateX(-110%);
+        transition: transform .22s ease;
+        z-index:70;
+        border-radius: 0 18px 18px 0;
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+      }
+      .sidebar.open{ transform: translateX(0); }
+    }
+
+    /* Desktop */
+    .sidebar{
+      position: sticky;
+      top: calc(var(--topbar-h) + 16px);
+      max-height: calc(100vh - var(--topbar-h) - 32px);
+      border-radius: var(--radius);
+      border: 1px solid var(--stroke);
+      background: rgba(10,16,28,.65);
+      backdrop-filter: blur(12px);
+      box-shadow: var(--shadow);
+      padding: 12px;
+      overflow: auto;
+      align-self: start;
+
+      transform: none; /* ✅ important (optionnel mais safe) */
+    }
+
+    /* Mobile */
+    @media (max-width: 991px){
+      .sidebar{
+        position:fixed;
+        top: var(--topbar-h);
+        left:0;
+        height: calc(100vh - var(--topbar-h));
+        width: min(320px, 92vw);
+        transform: translateX(-110%);
+        transition: transform .22s ease;
+        z-index:70;
+        border-radius: 0 18px 18px 0;
+        overflow-y:auto;
+      }
+      .sidebar.open{ transform: translateX(0); }
+    }
+
+
+  </style>
+</head>
+
+<body class="has-fixed-footer">
+
+  <!-- Header injecté -->
+  <div id="appHeader"></div>
+  <div id="overlay" class="overlay"></div>
+  <div class="shell">
+    <div id="appSidebar"></div>
+
+  <main>
+    <section class="panel">
+
+      <h1><i class="fa-solid fa-gavel"></i> Mentions légales</h1>
+      <div class="meta">
+        Version RNCP6 (niveau Licence/Bachelor) – mise à jour : <b>2026</b><br>
+        Ces mentions sont fournies dans une logique de conformité (information des utilisateurs, responsabilité, RGPD).
+      </div>
+
+      <div class="actions">
+        <button class="btn-ghost" onclick="history.length>1?history.back():location.href='index.html'">
+          <i class="fa-solid fa-arrow-left"></i> Retour
+        </button>
+        <a href="index.html" class="btn-primary">
+          <i class="fa-solid fa-house"></i> Accueil
+        </a>
+        <a href="conditions_utilisation.html" class="btn-ghost">
+          <i class="fa-solid fa-file-signature"></i> Conditions
+        </a>
+        <a href="politique_confidentialite.html" class="btn-ghost">
+          <i class="fa-solid fa-user-shield"></i> Confidentialité
+        </a>
+      </div>
+
+      <div class="notice">
+        <i class="fa-solid fa-circle-exclamation"></i>
+        Le site <b>Loto Tracker</b> est un projet indépendant, non affilié à la FDJ. Les informations sont fournies à titre informatif,
+        sans garantie d’exhaustivité, de mise à jour en temps réel, ni de résultat.
+      </div>
+
+      <h2><i class="fa-solid fa-user-pen"></i> 1. Éditeur du Site</h2>
+      <div class="table-like">
+        <div class="rowx">
+          <div class="cell key">Nom du site</div>
+          <div class="cell">Loto Tracker – Tracker du Loto Français</div>
+        </div>
+        <div class="rowx">
+          <div class="cell key">Responsable de publication</div>
+          <div class="cell">SDINAHET (éditeur / responsable du contenu)</div>
+        </div>
+        <div class="rowx">
+          <div class="cell key">Contact</div>
+          <div class="cell">stephane.dinahet@gmail.com</div>
+        </div>
+      </div>
+
+      <!-- <div class="info">
+        <i class="fa-solid fa-circle-info"></i>
+        Pour une version “production entreprise”, tu peux ajouter : raison sociale, adresse, n° SIRET, directeur de la publication,
+        et moyen de contact rapide (formulaire).
+      </div> -->
+
+      <h2><i class="fa-solid fa-server"></i> 2. Hébergement</h2>
+      <p>
+        Hébergeur :
+      </p>
+      <div class="table-like">
+        <div class="rowx">
+          <div class="cell key">Hébergeur</div>
+          <div class="cell">Serveur</div>
+        </div>
+        <div class="rowx">
+          <div class="cell key">Adresse</div>
+          <!-- <div class="cell">91 rue du Faubourg Saint-Honoré, 75008 Paris</div> -->
+          <div class="cell">NA</div>
+        </div>
+      </div>
+
+      <h2><i class="fa-solid fa-code"></i> 3. Technologies et fonctionnement</h2>
+      <p>
+        Le Site s’appuie sur une architecture web comprenant :
+      </p>
+      <ul>
+        <li>un frontend (HTML/CSS/JS),</li>
+        <li>une API backend (endpoints sécurisés),</li>
+        <li>des bases de données (selon les modules : SQL/NoSQL),</li>
+        <li>des mécanismes de sécurité (authentification, contrôle d’accès, cookies de session, etc.).</li>
+      </ul>
+
+      <h2><i class="fa-solid fa-copyright"></i> 4. Propriété intellectuelle</h2>
+      <p>
+        L’ensemble des éléments du Site (structure, textes, code source, interface, graphismes, logos) est protégé
+        par le droit d’auteur et/ou le droit de la propriété intellectuelle.
+      </p>
+      <p>
+        Toute reproduction, représentation, modification ou diffusion, totale ou partielle, sans autorisation écrite préalable,
+        est interdite.
+      </p>
+
+      <h2><i class="fa-solid fa-triangle-exclamation"></i> 5. Limitation de responsabilité</h2>
+      <p>
+        L’éditeur met en œuvre des moyens raisonnables pour assurer la qualité et l’exactitude des informations proposées,
+        mais ne garantit pas l’absence d’erreurs, de retards, d’omissions ou d’indisponibilités.
+      </p>
+      <p>
+        Le Site ne constitue pas un service officiel FDJ, ni une incitation au jeu. L’utilisateur reste seul responsable
+        de l’utilisation des informations et des décisions prises sur la base du contenu affiché.
+      </p>
+
+      <h2><i class="fa-solid fa-user-shield"></i> 6. Données personnelles (RGPD)</h2>
+      <p>
+        Les traitements de données personnelles sont décrits dans la
+        <a class="link" href="politique_confidentialite.html">Politique de Confidentialité</a>,
+        conformément au RGPD (UE 2016/679).
+      </p>
+      <ul>
+        <li>Données traitées : identifiants, email, tickets utilisateur, logs techniques</li>
+        <li>Finalités : fonctionnement, sécurité, traçabilité, amélioration</li>
+        <li>Droits : accès, rectification, effacement, opposition, limitation, portabilité (si applicable)</li>
+      </ul>
+
+      <h2><i class="fa-solid fa-cookie-bite"></i> 7. Cookies</h2>
+      <p>
+        Le Site peut utiliser des cookies strictement nécessaires au fonctionnement (ex. session).
+        Des cookies non essentiels ne doivent être déposés qu’après consentement (si ajoutés).
+      </p>
+
+      <h2><i class="fa-solid fa-link"></i> 8. Liens externes</h2>
+      <p>
+        Le Site peut contenir des liens vers des sites tiers. L’éditeur ne peut être tenu responsable
+        du contenu ou de la disponibilité de ces sites externes.
+      </p>
+
+      <h2><i class="fa-solid fa-envelope"></i> 9. Contact</h2>
+      <p>
+        Pour toute question : <b>stephane.dinahet@gmail.com</b>
+      </p>
+
+      <div class="actions mt-3">
+        <button class="btn-primary" type="button" onclick="window.scrollTo({top:0, behavior:'smooth'})">
+          <i class="fa-solid fa-arrow-up"></i> Retour en haut
+        </button>
+      </div>
+
+    </section>
+  </main>
+  <div id="appSidebar"></div>
+
+  <!-- Footer injecté -->
+  <div id="appFooter"></div>
+
+  <script src="cookies.js"></script>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+  <!-- IA (si tu l'utilises) -->
+  <script src="ai-loader.js"></script>
+<script>
+  (function () {
+    const API_BASE =
+      (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1")
+        ? "http://localhost:8082"
+        : "https://stephanedinahet.fr";
+
+    function renderSidebar() {
+      const path = (window.location.pathname || "").toLowerCase();
+      const active = (name) => path.endsWith(name) ? " active" : "";
+
+      return `
+        <aside class="sidebar" id="sidebar">
+          <div class="nav-title">Dashboard</div>
+
+          <a class="nav-item${active("index.html") || (path.endsWith("/") ? " active" : "")}" href="index.html">
+            <i class="fa-solid fa-chart-line"></i><span>Résultats</span>
+          </a>
+
+          <a class="nav-item auth-only${active("tickets.html")}" href="tickets.html" style="display:none;">
+            <i class="fa-solid fa-ticket"></i><span>Tickets</span>
+          </a>
+          <a class="nav-item auth-only${active("statistiques.html")}" href="statistiques.html" style="display:none;">
+            <i class="fa-solid fa-signal"></i><span>Statistiques</span>
+          </a>
+          <a class="nav-item auth-only${active("profil.html")}" href="profil.html" style="display:none;">
+            <i class="fa-solid fa-user-gear"></i><span>Compte</span>
+          </a>
+
+          <div class="nav-sep"></div>
+
+          <div class="nav-title">Pages</div>
+          <a class="nav-item${active("mentions_legales.html")}" href="mentions_legales.html">
+            <i class="fa-solid fa-file-signature"></i><span>Mentions légales</span>
+          </a>
+          <a class="nav-item${active("conditions_utilisation.html")}" href="conditions_utilisation.html">
+            <i class="fa-solid fa-scale-balanced"></i><span>Conditions</span>
+          </a>
+          <a class="nav-item${active("politique_confidentialite.html")}" href="politique_confidentialite.html">
+            <i class="fa-solid fa-user-shield"></i><span>Confidentialité</span>
+          </a>
+        </aside>
+      `;
+    }
+
+    async function fetchUserInfo() {
+      const res = await fetch(`${API_BASE}/api/protected/userinfo`, {
+        method: "GET",
+        credentials: "include",
+        cache: "no-store"
+      });
+      if (!res.ok) throw new Error("Not authenticated");
+      return await res.json();
+    }
+
+    async function applyAuthOnly() {
+      let logged = false;
+      try { await fetchUserInfo(); logged = true; } catch { logged = false; }
+      document.querySelectorAll(".auth-only").forEach((el) => {
+        el.style.display = logged ? "" : "none";
+      });
+    }
+
+    document.addEventListener("layout:ready", () => {
+      const mount = document.getElementById("appSidebar");
+      if (mount) mount.innerHTML = renderSidebar();
+
+      // le burger est déjà bind dans layout.js (bindBurgerGlobal) :contentReference[oaicite:3]{index=3}
+      // donc pas besoin de re-binder ici
+
+      setTimeout(applyAuthOnly, 80);
+      setTimeout(applyAuthOnly, 800);
+    });
+  })();
+</script>
+
+
+
+</body>
+</html>
