@@ -1,0 +1,7 @@
+curl
+wget
+git
+htop
+build-essential
+lsof
+postgresql-client

@@ -1,0 +1,156 @@
+# # # services:
+# # #   tests:
+# # #     image: maven:3.9.8-eclipse-temurin-21
+# # #     working_dir: /workspace
+# # #     volumes:
+# # #       - ./:/workspace
+# # #       # Needed so Testcontainers can start its own Postgres container
+# # #       - /var/run/docker.sock:/var/run/docker.sock
+# # #     environment:
+# # #       - SPRING_PROFILES_ACTIVE=test
+# # #     command: mvn -q verify
+
+
+# # services:
+# #   postgres_test:
+# #     image: postgres:14
+# #     environment:
+# #       POSTGRES_DB: loto_test
+# #       POSTGRES_USER: test
+# #       POSTGRES_PASSWORD: test
+# #     ports:
+# #       - "5433:5432"
+# #     tmpfs:
+# #       - /var/lib/postgresql/data   # DB en RAM, donc jetable
+
+# #   mongo_test:
+# #     image: mongo:6
+# #     ports:
+# #       - "27018:27017"
+# #     tmpfs:
+# #       - /data/db                   # jetable aussi
+
+# #   tests:
+# #     image: maven:3.9.8-eclipse-temurin-21
+# #     working_dir: /workspace
+# #     depends_on:
+# #       - postgres_test
+# #       - mongo_test
+# #     volumes:
+# #       - ./:/workspace
+# #     environment:
+# #       SPRING_PROFILES_ACTIVE: test
+# #       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres_test:5432/loto_test
+# #       SPRING_DATASOURCE_USERNAME: test
+# #       SPRING_DATASOURCE_PASSWORD: test
+# #       SPRING_DATA_MONGODB_URI: mongodb://mongo_test:27017/loto_test
+# #     command: mvn -q verify
+
+
+# services:
+#   postgres_test:
+#     image: postgres:14
+#     environment:
+#       POSTGRES_DB: lotodb_test
+#       POSTGRES_USER: test
+#       POSTGRES_PASSWORD: test
+#     ports:
+#       - "5433:5432"   # optionnel (utile si tu veux te connecter depuis ta machine)
+#     tmpfs:
+#       - /var/lib/postgresql/data
+#     healthcheck:
+#       test: ["CMD-SHELL", "pg_isready -U test -d lotodb_test"]
+#       interval: 5s
+#       timeout: 3s
+#       retries: 20
+
+#   mongo_test:
+#     image: mongo:6
+#     ports:
+#       - "27018:27017" # optionnel
+#     tmpfs:
+#       - /data/db
+#     healthcheck:
+#       test: ["CMD-SHELL", "mongosh --quiet --eval \"db.adminCommand('ping').ok\" | grep 1"]
+#       interval: 5s
+#       timeout: 5s
+#       retries: 20
+
+#   tests:
+#     image: maven:3.9.8-eclipse-temurin-21
+#     working_dir: /workspace
+#     depends_on:
+#       postgres_test:
+#         condition: service_healthy
+#       mongo_test:
+#         condition: service_healthy
+#     volumes:
+#       - ./:/workspace
+#     environment:
+#       SPRING_PROFILES_ACTIVE: test
+
+#       # Postgres TEST (container->container)
+#       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres_test:5432/lotodb_test
+#       SPRING_DATASOURCE_USERNAME: test
+#       SPRING_DATASOURCE_PASSWORD: test
+
+#       # IMPORTANT: en test, on veut créer le schema
+#       SPRING_JPA_HIBERNATE_DDL_AUTO: create-drop
+#       SPRING_JPA_SHOW_SQL: "false"
+
+#       # Mongo TEST
+#       SPRING_DATA_MONGODB_URI: mongodb://mongo_test:27017/lotodb_test
+
+#       # Optionnel : éviter que des schedulers perturbent les tests
+#       SPRING_TASK_SCHEDULING_ENABLED: "false"
+
+#     command: mvn -q verify
+
+services:
+  postgres_test:
+    image: postgres:14
+    # ports:
+    # - "55433:5432"
+    environment:
+      POSTGRES_DB: lotodb_test
+      POSTGRES_USER: test
+      POSTGRES_PASSWORD: test
+    tmpfs:
+      - /var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U test -d lotodb_test"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  mongo_test:
+    image: mongo:6
+    # ports:
+    # - "27018:27017"
+    tmpfs:
+      - /data/db
+    healthcheck:
+      test: ["CMD-SHELL", "mongosh --quiet --eval \"db.adminCommand('ping').ok\" | grep 1"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  tests:
+    image: maven:3.9.8-eclipse-temurin-21
+    working_dir: /workspace
+    depends_on:
+      postgres_test:
+        condition: service_healthy
+      mongo_test:
+        condition: service_healthy
+    volumes:
+      - ./:/workspace
+    environment:
+      SPRING_PROFILES_ACTIVE: test
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres_test:5432/lotodb_test
+      SPRING_DATASOURCE_USERNAME: test
+      SPRING_DATASOURCE_PASSWORD: test
+      SPRING_JPA_HIBERNATE_DDL_AUTO: create-drop
+      SPRING_DATA_MONGODB_URI: mongodb://mongo_test:27017/lotodb_test
+      SPRING_TASK_SCHEDULING_ENABLED: "false"
+    command: mvn -q verify -Djacoco.skip=true

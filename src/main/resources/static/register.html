@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+  <title>Loto Tracker - Inscription</title>
+  <link rel="icon" type="image/png" href="loto_tracker.png" />
+
+  <!-- Inject header/footer -->
+  <script defer src="layout.js"></script>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    :root{
+      /* ✅ mêmes variables et fond que login */
+      --bg0:#0b1220;
+      --bg1:#0f1b2d;
+      --stroke: rgba(255,255,255,.12);
+      --text: rgba(255,255,255,.92);
+      --muted: rgba(255,255,255,.65);
+
+      --card: rgba(0,0,0,.88);
+      --input:#1a1a1a;
+
+      --blue:#0b66b3;
+      --blue2:#0d78d1;
+      --green:#2ecc71;
+      --red:#e74c3c;
+      --warn:#f59e0b;
+
+      --shadow: 0 18px 45px rgba(0,0,0,.55);
+      --topbar-h: 72px;
+    }
+
+    *{ box-sizing:border-box; }
+    html,body{ height:100%; }
+
+    /*html{
+      background:
+        radial-gradient(1200px 600px at 20% 10%, rgba(59,130,246,.22), transparent 60%),
+        radial-gradient(900px 500px at 90% 25%, rgba(239,68,68,.14), transparent 55%),
+        linear-gradient(180deg, var(--bg0), var(--bg1));
+    }*/
+
+    body{
+      margin:0;
+      min-height:100vh;
+      font-family: Arial, sans-serif;
+      color: var(--text);
+
+      /* ✅ EXACT fond login */
+      background: transparent;
+      background:
+        /*radial-gradient(1200px 600px at 20% 10%, rgba(59,130,246,.22), transparent 60%),
+        radial-gradient(900px 500px at 90% 25%, rgba(239,68,68,.14), transparent 55%),
+        linear-gradient(180deg, var(--bg0), var(--bg1));*/
+        radial-gradient(1600px 1000px at 20% 30%, rgba(59,130,246,.22), transparent 75%),
+        radial-gradient(1600px 1000px at 85% 40%, rgba(239,68,68,.14), transparent 75%),
+        linear-gradient(180deg, var(--bg0), var(--bg1));
+        background-attachment: fixed;
+
+
+      /*overflow:hidden;*/
+      overflow-x: hidden;
+      /*overflow-y: auto;*/
+      min-height: 100dvh;
+    }
+
+    .page{
+      min-height: calc(100vh - var(--topbar-h));
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding: 22px 18px 88px; /* place footer fixed */
+    }
+
+    /* Fix autofill */
+    input:-webkit-autofill,
+    input:-webkit-autofill:hover,
+    input:-webkit-autofill:focus,
+    input:-webkit-autofill:active {
+      -webkit-text-fill-color: #fff !important;
+      -webkit-box-shadow: 0 0 0 1000px var(--input) inset !important;
+      box-shadow: 0 0 0 1000px var(--input) inset !important;
+      transition: background-color 999999s ease-in-out 0s;
+      caret-color: #fff;
+    }
+
+    .container{
+      width: 430px;
+      max-width: calc(100vw - 36px);
+      background: var(--card);
+      border: 1px solid rgba(255,255,255,.08);
+      border-radius: 18px;
+      box-shadow: var(--shadow);
+      padding: 42px 44px 34px;
+      position: relative;
+      z-index: 2;
+    }
+
+    h2{
+      margin: 0 0 26px;
+      font-size: 28px;
+      text-align:center;
+      letter-spacing:.2px;
+      color:#fff;
+      line-height: 1.12;
+      font-weight: 900;
+    }
+
+    .input-group{ width:100%; margin-bottom: 18px; }
+    label{ display:block; color:#d7d7d7; font-size: 15px; margin-bottom: 8px; }
+
+    .field{ position:relative; width:100%; }
+
+    .field input{
+      width:100%;
+      height:44px;
+      border-radius: 10px;
+      background: var(--input);
+      color:#fff;
+      border: 1px solid rgba(255,255,255,.08);
+      padding: 10px 120px 10px 12px; /* place icônes */
+      outline:none;
+      transition: box-shadow .2s ease, border-color .2s ease;
+    }
+
+    .field input:focus{
+      border-color: rgba(79,163,209,.7);
+      box-shadow: 0 0 0 4px rgba(79,163,209,.22), 0 10px 22px rgba(0,0,0,.35);
+    }
+
+    /* encadré seulement au submit */
+    .field.valid input{
+      border-color: rgba(46,204,113,.9);
+      box-shadow: 0 0 0 4px rgba(46,204,113,.18);
+    }
+    .field.invalid input{
+      border-color: rgba(231,76,60,.9);
+      box-shadow: 0 0 0 4px rgba(231,76,60,.15);
+    }
+
+    .right-icons{
+      position:absolute;
+      right:10px;
+      top:50%;
+      transform: translateY(-50%);
+      display:flex;
+      align-items:center;
+      gap:10px;
+      pointer-events:none;
+    }
+
+    .icon-btn{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      padding:0;
+      margin:0;
+      border:none;
+      background: transparent;
+      cursor:pointer;
+      opacity:.95;
+      transition: opacity .15s ease, transform .15s ease;
+      pointer-events:auto;
+    }
+    .icon-btn:hover{ opacity:1; transform: translateY(-1px); }
+
+    .eye-icon{
+      width: 28px;
+      height: 28px;
+      fill:none;
+      stroke: var(--green);
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+    .hidden{ display:none; }
+
+    .status-icon{
+      width: 20px;
+      height: 20px;
+      fill:none;
+      stroke-width:2;
+      stroke-linecap:round;
+      stroke-linejoin:round;
+      opacity:0;
+      transform: scale(.92);
+      transition: opacity .18s ease, transform .18s ease;
+    }
+    .status-icon.ok{ stroke: var(--green); }
+    .status-icon.bad{ stroke: var(--red); }
+    .status-icon.show{ opacity:1; transform: scale(1); }
+
+    /* force mot de passe */
+    .strength{
+      margin-top: 8px;
+      display:flex;
+      align-items:center;
+      gap: 10px;
+    }
+    .bar-wrap{
+      flex: 1;
+      height: 10px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.10);
+      border: 1px solid rgba(255,255,255,.10);
+      overflow:hidden;
+    }
+    .bar{
+      height:100%;
+      width:0%;
+      border-radius: 999px;
+      background: var(--red);
+      transition: width .2s ease, background .2s ease;
+    }
+    .strength-text{
+      min-width: 76px;
+      font-size: 12px;
+      font-weight: 900;
+      color: rgba(255,255,255,.85);
+      text-align:right;
+    }
+
+    .btn{
+      width:100%;
+      height:48px;
+      border:none;
+      border-radius: 10px;
+      background: var(--blue);
+      color:#fff;
+      font-size: 16px;
+      font-weight: 800;
+      cursor:pointer;
+      margin-top: 14px;
+      transition: background .2s ease, transform .15s ease;
+    }
+    .btn:hover{ background: var(--blue2); transform: translateY(-1px); }
+    .btn:disabled{ opacity:.65; cursor:not-allowed; }
+
+    .msg{
+      margin-top: 14px;
+      padding: 10px 12px;
+      border-radius: 10px;
+      font-size: 13px;
+      display:none;
+      border: 1px solid transparent;
+      background: rgba(255,255,255,.04);
+      color: #eaeaea;
+    }
+    .msg.show{ display:block; }
+    .msg.ok{
+      border-color: rgba(46,204,113,.35);
+      background: rgba(46,204,113,.10);
+      color: #c8f7da;
+    }
+    .msg.bad{
+      border-color: rgba(231,76,60,.35);
+      background: rgba(231,76,60,.10);
+      color: #ffd1cc;
+    }
+
+    .register-link{
+      text-align:center;
+      margin-top: 18px;
+      color:#fff;
+      font-size: 15px;
+    }
+    .register-link a{
+      color:#4fa3d1;
+      text-decoration:none;
+      font-weight: 900;
+    }
+    .register-link a:hover{ text-decoration:underline; }
+
+    /* loto balls */
+    .balls{
+      position: fixed;
+      inset: 0;
+      pointer-events:none;
+      overflow:hidden;
+      z-index: 10;
+      opacity: 0;
+      transition: opacity .25s ease;
+    }
+    .balls.show{ opacity: 1; }
+
+    .ball{
+      position:absolute;
+      top: -80px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 30% 30%, rgba(255,255,255,.95), rgba(255,255,255,.35) 35%, rgba(0,0,0,.12) 70%);
+      border: 2px solid rgba(255,255,255,.55);
+      box-shadow: 0 18px 35px rgba(0,0,0,.35);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-weight: 900;
+      color: #0a2a4a;
+      text-shadow: 0 1px 0 rgba(255,255,255,.7);
+      animation: fall var(--dur) linear forwards, spin var(--spin) linear infinite;
+      width: var(--size);
+      height: var(--size);
+      left: var(--left);
+      animation-delay: var(--delay);
+    }
+    @keyframes fall{ to { transform: translateY(120vh); } }
+    @keyframes spin{ to { rotate: 360deg; } }
+  </style>
+</head>
+
+<body>
+  <div id="appHeader"></div>
+
+  <div class="page">
+    <div class="container">
+      <h2>Loto Tracker -<br>Inscription</h2>
+
+      <form id="registerForm" novalidate>
+        <div class="input-group">
+          <label for="firstName">Prénom</label>
+          <div class="field" id="firstNameField">
+            <input type="text" id="firstName" required autocomplete="given-name" placeholder="Prénom" />
+          </div>
+        </div>
+
+        <div class="input-group">
+          <label for="lastName">Nom</label>
+          <div class="field" id="lastNameField">
+            <input type="text" id="lastName" required autocomplete="family-name" placeholder="Nom" />
+          </div>
+        </div>
+
+        <div class="input-group">
+          <label for="email">Email</label>
+          <div class="field" id="emailField">
+            <input type="email" id="email" required autocomplete="email" placeholder="Email" />
+            <div class="right-icons" aria-hidden="true">
+              <svg id="emailOkIcon" viewBox="0 0 24 24" class="status-icon ok hidden">
+                <circle cx="12" cy="12" r="10"></circle>
+                <path d="M8 12.5l2.5 2.5L16 9"></path>
+              </svg>
+              <svg id="emailBadIcon" viewBox="0 0 24 24" class="status-icon bad hidden">
+                <circle cx="12" cy="12" r="10"></circle>
+                <path d="M9 9l6 6"></path>
+                <path d="M15 9l-6 6"></path>
+              </svg>
+            </div>
+          </div>
+        </div>
+
+        <div class="input-group">
+          <label for="password">Mot de passe</label>
+          <div class="field" id="passwordField">
+            <input type="password" id="password" required autocomplete="new-password" placeholder="Mot de passe" />
+            <div class="right-icons">
+              <button type="button" class="icon-btn" id="togglePassword" aria-label="Afficher / Masquer" title="Afficher / Masquer">
+                <svg id="eyeOpen" class="eye-icon hidden" viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"/>
+                  <path d="M12 9a3 3 0 100 6 3 3 0 000-6z"/>
+                </svg>
+                <svg id="eyeClosed" class="eye-icon" viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"/>
+                  <path d="M12 9a3 3 0 100 6 3 3 0 000-6z"/>
+                  <path d="M4 4l16 16"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+
+          <div class="strength" aria-hidden="true">
+            <div class="bar-wrap"><div class="bar" id="pwBar"></div></div>
+            <div class="strength-text" id="pwText">—</div>
+          </div>
+        </div>
+
+        <div class="input-group">
+          <label for="confirmPassword">Confirmer</label>
+          <div class="field" id="confirmField">
+            <input type="password" id="confirmPassword" required autocomplete="new-password" placeholder="Confirmer le mot de passe" />
+            <div class="right-icons">
+              <svg id="confirmOkIcon" viewBox="0 0 24 24" class="status-icon ok hidden" aria-hidden="true">
+                <circle cx="12" cy="12" r="10"></circle>
+                <path d="M8 12.5l2.5 2.5L16 9"></path>
+              </svg>
+              <svg id="confirmBadIcon" viewBox="0 0 24 24" class="status-icon bad hidden" aria-hidden="true">
+                <circle cx="12" cy="12" r="10"></circle>
+                <path d="M9 9l6 6"></path>
+                <path d="M15 9l-6 6"></path>
+              </svg>
+
+              <button type="button" class="icon-btn" id="toggleConfirmPassword" aria-label="Afficher / Masquer" title="Afficher / Masquer">
+                <svg id="eyeOpenConfirm" class="eye-icon hidden" viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"/>
+                  <path d="M12 9a3 3 0 100 6 3 3 0 000-6z"/>
+                </svg>
+                <svg id="eyeClosedConfirm" class="eye-icon" viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"/>
+                  <path d="M12 9a3 3 0 100 6 3 3 0 000-6z"/>
+                  <path d="M4 4l16 16"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <button type="submit" class="btn" id="submitBtn">Créer un compte</button>
+        <div class="msg" id="feedback" aria-live="polite"></div>
+
+        <div class="register-link">
+          Déjà un compte ? <a href="login.html">Se connecter</a>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div id="appFooter"></div>
+
+  <div class="balls" id="ballsLayer" aria-hidden="true"></div>
+
+  <script>
+    const API_BASE =
+      (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1")
+        ? "http://localhost:8082"
+        : "https://stephanedinahet.fr";
+
+    const REGISTER_URL = `${API_BASE}/api/auth/register`;
+    const LOGIN_URL    = `${API_BASE}/api/auth/login3`;
+
+    const form = document.getElementById("registerForm");
+    const btn  = document.getElementById("submitBtn");
+    const fb   = document.getElementById("feedback");
+
+    const firstNameField = document.getElementById("firstNameField");
+    const lastNameField  = document.getElementById("lastNameField");
+    const emailField     = document.getElementById("emailField");
+    const passwordField  = document.getElementById("passwordField");
+    const confirmField   = document.getElementById("confirmField");
+
+    const firstNameInput = document.getElementById("firstName");
+    const lastNameInput  = document.getElementById("lastName");
+    const emailInput     = document.getElementById("email");
+    const passInput      = document.getElementById("password");
+    const confirmInput   = document.getElementById("confirmPassword");
+
+    const emailOkIcon    = document.getElementById("emailOkIcon");
+    const emailBadIcon   = document.getElementById("emailBadIcon");
+    const confirmOkIcon  = document.getElementById("confirmOkIcon");
+    const confirmBadIcon = document.getElementById("confirmBadIcon");
+
+    const pwBar  = document.getElementById("pwBar");
+    const pwText = document.getElementById("pwText");
+
+    let hasSubmitted = false;
+
+    function showMsg(type, text){
+      fb.className = "msg show " + (type === "ok" ? "ok" : "bad");
+      fb.textContent = text;
+    }
+    function clearMsg(){
+      fb.className = "msg";
+      fb.textContent = "";
+    }
+    function setFieldState(fieldEl, ok){
+      fieldEl.classList.toggle("valid", !!ok);
+      fieldEl.classList.toggle("invalid", !ok);
+    }
+    function isValidEmail(v){
+      return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(String(v).trim());
+    }
+    function showStatus(okEl, badEl, state){
+      [okEl,badEl].forEach(el => { el.classList.add("hidden"); el.classList.remove("show"); });
+      if (state === "ok"){ okEl.classList.remove("hidden"); okEl.classList.add("show"); }
+      if (state === "bad"){ badEl.classList.remove("hidden"); badEl.classList.add("show"); }
+    }
+
+    emailInput.addEventListener("input", () => {
+      const v = emailInput.value.trim();
+      if (!hasSubmitted) emailField.classList.remove("valid","invalid");
+      if (!v) return showStatus(emailOkIcon, emailBadIcon, "none");
+      return showStatus(emailOkIcon, emailBadIcon, isValidEmail(v) ? "ok" : "bad");
+    });
+
+    function updateConfirmLive(){
+      const pw = passInput.value;
+      const c  = confirmInput.value;
+      if (!c) return showStatus(confirmOkIcon, confirmBadIcon, "none");
+      if (!pw) return showStatus(confirmOkIcon, confirmBadIcon, "bad");
+      return showStatus(confirmOkIcon, confirmBadIcon, (c === pw) ? "ok" : "bad");
+    }
+    passInput.addEventListener("input", updateConfirmLive);
+    confirmInput.addEventListener("input", updateConfirmLive);
+
+    function bindEye(btnId, inputId, openId, closedId){
+      const b = document.getElementById(btnId);
+      const i = document.getElementById(inputId);
+      const o = document.getElementById(openId);
+      const c = document.getElementById(closedId);
+      b.addEventListener("click", () => {
+        const hidden = i.type === "password";
+        i.type = hidden ? "text" : "password";
+        o.classList.toggle("hidden", !hidden);
+        c.classList.toggle("hidden", hidden);
+        i.focus();
+      });
+    }
+    bindEye("togglePassword", "password", "eyeOpen", "eyeClosed");
+    bindEye("toggleConfirmPassword", "confirmPassword", "eyeOpenConfirm", "eyeClosedConfirm");
+
+    function scorePassword(pw){
+      let score = 0;
+      if (!pw) return 0;
+      if (pw.length >= 8) score += 1;
+      if (pw.length >= 12) score += 1;
+      if (/[a-z]/.test(pw)) score += 1;
+      if (/[A-Z]/.test(pw)) score += 1;
+      if (/\d/.test(pw)) score += 1;
+      if (/[^a-zA-Z0-9]/.test(pw)) score += 1;
+      return Math.min(score, 6);
+    }
+    function updateStrength(){
+      const pw = passInput.value;
+      const s = scorePassword(pw);
+      const pct = Math.round((s / 6) * 100);
+
+      pwBar.style.width = pw ? (pct + "%") : "0%";
+      if (!pw){ pwText.textContent = "—"; pwBar.style.background = "var(--red)"; return; }
+
+      if (s <= 1){ pwBar.style.background = "var(--red)"; pwText.textContent = "Faible"; }
+      else if (s <= 3){ pwBar.style.background = "var(--warn)"; pwText.textContent = "Moyen"; }
+      else { pwBar.style.background = "var(--green)"; pwText.textContent = "Fort"; }
+    }
+    passInput.addEventListener("input", updateStrength);
+    updateStrength();
+
+    const ballsLayer = document.getElementById("ballsLayer");
+    function rand(min, max){ return Math.random() * (max - min) + min; }
+    function startLotoBallsTransition(){
+      ballsLayer.innerHTML = "";
+      ballsLayer.classList.add("show");
+
+      const count = 24;
+      for(let i=0;i<count;i++){
+        const ball = document.createElement("div");
+        ball.className = "ball";
+        ball.style.setProperty("--left", `${rand(0, 100)}vw`);
+        ball.style.setProperty("--size", `${rand(38, 62)}px`);
+        ball.style.setProperty("--dur", `${rand(1.6, 2.6)}s`);
+        ball.style.setProperty("--spin", `${rand(0.7, 1.4)}s`);
+        ball.style.setProperty("--delay", `${rand(0, 0.7)}s`);
+        ball.textContent = String(Math.floor(rand(1, 50)));
+        ballsLayer.appendChild(ball);
+      }
+
+      setTimeout(() => {
+        ballsLayer.classList.remove("show");
+        ballsLayer.innerHTML = "";
+      }, 3200);
+    }
+
+    async function autoLogin(email, password){
+      const resp = await fetch(LOGIN_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+        credentials: "include"
+      });
+      return resp.ok;
+    }
+
+    form.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      clearMsg();
+      hasSubmitted = true;
+
+      [firstNameField,lastNameField,emailField,passwordField,confirmField]
+        .forEach(f => f.classList.remove("valid","invalid"));
+
+      const firstName = firstNameInput.value.trim();
+      const lastName  = lastNameInput.value.trim();
+      const email     = emailInput.value.trim();
+      const password  = passInput.value;
+      const confirm   = confirmInput.value;
+
+      let ok = true;
+
+      if (!firstName){ setFieldState(firstNameField,false); ok=false; } else setFieldState(firstNameField,true);
+      if (!lastName){  setFieldState(lastNameField,false);  ok=false; } else setFieldState(lastNameField,true);
+
+      if (!email || !isValidEmail(email)){ setFieldState(emailField,false); ok=false; } else setFieldState(emailField,true);
+
+      const pwScore = scorePassword(password);
+      if (!password || password.length < 6 || pwScore < 2){ setFieldState(passwordField,false); ok=false; }
+      else { setFieldState(passwordField,true); }
+
+      if (!confirm || confirm !== password){ setFieldState(confirmField,false); ok=false; }
+      else { setFieldState(confirmField,true); }
+
+      if (!ok){
+        showMsg("bad","❌ Vérifie les champs en rouge (email + mot de passe + confirmation).");
+        return;
+      }
+
+      btn.disabled = true;
+      btn.textContent = "Création...";
+
+      try{
+        const registerResp = await fetch(REGISTER_URL, {
+          method: "POST",
+          headers: { "Content-Type":"application/json", "Accept":"application/json" },
+          body: JSON.stringify({ firstName, lastName, email, password, admin:false })
+        });
+
+        const text = await registerResp.text().catch(() => "");
+        if (!registerResp.ok){
+          if (registerResp.status === 409) showMsg("bad","❌ Un compte existe déjà avec cet email.");
+          else showMsg("bad","❌ Inscription NOK : " + (text || `HTTP ${registerResp.status}`));
+          return;
+        }
+
+        showMsg("ok","✅ Compte créé ! Connexion automatique...");
+        const logged = await autoLogin(email, password);
+
+        if (!logged){
+          showMsg("bad","⚠️ Compte créé, mais auto-login impossible. Redirection vers connexion...");
+          setTimeout(() => window.location.href = "login.html", 900);
+          return;
+        }
+
+        showMsg("ok","✅ Connecté ! Redirection...");
+        startLotoBallsTransition();
+        setTimeout(() => window.location.href = "index.html", 1400);
+
+      }catch(err){
+        console.error(err);
+        showMsg("bad","❌ Impossible de contacter le serveur.");
+      }finally{
+        setTimeout(() => {
+          btn.disabled = false;
+          btn.textContent = "Créer un compte";
+        }, 800);
+      }
+    });
+  </script>
+  <script src="cookies.js"></script>
+</body>
+</html>

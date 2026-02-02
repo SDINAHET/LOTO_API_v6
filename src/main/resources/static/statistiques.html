@@ -1,0 +1,837 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Statistiques — Loto Tracker</title>
+
+  <link rel="icon" type="image/png" href="loto_tracker.png" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <link rel="stylesheet" href="styles.css">
+
+  <style>
+    body{
+      margin:0;
+      min-height:100vh;
+      background:
+        radial-gradient(1200px 600px at 20% 20%, rgba(37,99,235,.28), transparent 60%),
+        radial-gradient(1000px 700px at 80% 30%, rgba(168,85,247,.22), transparent 60%),
+        rgba(6,10,18,1);
+      color: rgba(255,255,255,.92);
+    }
+
+    /* ===== Layout (comme profil/index) ===== */
+    .app-shell{
+      display: grid;
+      grid-template-columns: 280px 1fr;
+      gap: 18px;
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 24px 16px 86px; /* place pour footer fixed */
+    }
+
+    .glass-panel{
+      border-radius: 18px;
+      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(15,23,42,.55);
+      backdrop-filter: blur(12px);
+      box-shadow: 0 18px 50px rgba(0,0,0,.45);
+      padding: 22px;
+    }
+
+    .panel-title{
+      font-weight: 950;
+      letter-spacing: .2px;
+      margin: 0 0 8px;
+      font-size: 2.1rem;
+    }
+    .muted{ color: rgba(255,255,255,.65); }
+
+    /* ===== Alerts propres ===== */
+    .alert{
+      border-radius: 12px;
+      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(255,255,255,.06);
+      color: rgba(255,255,255,.9);
+    }
+    .alert-success{
+      border-color: rgba(34,197,94,.25);
+      background: rgba(34,197,94,.10);
+    }
+    .alert-danger{
+      border-color: rgba(239,68,68,.25);
+      background: rgba(239,68,68,.10);
+    }
+
+    /* ===== Sidebar (comme profil) ===== */
+    .sidebar{
+      border-radius: 18px;
+      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(15,23,42,.55);
+      backdrop-filter: blur(12px);
+      box-shadow: 0 18px 50px rgba(0,0,0,.35);
+      overflow: hidden;
+    }
+    .sidebar-inner{ padding: 14px; }
+
+    .sidebar-title{
+      font-weight: 950;
+      letter-spacing: .2px;
+      color: rgba(255,255,255,.75);
+      margin: 6px 8px 10px;
+      font-size: .92rem;
+      text-transform: uppercase;
+    }
+
+    .side-link{
+      display:flex;
+      align-items:center;
+      gap: 10px;
+      padding: 11px 12px;
+      border-radius: 12px;
+      color: rgba(255,255,255,.86);
+      text-decoration:none;
+      font-weight: 850;
+      background: rgba(255,255,255,.04);
+      border: 1px solid rgba(255,255,255,.08);
+      margin: 8px 0;
+    }
+    .side-link:hover{ background: rgba(255,255,255,.06); }
+    .side-link.active{
+      background: rgba(59,130,246,.18);
+      border-color: rgba(59,130,246,.25);
+    }
+
+    /* Desktop sticky sous le header fixed (layout.js gère --topbar-h) */
+    @media (min-width: 992px){
+      .sidebar{
+        position: sticky;
+        top: calc(var(--topbar-h) + 16px);
+        align-self: start;
+      }
+    }
+
+    /* ===== Overlay mobile (sidebar offcanvas) ===== */
+    #overlay{
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,.55);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .2s ease;
+      z-index: 80;
+    }
+    #overlay.show{
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    /* Mobile : sidebar offcanvas sous le header */
+    @media (max-width: 991px){
+      .app-shell{ grid-template-columns: 1fr; }
+
+      .sidebar{
+        position: fixed;
+        top: var(--topbar-h);
+        left: 0;
+        height: calc(100vh - var(--topbar-h));
+        width: 300px;
+        transform: translateX(-105%);
+        transition: transform .2s ease;
+        z-index: 90;
+        border-radius: 0 18px 18px 0;
+      }
+      .sidebar.open{ transform: translateX(0); }
+    }
+
+    /* ===== Table style (glass) ===== */
+    .table-glass{
+      border-radius: 14px;
+      overflow: hidden;
+      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(255,255,255,.04);
+    }
+    .table-glass .table{
+      margin: 0;
+      color: rgba(255,255,255,.90);
+    }
+    .table-glass thead{
+      background: rgba(255,255,255,.06);
+      color: rgba(255,255,255,.90);
+    }
+    .table-glass tbody tr{
+      border-color: rgba(255,255,255,.08);
+    }
+    .table-glass tbody tr:hover{
+      background: rgba(255,255,255,.04);
+    }
+
+    /* ===== Cards totals ===== */
+    .stat-tile{
+      border-radius: 14px;
+      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(255,255,255,.04);
+      padding: 14px;
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap: 12px;
+      font-weight: 900;
+    }
+    .stat-label{ color: rgba(255,255,255,.70); font-weight: 850; }
+    .stat-value{ font-size: 1.15rem; }
+
+    /* Loader */
+    .mini-loader{
+      display:inline-flex;
+      align-items:center;
+      gap: 10px;
+      color: rgba(255,255,255,.75);
+      font-weight: 900;
+    }
+
+    /* ===== TABLE: version premium ===== */
+    .table-wrap{
+    border-radius: 14px;
+    overflow: hidden;
+    border: 1px solid rgba(255,255,255,.10);
+    background: rgba(255,255,255,.04);
+    }
+
+    .table-tools{
+    display:flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items:center;
+    justify-content: space-between;
+    margin-bottom: 10px;
+    }
+
+    .tool-left, .tool-right{
+    display:flex;
+    gap: 10px;
+    align-items:center;
+    flex-wrap: wrap;
+    }
+
+    .input-dark, .select-dark{
+    background: rgba(255,255,255,.06);
+    border: 1px solid rgba(255,255,255,.12);
+    color: rgba(255,255,255,.90);
+    border-radius: 12px;
+    padding: 10px 12px;
+    outline: none;
+    }
+    .input-dark:focus, .select-dark:focus{
+    border-color: rgba(96,165,250,.55);
+    box-shadow: 0 0 0 .2rem rgba(96,165,250,.12);
+    }
+
+    .table-premium{
+    margin:0;
+    color: rgba(255,255,255,.92);
+    }
+
+    .table-premium thead th{
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    background: rgba(15,23,42,.92);
+    border-bottom: 1px solid rgba(255,255,255,.10);
+    font-weight: 950;
+    letter-spacing: .2px;
+    }
+
+    .table-premium tbody tr{
+    border-color: rgba(255,255,255,.08);
+    }
+    .table-premium tbody tr:nth-child(odd){
+    background: rgba(255,255,255,.02);
+    }
+    .table-premium tbody tr:hover{
+    background: rgba(59,130,246,.06);
+    }
+
+    .badge-soft{
+    border-radius: 999px;
+    padding: 6px 10px;
+    font-weight: 950;
+    border: 1px solid rgba(255,255,255,.10);
+    }
+    .badge-wait{ background: rgba(148,163,184,.15); color: rgba(255,255,255,.85); }
+    .badge-win{  background: rgba(34,197,94,.18);  color: rgba(34,197,94,.95); border-color: rgba(34,197,94,.25);}
+    .badge-lose{ background: rgba(245,158,11,.18); color: rgba(245,158,11,.95); border-color: rgba(245,158,11,.25);}
+    .badge-err{  background: rgba(239,68,68,.18);  color: rgba(239,68,68,.95); border-color: rgba(239,68,68,.25);}
+
+    /* ===== Pagination ===== */
+    .pager{
+    display:flex;
+    align-items:center;
+    justify-content: space-between;
+    gap: 10px;
+    margin-top: 12px;
+    flex-wrap: wrap;
+    }
+
+    .pager .btn-pager{
+    border-radius: 12px;
+    border: 1px solid rgba(255,255,255,.12);
+    background: rgba(255,255,255,.06);
+    color: rgba(255,255,255,.9);
+    font-weight: 950;
+    padding: 10px 12px;
+    }
+    .pager .btn-pager:disabled{
+    opacity: .5;
+    cursor:not-allowed;
+    }
+
+    /* ===== Chart tools ===== */
+    .chart-tools{
+    display:flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items:center;
+    margin-bottom: 10px;
+    }
+
+    .toggle{
+    display:inline-flex;
+    gap: 8px;
+    align-items:center;
+    border: 1px solid rgba(255,255,255,.12);
+    background: rgba(255,255,255,.06);
+    border-radius: 12px;
+    padding: 10px 12px;
+    font-weight: 950;
+    cursor:pointer;
+    user-select:none;
+    }
+    .toggle input{ display:none; }
+    .toggle .dot{
+    width: 14px;
+    height: 14px;
+    border-radius: 999px;
+    border: 2px solid rgba(255,255,255,.35);
+    }
+    .toggle input:checked + .dot{
+    border-color: rgba(34,197,94,.9);
+    box-shadow: 0 0 0 3px rgba(34,197,94,.12);
+    }
+
+    .table thead th{
+    background: rgba(255,255,255,0.04);
+    color: rgba(255,255,255,0.78);
+    font-weight: 700;
+    letter-spacing: .3px;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .table{
+    background: rgba(255,255,255,0.03);
+    border-radius: 14px;
+    overflow: hidden;
+    }
+
+    .table tbody tr{
+    border-color: rgba(255,255,255,0.06);
+    }
+
+    .table tbody tr:hover{
+    background: rgba(255,255,255,0.04);
+    }
+
+    .table td{
+    color: rgba(255,255,255,0.85);
+    }
+
+    /* ✅ Force la table Bootstrap à être "glass" (plus de fond blanc) */
+    .table-premium{
+    --bs-table-bg: transparent !important;
+    --bs-table-color: rgba(255,255,255,.90) !important;
+
+    --bs-table-striped-bg: rgba(255,255,255,.03);
+    --bs-table-hover-bg: rgba(59,130,246,.06);
+    --bs-table-border-color: rgba(255,255,255,.08);
+
+    background: transparent !important;
+    }
+
+    /* cellules */
+    .table-premium td,
+    .table-premium th{
+    background: transparent !important;
+    color: rgba(255,255,255,.88) !important;
+    border-color: rgba(255,255,255,.08) !important;
+    }
+
+    /* ✅ Header plus lisible (pas trop sombre) */
+    .table-premium thead th{
+    background: rgba(255,255,255,.07) !important;
+    color: rgba(255,255,255,.92) !important;
+    font-weight: 950;
+    letter-spacing: .2px;
+    border-bottom: 1px solid rgba(255,255,255,.10) !important;
+    }
+
+    /* ✅ Arrondi + clip propre */
+    .table-wrap{
+    border-radius: 14px;
+    overflow: hidden;
+    }
+
+    /* option : scroll plus doux */
+    .table-responsive{
+    scrollbar-color: rgba(255,255,255,.25) transparent;
+    }
+    .table-responsive::-webkit-scrollbar{ width: 10px; }
+    .table-responsive::-webkit-scrollbar-thumb{
+    background: rgba(255,255,255,.18);
+    border-radius: 999px;
+    border: 2px solid rgba(0,0,0,0);
+    background-clip: padding-box;
+    }
+
+    .table-premium thead th{
+    position: sticky;
+    top: 0;
+    z-index: 5;
+    }
+
+    /* Select “dark” */
+    .select-dark{
+    background: rgba(15,23,42,.65) !important;
+    color: rgba(255,255,255,.92) !important;
+    border: 1px solid rgba(255,255,255,.12) !important;
+    border-radius: 12px;
+    }
+
+    /* Focus propre */
+    .select-dark:focus{
+    box-shadow: 0 0 0 .2rem rgba(96,165,250,.12) !important;
+    border-color: rgba(96,165,250,.55) !important;
+    }
+
+    /* ✅ IMPORTANT : le menu déroulant (options) */
+    .select-dark option{
+    background: #0b1220;     /* fond sombre */
+    color: #fff;             /* texte lisible */
+    }
+
+    /* (optionnel) pour certains navigateurs */
+    .select-dark optgroup{
+    background: #0b1220;
+    color: #fff;
+    }
+
+
+
+
+
+  </style>
+</head>
+
+<body>
+  <!-- Header injecté -->
+  <div id="appHeader"></div>
+
+  <div class="app-shell">
+    <!-- Sidebar (ID requis pour burger layout.js) -->
+    <aside id="sidebar" class="sidebar">
+      <div class="sidebar-inner">
+        <div class="sidebar-title">Dashboard</div>
+        <a class="side-link" href="index.html"><i class="fa-solid fa-chart-line"></i> Résultats</a>
+        <a class="side-link" href="tickets.html"><i class="fa-solid fa-ticket"></i> Tickets</a>
+        <a class="side-link active" href="statistiques.html"><i class="fa-solid fa-chart-column"></i> Statistiques</a>
+        <a class="side-link" href="profil.html"><i class="fa-solid fa-user-gear"></i> Mon profil</a>
+        <hr style="border-color: rgba(255,255,255,.10); margin: 12px 0;">
+
+        <div class="sidebar-title">Jouer</div>
+        <a class="side-link" href="index.html"><i class="fa-solid fa-clover"></i> Loto</a>
+        <a class="side-link" href="euromillions.html"><i class="fa-solid fa-star"></i> Euromillions</a>
+      </div>
+    </aside>
+
+    <!-- Contenu -->
+    <main>
+      <section class="glass-panel">
+        <h1 class="panel-title">Statistiques</h1>
+        <p class="muted mb-4">Historique de tes tickets + graphique dépenses/gains.</p>
+
+        <!-- Alerts propres (pas de alert()) -->
+        <div class="alert alert-danger d-none" id="errBox">
+          <i class="fa-solid fa-triangle-exclamation me-2"></i>
+          <span id="errText">Erreur.</span>
+        </div>
+
+        <div class="alert alert-success d-none" id="okBox">
+          <i class="fa-solid fa-circle-check me-2"></i>
+          <span id="okText">OK.</span>
+        </div>
+
+        <div class="row g-3 align-items-stretch">
+        <!-- Tableau -->
+        <div class="col-12 col-lg-6">
+            <div class="table-tools">
+            <div class="tool-left">
+                <h5 class="mb-0" style="font-weight:950;">Historique des tickets</h5>
+                <span class="mini-loader d-none" id="tableLoader">
+                <span class="spinner-border spinner-border-sm"></span> Chargement…
+                </span>
+            </div>
+
+            <div class="tool-right">
+                <input id="searchInput" class="input-dark" type="search" placeholder="Rechercher une date…">
+                <select id="pageSize" class="form-select select-dark">
+                <option value="10">10 / page</option>
+                <option value="15">15 / page</option>
+                <option value="25">25 / page</option>
+                </select>
+            </div>
+            </div>
+
+            <div class="table-wrap">
+            <div class="table-responsive" style="max-height: 520px;">
+                <table class="table table-borderless table-premium align-middle">
+                <thead>
+                    <tr>
+                    <th style="width:45%">Date</th>
+                    <th style="width:30%">Statut</th>
+                    <th style="width:25%" class="text-end">Gains</th>
+                    </tr>
+                </thead>
+                <tbody id="ticketsTable"></tbody>
+                </table>
+            </div>
+            </div>
+
+            <div class="pager">
+            <div class="muted" style="font-weight:900;">
+                <span id="pagerInfo">—</span>
+            </div>
+
+            <div class="d-flex gap-2">
+                <button class="btn-pager" id="prevBtn" type="button">← Précédent</button>
+                <button class="btn-pager" id="nextBtn" type="button">Suivant →</button>
+            </div>
+            </div>
+        </div>
+
+        <!-- Graphique + totaux -->
+        <div class="col-12 col-lg-6">
+            <div class="chart-tools">
+            <div class="tool-left">
+                <h5 class="mb-0" style="font-weight:950;">Graphique</h5>
+                <span class="mini-loader d-none" id="chartLoader">
+                <span class="spinner-border spinner-border-sm"></span> Calcul…
+                </span>
+            </div>
+
+            <label class="toggle">
+                <input type="checkbox" id="logScale">
+                <span class="dot"></span>
+                Échelle log
+            </label>
+            </div>
+
+            <div class="table-glass p-3">
+            <canvas id="statsChart" style="max-height: 330px;"></canvas>
+            </div>
+
+            <div class="row g-3 mt-1">
+            <div class="col-12 col-md-6">
+                <div class="stat-tile">
+                <div class="stat-label">Total dépensé</div>
+                <div class="stat-value text-danger"><span id="totalDepense">0.00</span> €</div>
+                </div>
+            </div>
+            <div class="col-12 col-md-6">
+                <div class="stat-tile">
+                <div class="stat-label">Total gagné</div>
+                <div class="stat-value text-success"><span id="totalGagne">0.00</span> €</div>
+                </div>
+            </div>
+            </div>
+        </div>
+        </div>
+
+
+      </section>
+    </main>
+  </div>
+
+  <!-- overlay requis pour fermer le menu mobile -->
+  <div id="overlay"></div>
+
+  <!-- Footer injecté -->
+  <div id="appFooter"></div>
+
+  <!-- Layout global -->
+  <script src="layout.js"></script>
+
+<script>
+(function () {
+  const API_BASE =
+    (location.hostname === "localhost" || location.hostname === "127.0.0.1")
+      ? "http://localhost:8082"
+      : "https://stephanedinahet.fr";
+
+  const ME_URL = `${API_BASE}/api/auth/me`;
+  const API_TICKETS = `${API_BASE}/api/tickets`;
+  const API_GAINS = `${API_BASE}/api/gains`;
+
+  /* ===== DOM ===== */
+  const tableBody = document.getElementById("ticketsTable");
+  const searchInput = document.getElementById("searchInput");
+  const pageSizeSelect = document.getElementById("pageSize");
+  const pagerInfo = document.getElementById("pagerInfo");
+  const prevBtn = document.getElementById("prevBtn");
+  const nextBtn = document.getElementById("nextBtn");
+  const logScaleToggle = document.getElementById("logScale");
+
+  const totalDepenseEl = document.getElementById("totalDepense");
+  const totalGagneEl = document.getElementById("totalGagne");
+
+  const errBox = document.getElementById("errBox");
+  const errText = document.getElementById("errText");
+
+  let chartInstance = null;
+
+  /* ===== STATE ===== */
+  let allTickets = [];
+  let filteredTickets = [];
+  let currentPage = 1;
+
+  /* ===== UTILS ===== */
+  const fmtLong = d =>
+    new Date(d).toLocaleDateString("fr-FR", {
+      day: "2-digit",
+      month: "long",
+      year: "numeric"
+    });
+
+  const fmtShort = d =>
+    new Date(d).toLocaleDateString("fr-FR", {
+      day: "2-digit",
+      month: "2-digit"
+    });
+
+  function showError(msg) {
+    errText.textContent = msg;
+    errBox.classList.remove("d-none");
+  }
+
+  function hideError() {
+    errBox.classList.add("d-none");
+  }
+
+  function getStatus(drawDate, gain) {
+    const today = new Date().toISOString().split("T")[0];
+    const d = new Date(drawDate).toISOString().split("T")[0];
+
+    if (d < today) {
+      return gain > 0
+        ? { label: "Gagné", cls: "badge-win" }
+        : { label: "Perdu", cls: "badge-lose" };
+    }
+    return { label: "En attente", cls: "badge-wait" };
+  }
+
+  /* ===== TABLE ===== */
+  function renderTable() {
+    tableBody.innerHTML = "";
+
+    const size = Number(pageSizeSelect.value);
+    const start = (currentPage - 1) * size;
+    const pageItems = filteredTickets.slice(start, start + size);
+
+    if (!pageItems.length) {
+      tableBody.innerHTML =
+        `<tr><td colspan="3" class="muted">Aucun résultat</td></tr>`;
+      return;
+    }
+
+    for (const t of pageItems) {
+      const gain = t.gain;
+      const st = getStatus(t.drawDate, gain);
+
+      tableBody.innerHTML += `
+        <tr>
+          <td data-label="Date">
+            <div class="ticket-head">
+              <b class="ticket-date">${fmtLong(t.drawDate)}</b>
+              <span class="badge-soft ${st.cls} ticket-status">${st.label}</span>
+            </div>
+          </td>
+
+          <td data-label="Statut" class="cell-hide-mobile">
+            <span class="badge-soft ${st.cls}">${st.label}</span>
+          </td>
+
+          <td data-label="Gains" class="text-end">
+            <b>${gain.toFixed(2)} €</b>
+          </td>
+        </tr>
+      `;
+
+
+    }
+
+    const maxPage = Math.ceil(filteredTickets.length / size);
+    pagerInfo.textContent = `Page ${currentPage} / ${maxPage}`;
+
+    prevBtn.disabled = currentPage === 1;
+    nextBtn.disabled = currentPage === maxPage;
+  }
+
+  /* ===== CHART ===== */
+    function renderChart() {
+    const monthly = {};
+
+    filteredTickets.forEach(t => {
+        const d = new Date(t.drawDate);
+        const key = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}`;
+
+        if (!monthly[key]) {
+        monthly[key] = { depense: 0, gain: 0 };
+        }
+        monthly[key].depense += 2.20;
+        monthly[key].gain += t.gain;
+    });
+
+    const labels = Object.keys(monthly).sort().map(k => {
+        const [y,m] = k.split("-");
+        return new Date(y, m-1).toLocaleDateString("fr-FR", { month:"long", year:"numeric" });
+    });
+
+    const depenses = Object.keys(monthly).sort().map(k => monthly[k].depense);
+    const gains = Object.keys(monthly).sort().map(k => monthly[k].gain);
+
+    const ctx = document.getElementById("statsChart").getContext("2d");
+    if (chartInstance) chartInstance.destroy();
+
+    chartInstance = new Chart(ctx, {
+        type: "bar",
+        data: {
+        labels,
+        datasets: [
+            {
+            label: "Dépenses (€)",
+            data: depenses,
+            backgroundColor: "rgba(59,130,246,0.65)"
+            },
+            {
+            label: "Gains (€)",
+            data: gains,
+            backgroundColor: "rgba(16,185,129,0.65)"
+            }
+        ]
+        },
+        options: {
+        responsive: true,
+        plugins: {
+            legend: {
+            labels: { color: "rgba(255,255,255,.85)" }
+            }
+        },
+        scales: {
+            x: {
+            ticks: { color: "rgba(255,255,255,.7)" },
+            grid: { color: "rgba(255,255,255,.06)" }
+            },
+            y: {
+            type: logScaleToggle.checked ? "logarithmic" : "linear",
+            beginAtZero: true,
+            ticks: { color: "rgba(255,255,255,.7)" },
+            grid: { color: "rgba(255,255,255,.06)" }
+            }
+        }
+        }
+    });
+    }
+
+
+  /* ===== FILTER ===== */
+  function applyFilters() {
+    const q = searchInput.value.toLowerCase();
+    filteredTickets = allTickets.filter(t =>
+      fmtLong(t.drawDate).toLowerCase().includes(q)
+    );
+    currentPage = 1;
+    renderTable();
+    renderChart();
+  }
+
+  /* ===== LOAD ===== */
+  async function loadStats() {
+    try {
+      await axios.get(ME_URL, { withCredentials: true });
+
+      const [tRes, gRes] = await Promise.all([
+        axios.get(API_TICKETS, { withCredentials: true }),
+        axios.get(API_GAINS, { withCredentials: true })
+      ]);
+
+      const gainsMap = new Map(
+        gRes.data.map(g => [g.ticketId, Number(g.gainAmount || 0)])
+      );
+
+      allTickets = tRes.data
+        .filter(t => t.drawDate)
+        .sort((a, b) => new Date(b.drawDate) - new Date(a.drawDate))
+        .map(t => ({
+          ...t,
+          gain: gainsMap.get(t.id) || 0
+        }));
+
+      filteredTickets = [...allTickets];
+
+      totalDepenseEl.textContent = (allTickets.length * 2.2).toFixed(2);
+      totalGagneEl.textContent = allTickets
+        .reduce((s, t) => s + t.gain, 0)
+        .toFixed(2);
+
+      renderTable();
+      renderChart();
+
+    } catch (e) {
+      showError("Impossible de charger les statistiques.");
+      console.error(e);
+    }
+  }
+
+  /* ===== EVENTS ===== */
+  searchInput.addEventListener("input", applyFilters);
+  pageSizeSelect.addEventListener("change", applyFilters);
+  logScaleToggle.addEventListener("change", renderChart);
+
+  prevBtn.addEventListener("click", () => {
+    currentPage--;
+    renderTable();
+  });
+
+  nextBtn.addEventListener("click", () => {
+    currentPage++;
+    renderTable();
+  });
+
+  document.addEventListener("DOMContentLoaded", loadStats);
+})();
+</script>
+
+
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+  <script src="cookies.js"></script>
+  <!-- IA (si tu l'utilises) -->
+  <script src="ai-loader.js"></script>
+
+</body>
+</html>

@@ -1,0 +1,54 @@
+# Utiliser une image Java 21 légère
+# l’image openjdk officielle est dépréciée et ne publie plus les tags “classiques” (comme 21-jdk-slim).
+# FROM openjdk:21-jdk-slim
+# Dockerfile.backend
+# FROM eclipse-temurin:21-jre-jammy
+
+# WORKDIR /app
+# COPY target/*.jar app.jar
+
+# EXPOSE 8082
+# ENTRYPOINT ["java","-jar","/app/app.jar"]
+
+
+# # Définir le répertoire de travail
+# WORKDIR /app
+
+# # Copier les fichiers du backend
+# COPY . /app
+
+# # Execution permissions
+# RUN chmod +x mvnw
+
+# # Construire l'application
+# RUN ./mvnw install
+
+# # Exécuter l'application
+# CMD ["./mvnw", "spring-boot:run"]
+
+# # Exposer le port de l'API
+# EXPOSE 8082
+
+# 1) BUILD STAGE
+FROM maven:3.9.9-eclipse-temurin-21 AS build
+WORKDIR /build
+
+COPY pom.xml .
+COPY .mvn .mvn
+COPY mvnw .
+RUN chmod +x mvnw
+
+# (optionnel) pré-télécharge les deps
+RUN ./mvnw -B -DskipTests dependency:go-offline
+
+COPY src src
+RUN ./mvnw -B -DskipTests clean package
+
+# 2) RUN STAGE
+FROM eclipse-temurin:21-jre-jammy
+WORKDIR /app
+
+COPY --from=build /build/target/*.jar app.jar
+
+EXPOSE 8082
+ENTRYPOINT ["java","-jar","/app/app.jar"]
