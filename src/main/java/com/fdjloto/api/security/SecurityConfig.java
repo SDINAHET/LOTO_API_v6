@@ -62,9 +62,44 @@ public class SecurityConfig {
 
         return http
                 // ✅ Autoriser les iframes depuis la même origine (Swagger dans ton dashboard)
+                // .headers(headers -> headers
+                //         .frameOptions(HeadersConfigurer.FrameOptionsConfig::sameOrigin)
+                // )
                 .headers(headers -> headers
-                        .frameOptions(HeadersConfigurer.FrameOptionsConfig::sameOrigin)
+                    // Autoriser iframe seulement même origine (utile si tu embed swagger/admin)
+                    .frameOptions(HeadersConfigurer.FrameOptionsConfig::sameOrigin)
+
+                    // Empêche le MIME sniffing
+                    .contentTypeOptions(Customizer.withDefaults())
+
+                    // Referrer policy (évite fuite d’URL sensibles)
+                    .referrerPolicy(ref -> ref.policy(
+                        org.springframework.security.web.header.writers.ReferrerPolicyHeaderWriter.ReferrerPolicy.NO_REFERRER
+                    ))
+
+                    // CSP (anti-XSS / anti-script externe)
+                    .contentSecurityPolicy(csp -> csp.policyDirectives(
+                        "default-src 'self'; " +
+                        // "script-src 'self'; " +
+                        "script-src 'self' 'unsafe-inline'; " +
+                        "style-src 'self' 'unsafe-inline'; " +
+                        "img-src 'self' data:; " +
+                        "font-src 'self'; " +
+                        // "connect-src 'self' https://stephanedinahet.fr https://www.stephanedinahet.fr http://localhost:8082; " +
+                        "connect-src 'self' http://localhost:8082 http://127.0.0.1:8082 https://stephanedinahet.fr https://www.stephanedinahet.fr; " +
+                        "frame-ancestors 'self'; " +
+                        "base-uri 'self'; " +
+                        "form-action 'self'"
+                    ))
+
+                    // HSTS (uniquement si tu es en HTTPS en prod)
+                    .httpStrictTransportSecurity(hsts -> hsts
+                        .includeSubDomains(true)
+                        .preload(true)
+                        .maxAgeInSeconds(31536000)
+                    )
                 )
+
                 // .headers(headers -> headers
                 //     .frameOptions(frame -> frame.sameOrigin()) // ✅ Autoriser les iframes depuis la même origine
                 //     .xssProtection(xss -> xss.disable()) // ✅ Désactiver la protection XSS si nécessaire
