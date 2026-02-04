@@ -270,6 +270,21 @@
     <!-- Sidebar (ID requis pour burger layout.js) -->
     <aside id="sidebar" class="sidebar">
       <div class="sidebar-inner">
+
+        <!-- ✅ Profil + rôle dans le menu burger -->
+        <div class="burger-user" id="burgerUserBox" style="display:none;">
+          <div class="burger-user-row">
+            <i class="fa-solid fa-user-shield"></i>
+            <div class="burger-user-text">
+              <div class="burger-user-name" id="burgerUserName">—</div>
+              <div class="burger-user-role" id="burgerUserRole">Utilisateur</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ✅ Slot pour lien admin dans le menu (si admin) -->
+        <div id="adminMenuSlot"></div>
+
         <div class="sidebar-title">Dashboard</div>
         <a class="side-link" href="index.html"><i class="fa-solid fa-chart-line"></i> Résultats</a>
         <a class="side-link" href="tickets.html"><i class="fa-solid fa-ticket"></i> Tickets</a>

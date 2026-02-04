@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <title>Login admin - Swagger</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="icon" href="/favicon-admin.ico" />
+
+  <!-- CSS séparé -->
+  <link rel="stylesheet" href="/assets/css/admin-login.css" />
+
+  <!-- CSS global (layout + footer) -->
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+
+<body class="page no-sidebar">
+
+  <!-- HEADER injecté automatiquement -->
+  <div id="appHeader"></div>
+
+  <main class="page-content">
+    <div class="card">
+      <h1 class="title">Connexion admin</h1>
+
+      <p class="subtitle">
+        Accès réservé à l'administrateur pour consulter la documentation Swagger.
+      </p>
+
+      <form id="adminLoginForm">
+        <!-- Email -->
+        <div class="field">
+          <label for="email" class="label">Email admin</label>
+          <div class="inputWrap">
+            <input id="email" type="email" class="input" required />
+            <div id="emailStatus" class="emailStatus"></div>
+          </div>
+        </div>
+
+        <!-- Password -->
+        <div class="field">
+          <label for="password" class="label">Mot de passe</label>
+          <div class="inputWrap">
+            <input id="password" type="password" class="input" required />
+
+            <button
+              type="button"
+              id="togglePassword"
+              class="togglePassword"
+              aria-label="Afficher / masquer le mot de passe"
+            >
+              <svg id="eyeIcon" width="22" height="22" viewBox="0 0 24 24" fill="none"
+                   stroke="#22c55e" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"
+                   class="eyeIcon">
+                <path id="eyeOpen" d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z"></path>
+                <circle id="eyePupil" cx="12" cy="12" r="3"></circle>
+                <line id="eyeSlash" x1="3" y1="21" x2="21" y2="3" class="eyeSlash"></line>
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- CAPTCHA -->
+        <div class="field">
+          <label class="label">Vérification anti-robot</label>
+
+          <div class="captchaRow">
+            <canvas id="captchaCanvas" width="220" height="70" class="captchaCanvas"></canvas>
+            <button type="button" id="refreshCaptcha" class="captchaRefresh">↻</button>
+          </div>
+
+          <input
+            id="captchaAnswer"
+            type="text"
+            class="input"
+            required
+            placeholder="Recopiez le code"
+            autocomplete="off"
+            spellcheck="false"
+          />
+        </div>
+
+        <button id="submitBtn" type="submit" class="submitBtn">Se connecter</button>
+      </form>
+
+      <p id="errorMsg" class="errorMsg"></p>
+      <p class="hint">Accès bloqué après 3 tentatives.</p>
+      <p class="hint">Après connexion réussie, vous serez redirigé automatiquement vers Swagger UI.</p>
+    </div>
+  </main>
+
+  <!-- Overlay (optionnel, mais layout.js le cherche parfois) -->
+  <div id="overlay"></div>
+
+  <!-- FOOTER injecté automatiquement -->
+  <div id="appFooter"></div>
+
+  <!-- ✅ Layout en premier (injecte header/footer + patch fetch/axios) -->
+  <script src="/layout.js"></script>
+
+  <!-- JS admin ensuite -->
+  <script src="/assets/js/admin-login.js"></script>
+
+</body>
+</html>

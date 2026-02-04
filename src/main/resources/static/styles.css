@@ -684,3 +684,256 @@ body.has-fixed-footer{
 }*/
 
 
+/* =========================================================
+   ✅ BURGER USER BOX (JohnDoe + rôle)
+========================================================= */
+.burger-user{
+  padding: 12px 12px 10px;
+  margin-bottom: 8px;
+  border-radius: 14px;
+  border: 1px solid rgba(255,255,255,.10);
+  background: rgba(255,255,255,.04);
+}
+
+.burger-user-row{
+  display:flex;
+  align-items:center;
+  gap: 10px;
+}
+
+.burger-user-row i{
+  width: 34px;
+  height: 34px;
+  display:grid;
+  place-items:center;
+  border-radius: 12px;
+  background: rgba(255,255,255,.06);
+  border: 1px solid rgba(255,255,255,.10);
+  color: rgba(255,255,255,.92);
+  flex: 0 0 auto;
+}
+
+.burger-user-text{
+  min-width: 0;
+}
+
+.burger-user-name{
+  font-weight: 950;
+  color: rgba(255,255,255,.92);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.burger-user-role{
+  margin-top: 2px;
+  font-size: .85rem;
+  font-weight: 850;
+  color: rgba(255,255,255,.65);
+}
+
+/* =========================================================
+   ✅ ADMIN ITEM dans le burger
+========================================================= */
+.admin-menu-item{
+  border: 1px solid rgba(96,165,250,.22) !important;
+  background: rgba(96,165,250,.08) !important;
+}
+.admin-menu-item:hover{
+  background: rgba(96,165,250,.14) !important;
+}
+.admin-menu-item i{
+  color: rgba(96,165,250,.95) !important;
+}
+
+/* Option : cacher le bouton Admin du header sur mobile
+   (pour forcer l’usage via burger) */
+@media (max-width: 640px){
+  #adminLink{ display:none !important; }
+}
+
+/* =========================================================
+   ✅ Burger user box (Nom + rôle) dans la sidebar
+   (affiché uniquement quand connecté)
+========================================================= */
+
+.burger-user{
+  border: 1px solid rgba(255,255,255,.10);
+  background: rgba(255,255,255,.04);
+  border-radius: 14px;
+  padding: 12px;
+  margin: 6px 0 12px;
+}
+
+.burger-user-row{
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.burger-user-row i{
+  width: 38px;
+  height: 38px;
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+  background: rgba(59,130,246,.12);
+  border: 1px solid rgba(59,130,246,.20);
+  color: rgba(255,255,255,.92);
+}
+
+.burger-user-text{
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
+.burger-user-name{
+  font-weight: 950;
+  color: rgba(255,255,255,.92);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+.burger-user-role{
+  margin-top: 2px;
+  font-weight: 850;
+  font-size: .85rem;
+  color: rgba(255,255,255,.65);
+}
+
+/* =========================================================
+   ✅ Fix "ligne vide" quand NON admin / ou quand bloc user absent
+   -> on réduit le margin-top du 1er titre Dashboard
+========================================================= */
+
+/* Par défaut : pas de marge haute (évite la ligne vide) */
+.sidebar-inner .sidebar-title:first-of-type{
+  margin-top: 0 !important;
+}
+
+/* Si le bloc user est présent, on remet une marge propre */
+#sidebar.has-burger-user .sidebar-inner .sidebar-title:first-of-type{
+  margin-top: 6px !important;
+}
+
+/* =========================================================
+   ✅ Lien Admin dans le burger menu (sidebar)
+========================================================= */
+.admin-only-link{
+  background: rgba(168,85,247,.12) !important;
+  border-color: rgba(168,85,247,.22) !important;
+}
+
+.admin-only-link:hover{
+  background: rgba(168,85,247,.18) !important;
+  border-color: rgba(168,85,247,.28) !important;
+}
+
+/* =========================================================
+   FIX ESPACE VIDE SIDEBAR (non-admin)
+========================================================= */
+
+/* 1️⃣ Le bloc user du burger ne doit RIEN réserver */
+.burger-user{
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+/* 2️⃣ Slot admin : zéro espace quand vide */
+#adminMenuSlot{
+  display: contents; /* clé magique ✨ */
+}
+
+/* fallback si contents non supporté */
+#adminMenuSlot:empty{
+  display: none !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+/* 3️⃣ Évite que le titre DASHBOARD descende */
+.sidebar-title:first-of-type{
+  margin-top: 0 !important;
+}
+
+/* 4️⃣ Sécurité : aucun enfant vide ne réserve de place */
+.sidebar-inner > *:empty{
+  display: none !important;
+}
+
+
+/* =========================================================
+   ADMIN LOGIN – IDENTIQUE À index.html
+========================================================= */
+
+/* On garde EXACTEMENT le même layout que index */
+body.page{
+  margin: 0;
+}
+
+/* On NE RAJOUTE PAS de padding custom */
+body.page.has-fixed-footer{
+  padding-top: var(--topbar-h);
+  padding-bottom: var(--footer-h);
+}
+
+/* Zone centrale : centrée SANS toucher header/footer */
+.page-content{
+  min-height: calc(100vh - var(--topbar-h) - var(--footer-h));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 16px; /* même logique que index */
+}
+
+/* La card ne pousse RIEN */
+.page-content .card{
+  margin: 0;
+}
+
+
+/* =========================================================
+   ✅ FIX HEADER/FOOTER sur 1 ligne (pages no-sidebar)
+   (ex: /admin/admin-login.html)
+========================================================= */
+
+/* Desktop */
+@media (min-width: 992px){
+
+  /* Header : ne doit jamais passer sur 2 lignes */
+  body.no-sidebar .topbar{
+    flex-wrap: nowrap !important;
+  }
+  body.no-sidebar .topbar-actions{
+    flex-wrap: nowrap !important;
+    gap: 10px !important;
+  }
+
+  /* (optionnel) boutons un peu plus compacts pour éviter le wrap */
+  body.no-sidebar .topbar .btn-ghost{
+    padding: 9px 10px !important;
+  }
+
+  /* Footer : 1 seule ligne, jamais de wrap */
+  body.no-sidebar .footer{
+    flex-wrap: nowrap !important;     /* 🔥 override layout.js */
+    white-space: nowrap !important;
+    gap: 14px !important;
+    overflow-x: auto;                 /* si ça dépasse -> scroll horizontal */
+    -webkit-overflow-scrolling: touch;
+  }
+
+  body.no-sidebar .footer > *{
+    flex: 0 0 auto !important;
+    white-space: nowrap !important;
+  }
+
+  /* scrollbar discret (optionnel) */
+  body.no-sidebar .footer::-webkit-scrollbar{ height: 6px; }
+  body.no-sidebar .footer::-webkit-scrollbar-thumb{
+    background: rgba(255,255,255,.14);
+    border-radius: 10px;
+  }
+}

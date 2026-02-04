@@ -31,6 +31,8 @@ import java.util.List;
 import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 import org.springframework.security.web.csrf.CsrfTokenRequestAttributeHandler;
 
+import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
+
 
 @Configuration
 @EnableWebSecurity
@@ -163,6 +165,8 @@ public class SecurityConfig {
                 )
 
                 .authorizeHttpRequests(auth -> auth
+                        .requestMatchers(PathRequest.toStaticResources().atCommonLocations()).permitAll()
+                        .requestMatchers("/admin-login", "/admin-login.html").permitAll()
                         // =====================
                         // 🔓 PUBLIC ENDPOINTS
                         // =====================
@@ -192,14 +196,23 @@ public class SecurityConfig {
                         // --- AUTH PUBLIC ---
                         .requestMatchers(HttpMethod.POST, "/api/auth/register").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/auth/login3").permitAll()
-                        .requestMatchers("/api/auth/**").permitAll()
+                        // .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         // 🔓 Pages d’erreur accessibles à tout le monde
                         .requestMatchers("/errors/**", "/401", "/403", "/404", "/500").permitAll()
                         .requestMatchers("/admin-login.html").permitAll()
 
                         // 🔓 le HTML du dashboard peut être public, les vraies données restent derrière /api/admin/**
-                        .requestMatchers("/admin/**").permitAll()
+                        // .requestMatchers("/admin/**").permitAll()
+                        .requestMatchers(
+                            "/admin-login",
+                            "/admin-login.html",
+                            "/assets/**",
+                            "/favicon-admin.ico"
+                        ).permitAll()
+                        .requestMatchers("/admin/**").hasRole("ADMIN")
+
+
 
                         // Swagger UI accessible sans authentification
                         // .requestMatchers("/swagger-ui/**", "/v3/api-docs", "/v3/api-docs/**", "/v1/api-docs/**", "/swagger-ui.html", "/login-swagger").permitAll() // ✅ Swagger accessible sans JWT
@@ -211,6 +224,10 @@ public class SecurityConfig {
                                 "/v1/api-docs/**",
                                 "/swagger-ui.html",
                                 "/swagger-ui/index.html"
+                                // "/admin-login",
+                                // "/admin-login.html",
+                                // "/assets/**",
+                                // "/favicon-admin.ico"
                         ).hasRole("ADMIN")
 
                         // .requestMatchers("/api/health").permitAll()

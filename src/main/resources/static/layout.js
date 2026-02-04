@@ -536,6 +536,14 @@
             <span>Créer un compte</span>
           </a>
 
+          <a href="/admin-login.html" class="btn-ghost admin-only" id="adminLink" style="display:none;">
+            <svg class="btn-ico" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M12 2l8 4v6c0 5-3 9-8 10C7 21 4 17 4 12V6l8-4z"></path>
+            </svg>
+            <span>Admin</span>
+          </a>
+
+
           <div class="chip user-chip" id="userChip" style="display:none;">
             <span>Bienvenue, <b id="userEmail">—</b></span>
             <button class="btn-danger-soft" id="logoutBtn" type="button" title="Déconnexion">
@@ -570,6 +578,28 @@
     `;
   }
 
+
+  /* =========================================================
+   Admin link (dans le menu burger)
+========================================================= */
+function renderAdminMenuItem() {
+  return `
+    <a href="/admin-login.html" class="btn-ghost admin-menu-item" id="adminBurgerLink">
+      <svg class="btn-ico" viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M12 2l8 4v6c0 5-3 9-8 10C7 21 4 17 4 12V6l8-4z"></path>
+      </svg>
+      <span>Admin Dashboard</span>
+    </a>
+  `;
+}
+
+function setAdminInBurger(isAdmin) {
+  const slot = document.getElementById("adminMenuSlot");
+  if (!slot) return;
+  slot.innerHTML = isAdmin ? renderAdminMenuItem() : "";
+}
+
+
   /* =========================================================
      Auth UI (source de vérité = /userinfo)
   ========================================================= */
@@ -580,7 +610,9 @@
     return await res.json();
   }
 
-  function setAuthUI({ logged, label }) {
+  // function setAuthUI({ logged, label }) {
+  function setAuthUI({ logged, label, isAdmin }) {
+    const adminLink = document.getElementById("adminLink");
     const authBtn = document.getElementById("authActionBtn");
     const registerBtn = document.getElementById("registerBtn");
     const userChip = document.getElementById("userChip");
@@ -597,10 +629,19 @@
       if (registerBtn) registerBtn.style.display = "none";
       userChip.style.display = "inline-flex";
       userEmail.textContent = label || "Utilisateur";
+
+      // ✅ injecte l’item Admin dans le burger menu
+      setAdminInBurger(!!isAdmin);
+
+      // (optionnel) tu peux aussi masquer le bouton admin du header :
+      if (adminLink) adminLink.style.display = "none";
+      // if (adminLink) adminLink.style.display = isAdmin ? "inline-flex" : "none";
       return;
     }
 
     userChip.style.display = "none";
+    setAdminInBurger(false);
+    if (adminLink) adminLink.style.display = "none";
     userEmail.textContent = "—";
 
     if (isLoginPage) {
@@ -621,9 +662,20 @@
 
   async function checkUserAuthUI() {
     try {
+      // const data = await fetchUserInfo(API_BASE_PRIMARY);
+      // const shown = data.username || data.email || "Utilisateur";
+      // setAuthUI({ logged: true, label: shown });
       const data = await fetchUserInfo(API_BASE_PRIMARY);
       const shown = data.username || data.email || "Utilisateur";
-      setAuthUI({ logged: true, label: shown });
+
+      const isAdmin =
+        data?.role === "ADMIN" ||
+        data?.role === "ROLE_ADMIN" ||
+        (Array.isArray(data?.roles) && data.roles.includes("ADMIN")) ||
+        (Array.isArray(data?.roles) && data.roles.includes("ROLE_ADMIN"));
+
+      setAuthUI({ logged: true, label: shown, isAdmin });
+
       window.__API_BASE_ACTIVE__ = API_BASE_PRIMARY;
       return;
     } catch {
@@ -635,12 +687,14 @@
           window.__API_BASE_ACTIVE__ = API_BASE_FALLBACK;
           return;
         } catch {
-          setAuthUI({ logged: false });
+          // setAuthUI({ logged: false });
+          setAuthUI({ logged: false, isAdmin: false });
           window.__API_BASE_ACTIVE__ = API_BASE_PRIMARY;
           return;
         }
       }
-      setAuthUI({ logged: false });
+      // setAuthUI({ logged: false });
+      setAuthUI({ logged: false, isAdmin: false });
       window.__API_BASE_ACTIVE__ = API_BASE_PRIMARY;
     }
   }
@@ -945,6 +999,64 @@
       syncFooterHeight();
       window.addEventListener("resize", syncFooterHeight);
     });
+
+
+    // function renderAdminMenuItem() {
+    //   return `
+    //     <a href="/admin-login.html" class="btn-ghost admin-menu-item" id="adminBurgerLink">
+    //       <svg class="btn-ico" viewBox="0 0 24 24" aria-hidden="true">
+    //         <path d="M12 2l8 4v6c0 5-3 9-8 10C7 21 4 17 4 12V6l8-4z"></path>
+    //       </svg>
+    //       <span>Admin Dashboard</span>
+    //     </a>
+    //   `;
+    // }
+
+    // function setAdminInBurger(isAdmin) {
+    //   const slot = document.getElementById("adminMenuSlot");
+    //   if (!slot) return;
+
+    //   if (isAdmin) {
+    //     slot.innerHTML = renderAdminMenuItem();
+    //   } else {
+    //     slot.innerHTML = "";
+    //   }
+    // }
+
+    function renderAdminMenuItem() {
+      return `
+        <a href="/admin-login.html" class="nav-item admin-menu-item" id="adminBurgerLink">
+          <i class="fa-solid fa-shield-halved"></i><span>Admin</span>
+        </a>
+      `;
+    }
+
+    function setAdminInBurger(isAdmin) {
+      const slot = document.getElementById("adminMenuSlot");
+      if (!slot) return;
+      slot.innerHTML = isAdmin ? renderAdminMenuItem() : "";
+    }
+
+    function setBurgerIdentity({ logged, label, isAdmin }) {
+      const box = document.getElementById("burgerUserBox");
+      const name = document.getElementById("burgerUserName");
+      const role = document.getElementById("burgerUserRole");
+
+      if (!box || !name || !role) return;
+
+      if (!logged) {
+        box.style.display = "none";
+        name.textContent = "—";
+        role.textContent = "Invité";
+        return;
+      }
+
+      box.style.display = "block";
+      name.textContent = label || "Utilisateur";
+      role.textContent = isAdmin ? "Administrateur" : "Utilisateur";
+    }
+
+
 
     document.dispatchEvent(new CustomEvent("layout:ready"));
   }
