@@ -2,8 +2,10 @@
 // En prod, tu pourras remplacer par ton domaine (ex: https://stephanedinahet.fr)
 const API_BASE =
   (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1")
+    // ? "http://localhost:8082"
+    // : window.location.origin;
     ? "http://localhost:8082"
-    : window.location.origin;
+    : "https://stephanedinahet.fr";
 
 // ✅ JWT en cookie => pas d'Authorization header
 function getAuthHeaders() { return {}; }

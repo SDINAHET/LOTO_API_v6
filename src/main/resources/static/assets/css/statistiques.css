@@ -1,0 +1,418 @@
+    body{
+      margin:0;
+      min-height:100vh;
+      background:
+        radial-gradient(1200px 600px at 20% 20%, rgba(37,99,235,.28), transparent 60%),
+        radial-gradient(1000px 700px at 80% 30%, rgba(168,85,247,.22), transparent 60%),
+        rgba(6,10,18,1);
+      color: rgba(255,255,255,.92);
+    }
+
+    /* ===== Layout (comme profil/index) ===== */
+    .app-shell{
+      display: grid;
+      grid-template-columns: 280px 1fr;
+      gap: 18px;
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 24px 16px 86px; /* place pour footer fixed */
+    }
+
+    .glass-panel{
+      border-radius: 18px;
+      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(15,23,42,.55);
+      backdrop-filter: blur(12px);
+      box-shadow: 0 18px 50px rgba(0,0,0,.45);
+      padding: 22px;
+    }
+
+    .panel-title{
+      font-weight: 950;
+      letter-spacing: .2px;
+      margin: 0 0 8px;
+      font-size: 2.1rem;
+    }
+    .muted{ color: rgba(255,255,255,.65); }
+
+    /* ===== Alerts propres ===== */
+    .alert{
+      border-radius: 12px;
+      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(255,255,255,.06);
+      color: rgba(255,255,255,.9);
+    }
+    .alert-success{
+      border-color: rgba(34,197,94,.25);
+      background: rgba(34,197,94,.10);
+    }
+    .alert-danger{
+      border-color: rgba(239,68,68,.25);
+      background: rgba(239,68,68,.10);
+    }
+
+    /* ===== Sidebar (comme profil) ===== */
+    .sidebar{
+      border-radius: 18px;
+      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(15,23,42,.55);
+      backdrop-filter: blur(12px);
+      box-shadow: 0 18px 50px rgba(0,0,0,.35);
+      overflow: hidden;
+    }
+    .sidebar-inner{ padding: 14px; }
+
+    .sidebar-title{
+      font-weight: 950;
+      letter-spacing: .2px;
+      color: rgba(255,255,255,.75);
+      margin: 6px 8px 10px;
+      font-size: .92rem;
+      text-transform: uppercase;
+    }
+
+    .side-link{
+      display:flex;
+      align-items:center;
+      gap: 10px;
+      padding: 11px 12px;
+      border-radius: 12px;
+      color: rgba(255,255,255,.86);
+      text-decoration:none;
+      font-weight: 850;
+      background: rgba(255,255,255,.04);
+      border: 1px solid rgba(255,255,255,.08);
+      margin: 8px 0;
+    }
+    .side-link:hover{ background: rgba(255,255,255,.06); }
+    .side-link.active{
+      background: rgba(59,130,246,.18);
+      border-color: rgba(59,130,246,.25);
+    }
+
+    /* Desktop sticky sous le header fixed (layout.js gère --topbar-h) */
+    @media (min-width: 992px){
+      .sidebar{
+        position: sticky;
+        top: calc(var(--topbar-h) + 16px);
+        align-self: start;
+      }
+    }
+
+    /* ===== Overlay mobile (sidebar offcanvas) ===== */
+    #overlay{
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,.55);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .2s ease;
+      z-index: 80;
+    }
+    #overlay.show{
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    /* Mobile : sidebar offcanvas sous le header */
+    @media (max-width: 991px){
+      .app-shell{ grid-template-columns: 1fr; }
+
+      .sidebar{
+        position: fixed;
+        top: var(--topbar-h);
+        left: 0;
+        height: calc(100vh - var(--topbar-h));
+        width: 300px;
+        transform: translateX(-105%);
+        transition: transform .2s ease;
+        z-index: 90;
+        border-radius: 0 18px 18px 0;
+      }
+      .sidebar.open{ transform: translateX(0); }
+    }
+
+    /* ===== Table style (glass) ===== */
+    .table-glass{
+      border-radius: 14px;
+      overflow: hidden;
+      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(255,255,255,.04);
+    }
+    .table-glass .table{
+      margin: 0;
+      color: rgba(255,255,255,.90);
+    }
+    .table-glass thead{
+      background: rgba(255,255,255,.06);
+      color: rgba(255,255,255,.90);
+    }
+    .table-glass tbody tr{
+      border-color: rgba(255,255,255,.08);
+    }
+    .table-glass tbody tr:hover{
+      background: rgba(255,255,255,.04);
+    }
+
+    /* ===== Cards totals ===== */
+    .stat-tile{
+      border-radius: 14px;
+      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(255,255,255,.04);
+      padding: 14px;
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap: 12px;
+      font-weight: 900;
+    }
+    .stat-label{ color: rgba(255,255,255,.70); font-weight: 850; }
+    .stat-value{ font-size: 1.15rem; }
+
+    /* Loader */
+    .mini-loader{
+      display:inline-flex;
+      align-items:center;
+      gap: 10px;
+      color: rgba(255,255,255,.75);
+      font-weight: 900;
+    }
+
+    /* ===== TABLE: version premium ===== */
+    .table-wrap{
+    border-radius: 14px;
+    overflow: hidden;
+    border: 1px solid rgba(255,255,255,.10);
+    background: rgba(255,255,255,.04);
+    }
+
+    .table-tools{
+    display:flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items:center;
+    justify-content: space-between;
+    margin-bottom: 10px;
+    }
+
+    .tool-left, .tool-right{
+    display:flex;
+    gap: 10px;
+    align-items:center;
+    flex-wrap: wrap;
+    }
+
+    .input-dark, .select-dark{
+    background: rgba(255,255,255,.06);
+    border: 1px solid rgba(255,255,255,.12);
+    color: rgba(255,255,255,.90);
+    border-radius: 12px;
+    padding: 10px 12px;
+    outline: none;
+    }
+    .input-dark:focus, .select-dark:focus{
+    border-color: rgba(96,165,250,.55);
+    box-shadow: 0 0 0 .2rem rgba(96,165,250,.12);
+    }
+
+    .table-premium{
+    margin:0;
+    color: rgba(255,255,255,.92);
+    }
+
+    .table-premium thead th{
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    background: rgba(15,23,42,.92);
+    border-bottom: 1px solid rgba(255,255,255,.10);
+    font-weight: 950;
+    letter-spacing: .2px;
+    }
+
+    .table-premium tbody tr{
+    border-color: rgba(255,255,255,.08);
+    }
+    .table-premium tbody tr:nth-child(odd){
+    background: rgba(255,255,255,.02);
+    }
+    .table-premium tbody tr:hover{
+    background: rgba(59,130,246,.06);
+    }
+
+    .badge-soft{
+    border-radius: 999px;
+    padding: 6px 10px;
+    font-weight: 950;
+    border: 1px solid rgba(255,255,255,.10);
+    }
+    .badge-wait{ background: rgba(148,163,184,.15); color: rgba(255,255,255,.85); }
+    .badge-win{  background: rgba(34,197,94,.18);  color: rgba(34,197,94,.95); border-color: rgba(34,197,94,.25);}
+    .badge-lose{ background: rgba(245,158,11,.18); color: rgba(245,158,11,.95); border-color: rgba(245,158,11,.25);}
+    .badge-err{  background: rgba(239,68,68,.18);  color: rgba(239,68,68,.95); border-color: rgba(239,68,68,.25);}
+
+    /* ===== Pagination ===== */
+    .pager{
+    display:flex;
+    align-items:center;
+    justify-content: space-between;
+    gap: 10px;
+    margin-top: 12px;
+    flex-wrap: wrap;
+    }
+
+    .pager .btn-pager{
+    border-radius: 12px;
+    border: 1px solid rgba(255,255,255,.12);
+    background: rgba(255,255,255,.06);
+    color: rgba(255,255,255,.9);
+    font-weight: 950;
+    padding: 10px 12px;
+    }
+    .pager .btn-pager:disabled{
+    opacity: .5;
+    cursor:not-allowed;
+    }
+
+    /* ===== Chart tools ===== */
+    .chart-tools{
+    display:flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items:center;
+    margin-bottom: 10px;
+    }
+
+    .toggle{
+    display:inline-flex;
+    gap: 8px;
+    align-items:center;
+    border: 1px solid rgba(255,255,255,.12);
+    background: rgba(255,255,255,.06);
+    border-radius: 12px;
+    padding: 10px 12px;
+    font-weight: 950;
+    cursor:pointer;
+    user-select:none;
+    }
+    .toggle input{ display:none; }
+    .toggle .dot{
+    width: 14px;
+    height: 14px;
+    border-radius: 999px;
+    border: 2px solid rgba(255,255,255,.35);
+    }
+    .toggle input:checked + .dot{
+    border-color: rgba(34,197,94,.9);
+    box-shadow: 0 0 0 3px rgba(34,197,94,.12);
+    }
+
+    .table thead th{
+    background: rgba(255,255,255,0.04);
+    color: rgba(255,255,255,0.78);
+    font-weight: 700;
+    letter-spacing: .3px;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .table{
+    background: rgba(255,255,255,0.03);
+    border-radius: 14px;
+    overflow: hidden;
+    }
+
+    .table tbody tr{
+    border-color: rgba(255,255,255,0.06);
+    }
+
+    .table tbody tr:hover{
+    background: rgba(255,255,255,0.04);
+    }
+
+    .table td{
+    color: rgba(255,255,255,0.85);
+    }
+
+    /* ✅ Force la table Bootstrap à être "glass" (plus de fond blanc) */
+    .table-premium{
+    --bs-table-bg: transparent !important;
+    --bs-table-color: rgba(255,255,255,.90) !important;
+
+    --bs-table-striped-bg: rgba(255,255,255,.03);
+    --bs-table-hover-bg: rgba(59,130,246,.06);
+    --bs-table-border-color: rgba(255,255,255,.08);
+
+    background: transparent !important;
+    }
+
+    /* cellules */
+    .table-premium td,
+    .table-premium th{
+    background: transparent !important;
+    color: rgba(255,255,255,.88) !important;
+    border-color: rgba(255,255,255,.08) !important;
+    }
+
+    /* ✅ Header plus lisible (pas trop sombre) */
+    .table-premium thead th{
+    background: rgba(255,255,255,.07) !important;
+    color: rgba(255,255,255,.92) !important;
+    font-weight: 950;
+    letter-spacing: .2px;
+    border-bottom: 1px solid rgba(255,255,255,.10) !important;
+    }
+
+    /* ✅ Arrondi + clip propre */
+    .table-wrap{
+    border-radius: 14px;
+    overflow: hidden;
+    }
+
+    /* option : scroll plus doux */
+    .table-responsive{
+    scrollbar-color: rgba(255,255,255,.25) transparent;
+    }
+    .table-responsive::-webkit-scrollbar{ width: 10px; }
+    .table-responsive::-webkit-scrollbar-thumb{
+    background: rgba(255,255,255,.18);
+    border-radius: 999px;
+    border: 2px solid rgba(0,0,0,0);
+    background-clip: padding-box;
+    }
+
+    .table-premium thead th{
+    position: sticky;
+    top: 0;
+    z-index: 5;
+    }
+
+    /* Select “dark” */
+    .select-dark{
+    background: rgba(15,23,42,.65) !important;
+    color: rgba(255,255,255,.92) !important;
+    border: 1px solid rgba(255,255,255,.12) !important;
+    border-radius: 12px;
+    }
+
+    /* Focus propre */
+    .select-dark:focus{
+    box-shadow: 0 0 0 .2rem rgba(96,165,250,.12) !important;
+    border-color: rgba(96,165,250,.55) !important;
+    }
+
+    /* ✅ IMPORTANT : le menu déroulant (options) */
+    .select-dark option{
+    background: #0b1220;     /* fond sombre */
+    color: #fff;             /* texte lisible */
+    }
+
+    /* (optionnel) pour certains navigateurs */
+    .select-dark optgroup{
+    background: #0b1220;
+    color: #fff;
+    }
+
+
+
+

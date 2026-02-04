@@ -3,8 +3,10 @@
 
 const API_BASE =
   (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1")
+    // ? "http://localhost:8082"
+    // : window.location.origin;
     ? "http://localhost:8082"
-    : window.location.origin;
+    : "https://stephanedinahet.fr";
 
 const form = document.getElementById("adminLoginForm");
 const errorMsg = document.getElementById("errorMsg");
