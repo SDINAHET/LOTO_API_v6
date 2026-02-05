@@ -98,7 +98,7 @@ for _ in {1..60}; do
 done
 
 # open_browser "http://localhost:$PORT_SPRING/swagger-ui/index.html"
-open_browser "http://localhost:$PORT_STATIC/admin-login.html"
+# open_browser "http://localhost:$PORT_STATIC/admin-login.html"
 open_browser "http://localhost:$PORT_STATIC/index.html"
 
 # ========================

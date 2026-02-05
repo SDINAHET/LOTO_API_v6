@@ -871,3 +871,7 @@ cd src/main/resources/static
 npx http-server -a 0.0.0.0 -p 5500
 
 ```
+Dépendance IA pour le chatbot dans le venv:
+```bash
+pip install "fastapi[standard]" uvicorn httpx pymongo python-dotenv
+```
