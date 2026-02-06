@@ -630,6 +630,12 @@ function setAdminInBurger(isAdmin) {
       userChip.style.display = "inline-flex";
       userEmail.textContent = label || "Utilisateur";
 
+      // 🔥 AJOUT ICI
+      if (window.location.pathname.endsWith("/login.html")) {
+        window.location.replace("index.html");
+        return;
+      }
+
       // ✅ injecte l’item Admin dans le burger menu
       setAdminInBurger(!!isAdmin);
 
