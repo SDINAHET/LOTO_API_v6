@@ -88,9 +88,14 @@
           <td data-label="Date">
             <div class="ticket-head">
               <b class="ticket-date">${fmtLong(t.drawDate)}</b>
+
+              <!-- Gain visible uniquement en mobile -->
+              <b class="ticket-gain-mobile d-lg-none">${gain.toFixed(2)} €</b>
+
               <span class="badge-soft ${st.cls} ticket-status">${st.label}</span>
             </div>
           </td>
+
 
           <td data-label="Statut" class="cell-hide-mobile">
             <span class="badge-soft ${st.cls}">${st.label}</span>

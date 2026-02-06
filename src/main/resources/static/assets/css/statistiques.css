@@ -9,6 +9,7 @@
     }
 
     /* ===== Layout (comme profil/index) ===== */
+    /* AVANT */
     .app-shell{
       display: grid;
       grid-template-columns: 280px 1fr;
@@ -16,6 +17,22 @@
       max-width: 1400px;
       margin: 0 auto;
       padding: 24px 16px 86px; /* place pour footer fixed */
+    }
+
+    /* APRÈS (anti overflow) */
+    .app-shell{
+      display: grid;
+      grid-template-columns: 280px minmax(0, 1fr); /* <- important */
+      gap: 18px;
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 24px 16px 86px;
+    }
+
+    /* IMPORTANT : autoriser les enfants à rétrécir */
+    .sidebar,
+    main{
+      min-width: 0;
     }
 
     .glass-panel{
@@ -413,6 +430,150 @@
     color: #fff;
     }
 
+    @media (min-width: 992px){
+    .sidebar{
+      position: sticky !important;
+      top: calc(var(--topbar-h) + 16px) !important;
+      height: fit-content;
+    }
+  }
 
 
 
+/* =========================
+   Responsive Date/Statut
+   - Desktop: badge dans colonne Statut
+   - Mobile : badge collé à la Date
+========================= */
+
+/* Desktop (>= 992px) : on cache le badge dans la cellule Date */
+@media (min-width: 992px){
+  .ticket-head .ticket-status{
+    display: none !important;
+  }
+}
+
+/* Mobile (< 992px) : on cache la colonne Statut (2e colonne) */
+@media (max-width: 991px){
+  /* ta classe est déjà sur le <td> Statut */
+  .cell-hide-mobile{
+    display: none !important;
+  }
+
+  /* On aligne Date + badge correctement */
+  .ticket-head{
+    /* display: flex; */
+    display: grid !important;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;          /* si écran très petit */
+  }
+
+  .ticket-date{
+    white-space: nowrap;      /* évite “28 février 2026” sur 2 lignes */
+  }
+
+  .ticket-head .ticket-status{
+    display: inline-flex !important;
+    white-space: nowrap;
+  }
+}
+
+
+/* =========================
+   MOBILE: table -> cards clean
+========================= */
+@media (max-width: 575px){
+
+  /* 1) On cache le header de table (inutile en mobile) */
+  .table-premium thead{
+    display: none;
+  }
+
+  /* 2) Chaque ligne devient une "card" */
+  .table-premium tbody tr{
+    display: block;
+    padding: 12px 12px;
+    border-bottom: 1px solid rgba(255,255,255,.08);
+  }
+
+  /* 3) Chaque cellule devient un bloc */
+  .table-premium tbody td{
+    display: block;
+    width: 100%;
+    border: 0 !important;
+    padding: 6px 0 !important;
+  }
+
+  /* 4) Layout de la cellule Date : Date gauche / Gains droite */
+  /* .table-premium tbody td:nth-child(1) .ticket-head{
+    display: grid;
+    grid-template-columns: 1fr auto;
+    grid-template-areas:
+      "date gain"
+      "status status";
+    gap: 8px 10px;
+    align-items: center;
+  } */
+  .table-premium tbody td:nth-child(1) .ticket-head{
+  display: grid;
+  grid-template-columns: minmax(0,1fr) auto;
+  grid-template-areas:
+    "date gain"
+    "status status";
+  align-items: center;
+  column-gap: 12px;
+  row-gap: 6px;
+}
+
+
+  .ticket-date{
+    grid-area: date;
+    font-weight: 950;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .ticket-gain-mobile{
+    grid-area: gain;
+    justify-self: end;
+    font-weight: 950;
+    white-space: nowrap;
+  }
+
+
+  /* 5) Gains : on le remonte à droite (même si c’est dans le 3e td) */
+  .table-premium tbody td:nth-child(3){
+    display: none; /* on le cache ici */
+  }
+
+  /* On affiche le gain dans la zone "gain" via un pseudo (propre) ?
+     -> NON, on fait plus simple : on DUPLIQUE le gain en JS (voir option plus bas) */
+
+  /* 6) Badge statut en dessous, aligné */
+  .ticket-status{
+    grid-area: status;
+    justify-self: start;
+    display: inline-flex !important;
+    white-space: nowrap;
+  }
+
+  /* 7) On cache la colonne Statut (déjà prévu) */
+  .cell-hide-mobile{
+    display: none !important;
+  }
+
+  /* 8) On arrondit chaque "card" visuellement */
+  .table-wrap{
+    border-radius: 14px;
+    overflow: hidden;
+  }
+}
+
+/* 🔒 Le gain mobile ne doit apparaître QUE sur mobile */
+@media (min-width: 576px){
+  .ticket-gain-mobile{
+    display: none !important;
+  }
+}
