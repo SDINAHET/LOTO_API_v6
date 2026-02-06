@@ -82,9 +82,10 @@ public class SecurityConfig {
                     // CSP (anti-XSS / anti-script externe)
                     .contentSecurityPolicy(csp -> csp.policyDirectives(
                         "default-src 'self'; " +
-                        // "script-src 'self'; " +
-                        "script-src 'self' 'unsafe-inline'; " +
+                        "script-src 'self'; " +
+                        // "script-src 'self' 'unsafe-inline'; " +
                         "style-src 'self' 'unsafe-inline'; " +
+                        // "style-src 'self'; " +
                         "img-src 'self' data:; " +
                         "font-src 'self'; " +
                         // "connect-src 'self' https://stephanedinahet.fr https://www.stephanedinahet.fr http://localhost:8082; " +

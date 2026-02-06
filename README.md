@@ -875,3 +875,4 @@ Dépendance IA pour le chatbot dans le venv:
 ```bash
 pip install "fastapi[standard]" uvicorn httpx pymongo python-dotenv
 ```
+git clone -b clean3 https://github.com/SDINAHET/LOTO_API_v6.git
