@@ -10,33 +10,59 @@
 </head>
 
 <body>
-  <div class="layout">
+  <!-- Topbar injectée par layout-dashboard.js -->
+  <div id="appHeader"></div>
 
-    <aside class="sidebar">
-      <div class="brand">
+  <div class="layout">
+    <aside id="sidebar" class="sidebar" aria-label="Menu d'administration">
+      <div class="brand-block">
         <div class="brand-kicker">Loto Tracker API</div>
-        <div class="brand-title">Admin console</div>
+        <!-- <div class="brand-title">Admin console</div> -->
       </div>
 
-      <nav class="nav">
-        <button class="nav-item active" data-section="swagger">
-          <span class="dot"></span><span>Swagger / API</span>
-        </button>
-        <button class="nav-item" data-section="logs">
-          <span class="dot"></span><span>Logs serveur</span>
-        </button>
-        <button class="nav-item" data-section="info">
-          <span class="dot"></span><span>Infos / Debug</span>
-        </button>
-        <button class="nav-item" data-section="db">
-          <span class="dot"></span><span>Base de données (CRUD)</span>
-        </button>
-        <button class="nav-item" data-section="stats">
-          <span class="dot"></span><span>Stats joueurs</span>
+      <nav class="nav" aria-label="Navigation">
+        <button class="nav-item active" data-section="swagger" type="button">
+          <span class="nav-ico" aria-hidden="true">
+            <!-- book / api -->
+            <svg viewBox="0 0 24 24"><path d="M4 19a2 2 0 0 0 2 2h14"/><path d="M6 17V5a2 2 0 0 1 2-2h12v18H8a2 2 0 0 1-2-2z"/></svg>
+          </span>
+          <span>Swagger / API</span>
         </button>
 
+        <button class="nav-item" data-section="logs" type="button">
+          <span class="nav-ico" aria-hidden="true">
+            <!-- terminal -->
+            <svg viewBox="0 0 24 24"><path d="M4 17l6-6-6-6"/><path d="M12 19h8"/></svg>
+          </span>
+          <span>Logs serveur</span>
+        </button>
+
+        <button class="nav-item" data-section="info" type="button">
+          <span class="nav-ico" aria-hidden="true">
+            <!-- info -->
+            <svg viewBox="0 0 24 24"><path d="M12 17v-6"/><path d="M12 8h.01"/><path d="M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0z"/></svg>
+          </span>
+          <span>Infos / Debug</span>
+        </button>
+
+        <button class="nav-item" data-section="db" type="button">
+          <span class="nav-ico" aria-hidden="true">
+            <!-- database -->
+            <svg viewBox="0 0 24 24"><ellipse cx="12" cy="5" rx="8" ry="3"/><path d="M4 5v6c0 1.7 3.6 3 8 3s8-1.3 8-3V5"/><path d="M4 11v6c0 1.7 3.6 3 8 3s8-1.3 8-3v-6"/></svg>
+          </span>
+          <span>Base de données (CRUD)</span>
+        </button>
+
+        <button class="nav-item" data-section="stats" type="button">
+          <span class="nav-ico" aria-hidden="true">
+            <!-- chart -->
+            <svg viewBox="0 0 24 24"><path d="M4 19V5"/><path d="M4 19h16"/><path d="M8 17v-6"/><path d="M12 17v-10"/><path d="M16 17v-3"/></svg>
+          </span>
+          <span>Stats joueurs</span>
+        </button>
       </nav>
 
+      <!-- ✅ Toujours visible, collé en bas -->
       <div class="sidebar-footer">
         Connecté en tant qu'<span class="strong">administrateur</span>.<br />
         Profil Spring : <span class="strong green">dev</span>
@@ -44,88 +70,67 @@
     </aside>
 
     <div class="content">
-      <header class="topbar">
-        <div>
-          <h1 id="pageTitle" class="title">Tableau de bord administrateur</h1>
-          <p id="pageSubtitle" class="subtitle">Vue générale : Swagger, logs serveur, debug.</p>
-        </div>
-        <button id="btnLogout" class="pill">Déconnexion</button>
+      <!-- Header de page (titre + sous-titre) -->
+      <header class="admin-pagebar">
+        <h1 id="pageTitle" class="title">Tableau de bord administrateur</h1>
+        <p id="pageSubtitle" class="subtitle">Vue générale : Swagger, logs serveur, debug.</p>
       </header>
 
       <main class="main">
-
         <!-- SWAGGER -->
         <section id="section-swagger" class="panel show">
-          <p class="muted">
-            Documentation Swagger de l'API Loto Tracker.
-          </p>
-
-          <div class="row">
-            <button id="btnOpenSwagger" class="pill pill-green" type="button">
-              Ouvrir Swagger (nouvel onglet)
-            </button>
-            <span class="muted small">
-              (L’iframe peut être bloquée en cross-origin : SAMEORIGIN)
-            </span>
+          <div class="panel-head">
+            <div class="row wrap">
+              <button id="btnOpenSwagger" class="btn btn-primary" type="button">
+                Ouvrir Swagger (nouvel onglet)
+              </button>
+              <span class="muted small">(L’iframe peut être bloquée en cross-origin : SAMEORIGIN)</span>
+            </div>
           </div>
 
-          <div style="flex:1;min-height:0;margin-top:8px;
-                      display:flex;align-items:center;justify-content:center;">
-
-            <a id="swaggerLink" href="http://localhost:8082/swagger-ui/index.html" target="_blank" title="Ouvrir Swagger">
+          <div class="panel-body center">
+            <a id="swaggerLink" href="http://localhost:8082/swagger-ui/index.html" target="_blank" rel="noopener noreferrer">
               <img
                 src="/assets/img/swagger.png"
                 alt="Aperçu Swagger API"
-                style="
-                  max-width:100%;
-                  max-height:80%;
-                  border-radius:12px;
-                  border:1px solid #111827;
-                  box-shadow:0 0 40px rgba(0,0,0,0.45);
-                  cursor:pointer;
-                "
+                class="preview-img"
               />
             </a>
-
+            <p class="muted small" style="margin-top:10px;text-align:center;">
+              Pour des raisons de sécurité (X-Frame-Options), Swagger s’ouvre dans un nouvel onglet.
+            </p>
           </div>
-          <p class="muted" style="font-size:.8rem;text-align:center;margin-top:6px;">
-            Pour des raisons de sécurité (X-Frame-Options), Swagger s’ouvre dans un nouvel onglet.
-          </p>
-
-
-
-          <!-- <div class="frame-wrap">
-            <iframe id="swaggerFrame" title="Swagger" class="frame" src="about:blank"></iframe>
-          </div> -->
         </section>
 
         <!-- LOGS -->
         <section id="section-logs" class="panel">
-          <div class="row wrap">
-            <span class="muted">Logs du backend (lecture seule).</span>
+          <div class="panel-head">
+            <div class="row wrap">
+              <span class="muted">Logs du backend (lecture seule).</span>
 
-            <button id="btnRefreshLogs" class="pill pill-green" type="button">🔄 Rafraîchir</button>
+              <button id="btnRefreshLogs" class="btn btn-primary" type="button">Rafraîchir</button>
 
-            <label class="muted small">
-              Lignes :
-              <select id="logLineCount" class="select">
-                <option value="200">200</option>
-                <option value="400" selected>400</option>
-                <option value="800">800</option>
-              </select>
-            </label>
+              <label class="muted small">
+                Lignes :
+                <select id="logLineCount" class="select">
+                  <option value="200">200</option>
+                  <option value="400" selected>400</option>
+                  <option value="800">800</option>
+                </select>
+              </label>
 
-            <label class="muted small check">
-              <input type="checkbox" id="autoScrollLogs" checked />
-              Auto-scroll
-            </label>
+              <label class="muted small check">
+                <input type="checkbox" id="autoScrollLogs" checked />
+                Auto-scroll
+              </label>
 
-            <label class="muted small check">
-              <input type="checkbox" id="autoRefreshLogs" checked />
-              Auto-refresh (3s)
-            </label>
+              <label class="muted small check">
+                <input type="checkbox" id="autoRefreshLogs" checked />
+                Auto-refresh (3s)
+              </label>
 
-            <span id="logsLastRefresh" class="muted small">Dernier refresh : -</span>
+              <span id="logsLastRefresh" class="muted small">Dernier refresh : -</span>
+            </div>
           </div>
 
           <pre id="logsContainer" class="logs">Chargement des logs...</pre>
@@ -135,12 +140,10 @@
         <section id="section-info" class="panel">
           <div class="card">
             <h2 class="h2">Debug</h2>
-            <p class="muted">
-              Vérifie que le backend répond et que le cookie JWT est bien envoyé.
-            </p>
+            <p class="muted">Vérifie que le backend répond et que le cookie JWT est bien envoyé.</p>
 
             <div class="row wrap">
-              <button id="btnPing" class="pill pill-green" type="button">Tester /admin/ping</button>
+              <button id="btnPing" class="btn btn-primary" type="button">Tester /admin/ping</button>
               <code id="pingResult" class="code">-</code>
             </div>
 
@@ -152,53 +155,55 @@
 
         <!-- DB CRUD -->
         <section id="section-db" class="panel">
-          <div class="row wrap">
-            <span class="muted">Vue base de données (CRUD simplifié).</span>
+          <div class="card">
+            <div class="row wrap">
+              <span class="muted">Vue base de données (CRUD simplifié).</span>
 
-            <label class="muted small">
-              Table :
-              <select id="dbResourceSelect" class="select">
-                <option value="users">users</option>
-                <option value="tickets">tickets</option>
-                <option value="ticket_gains">ticket_gains</option>
-                <option value="refresh_tokens">refresh_tokens (lecture seule)</option>
-              </select>
-            </label>
+              <label class="muted small">
+                Table :
+                <select id="dbResourceSelect" class="select">
+                  <option value="users">users</option>
+                  <option value="tickets">tickets</option>
+                  <option value="ticket_gains">ticket_gains</option>
+                  <option value="refresh_tokens">refresh_tokens (lecture seule)</option>
+                </select>
+              </label>
 
-            <button id="btnLoadData" class="pill pill-green" type="button">Charger</button>
-            <button id="btnNewRow" class="pill" type="button">➕ Nouvelle ligne</button>
+              <button id="btnLoadData" class="btn btn-primary" type="button">Charger</button>
+              <button id="btnNewRow" class="btn btn-ghost" type="button">➕ Nouvelle ligne</button>
 
-            <span id="dbStatus" class="muted small">-</span>
-          </div>
-
-          <div class="row wrap">
-            <label class="muted small">
-              Recherche :
-              <input id="dbSearch" class="input" type="text" placeholder="Filtrer..." />
-            </label>
-
-            <label class="muted small">
-              Lignes / page :
-              <select id="dbPageSize" class="select">
-                <option value="20" selected>20</option>
-                <option value="50">50</option>
-                <option value="100">100</option>
-              </select>
-            </label>
-
-            <span id="dbPagingInfo" class="muted small">Page 1 / 1</span>
-
-            <div class="row" style="gap:6px;">
-              <button id="dbPrevPage" class="pill" type="button">◀</button>
-              <button id="dbNextPage" class="pill" type="button">▶</button>
+              <span id="dbStatus" class="muted small">-</span>
             </div>
-          </div>
 
-          <div id="dbTableWrapper" class="table-wrap">
-            <table id="dbTable" class="table">
-              <thead id="dbTableHead"></thead>
-              <tbody id="dbTableBody"></tbody>
-            </table>
+            <div class="row wrap" style="margin-top:10px;">
+              <label class="muted small">
+                Recherche :
+                <input id="dbSearch" class="input" type="text" placeholder="Filtrer..." />
+              </label>
+
+              <label class="muted small">
+                Lignes / page :
+                <select id="dbPageSize" class="select">
+                  <option value="20" selected>20</option>
+                  <option value="50">50</option>
+                  <option value="100">100</option>
+                </select>
+              </label>
+
+              <span id="dbPagingInfo" class="muted small">Page 1 / 1</span>
+
+              <div class="row" style="gap:6px;">
+                <button id="dbPrevPage" class="btn btn-ghost" type="button">◀</button>
+                <button id="dbNextPage" class="btn btn-ghost" type="button">▶</button>
+              </div>
+            </div>
+
+            <div id="dbTableWrapper" class="table-wrap" style="margin-top:12px;">
+              <table id="dbTable" class="table">
+                <thead id="dbTableHead"></thead>
+                <tbody id="dbTableBody"></tbody>
+              </table>
+            </div>
           </div>
 
           <!-- MODAL CRUD -->
@@ -206,9 +211,9 @@
             <div class="modal">
               <h2 id="dbModalTitle" class="h2">Nouvelle ligne</h2>
               <form id="dbModalForm" class="modal-form"></form>
-              <div class="row" style="justify-content:flex-end;margin-top:10px;">
-                <button id="dbModalCancel" type="button" class="pill">Annuler</button>
-                <button id="dbModalSave" type="button" class="pill pill-green">Enregistrer</button>
+              <div class="row" style="justify-content:flex-end;margin-top:12px;">
+                <button id="dbModalCancel" type="button" class="btn btn-ghost">Annuler</button>
+                <button id="dbModalSave" type="button" class="btn btn-primary">Enregistrer</button>
               </div>
             </div>
           </div>
@@ -216,28 +221,30 @@
 
         <!-- STATS -->
         <section id="section-stats" class="panel">
-          <div class="row wrap">
-            <span class="muted">Analyse des joueurs et de leurs tickets.</span>
-            <button id="btnLoadStats" class="pill pill-green" type="button">Recharger</button>
+          <div class="card">
+            <div class="row wrap">
+              <span class="muted">Analyse des joueurs et de leurs tickets.</span>
+              <button id="btnLoadStats" class="btn btn-primary" type="button">Recharger</button>
 
-            <label class="muted small">
-              Filtrer par email :
-              <input id="statsSearch" class="input" type="text" placeholder="user@exemple.com" />
-            </label>
+              <label class="muted small">
+                Filtrer par email :
+                <input id="statsSearch" class="input" type="text" placeholder="user@exemple.com" />
+              </label>
 
-            <span id="statsStatus" class="muted small">-</span>
+              <span id="statsStatus" class="muted small">-</span>
+            </div>
+
+            <div id="statsGrid" class="stats-grid" style="margin-top:12px;"></div>
           </div>
-
-          <div id="statsGrid" class="stats-grid"></div>
         </section>
-
-
-
       </main>
     </div>
-
   </div>
 
+  <!-- Overlay sidebar mobile -->
+  <div id="sidebarOverlay" class="sidebar-overlay" hidden></div>
+
+  <script src="/assets/js/layout-dashboard.js"></script>
   <script src="/assets/js/admin-dashboard.js"></script>
 </body>
 </html>

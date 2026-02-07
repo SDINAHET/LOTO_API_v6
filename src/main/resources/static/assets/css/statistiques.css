@@ -577,3 +577,21 @@
     display: none !important;
   }
 }
+
+
+.burger{
+  display:none;
+  width:44px;
+  height:44px;
+  align-items:center;
+  justify-content:center;
+  background:transparent;   /* 👈 plus de fond */
+  border:none;               /* 👈 plus de cercle */
+  color:var(--text);
+  font-size:1.4rem;
+  cursor:pointer;
+}
+
+.burger:hover{
+  color:var(--green);        /* petit feedback sympa */
+}

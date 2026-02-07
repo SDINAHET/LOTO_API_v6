@@ -1,11 +1,28 @@
 // ✅ API_BASE : dashboard (5500) parle au backend (8082) en local.
-// En prod, tu pourras remplacer par ton domaine (ex: https://stephanedinahet.fr)
+// En prod : https://stephanedinahet.fr
 const API_BASE =
   (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1")
-    // ? "http://localhost:8082"
-    // : window.location.origin;
     ? "http://localhost:8082"
     : "https://stephanedinahet.fr";
+
+async function loadAdminUser() {
+  try {
+    const res = await fetch(`${API_BASE}/api/protected/userinfo`, { credentials: "include" });
+    if (!res.ok) return;
+
+    const data = await res.json();
+    const label = data.username || data.email || "Administrateur";
+
+    // ✅ Topbar injectée par layout-dashboard.js
+    const userEmail = document.getElementById("userEmail");
+    const userChip = document.getElementById("userChip");
+    if (userEmail) userEmail.textContent = label;
+    if (userChip) userChip.style.display = "inline-flex";
+
+  } catch (e) {
+    console.warn("Impossible de charger l'utilisateur admin");
+  }
+}
 
 // ✅ JWT en cookie => pas d'Authorization header
 function getAuthHeaders() { return {}; }
@@ -40,30 +57,15 @@ function showSection(key) {
 
   if (key === "logs") refreshLogs();
 }
-
 navItems.forEach(btn => btn.addEventListener("click", () => showSection(btn.dataset.section)));
 
 // ---------- SWAGGER ----------
-// const swaggerFrame = document.getElementById("swaggerFrame");
-// const btnOpenSwagger = document.getElementById("btnOpenSwagger");
-
-// ⚠️ L’iframe peut être bloquée si Swagger renvoie X-Frame-Options SAMEORIGIN.
-// On met quand même l’URL ; si ça bloque, tu utilises le bouton "nouvel onglet".
-// swaggerFrame.src = `${API_BASE}/swagger-ui/index.html`;
-
-// btnOpenSwagger.addEventListener("click", () => {
-//   window.open(`${API_BASE}/swagger-ui/index.html`, "_blank");
-// });
-
-// ---------- SWAGGER (sans iframe) ----------
 const btnOpenSwagger = document.getElementById("btnOpenSwagger");
 const SWAGGER_URL = `${API_BASE}/swagger-ui/index.html`;
 
 if (btnOpenSwagger) {
   btnOpenSwagger.addEventListener("click", (e) => {
     e.preventDefault();
-
-    // ✅ méthode fiable : clique programmatique sur un <a>
     const a = document.createElement("a");
     a.href = SWAGGER_URL;
     a.target = "_blank";
@@ -73,7 +75,6 @@ if (btnOpenSwagger) {
     a.remove();
   });
 }
-
 
 // ---------- LOGS ----------
 const logsContainer = document.getElementById("logsContainer");
@@ -104,20 +105,21 @@ async function refreshLogs() {
   }
 }
 
-btnRefreshLogs.addEventListener("click", refreshLogs);
-logLineCountSelect.addEventListener("change", refreshLogs);
+btnRefreshLogs?.addEventListener("click", refreshLogs);
+logLineCountSelect?.addEventListener("change", refreshLogs);
 
 setInterval(() => {
-  if (autoRefreshLogsCheckbox.checked) refreshLogs();
+  if (autoRefreshLogsCheckbox?.checked) refreshLogs();
 }, 3000);
 
 // ---------- INFO ----------
-document.getElementById("apiBase").textContent = API_BASE;
+const apiBaseEl = document.getElementById("apiBase");
+if (apiBaseEl) apiBaseEl.textContent = API_BASE;
 
 const btnPing = document.getElementById("btnPing");
 const pingResult = document.getElementById("pingResult");
 
-btnPing.addEventListener("click", async () => {
+btnPing?.addEventListener("click", async () => {
   pingResult.textContent = "…";
   try {
     const res = await fetch(`${API_BASE}/admin/ping`, { credentials: "include" });
@@ -129,19 +131,18 @@ btnPing.addEventListener("click", async () => {
   }
 });
 
-// ---------- LOGOUT ----------
-document.getElementById("btnLogout").addEventListener("click", async () => {
-  try {
-    await fetch(`${API_BASE}/api/auth/logout`, {
-      method: "POST",
-      credentials: "include"
-    });
-  } catch (e) {
-    console.error(e);
-  }
-  // page login en 5500
-  window.location.href = `/admin-login.html`;
-});
+// ---------- LOGOUT (optionnel si tu remets un bouton dans la page) ----------
+const btnLogout = document.getElementById("btnLogout");
+if (btnLogout) {
+  btnLogout.addEventListener("click", async () => {
+    try {
+      await fetch(`${API_BASE}/api/auth/logout`, { method: "POST", credentials: "include" });
+    } catch (e) {
+      console.error(e);
+    }
+    window.location.href = `/admin-login.html`;
+  });
+}
 
 // =========================
 // DB CRUD
@@ -222,7 +223,7 @@ function renderDbTable() {
   }
 
   if (!dbFilteredData.length) {
-    dbTableBody.innerHTML = "<tr><td style='padding:8px;color:#9ca3af;'>Aucune donnée.</td></tr>";
+    dbTableBody.innerHTML = "<tr><td style='padding:10px;color:#9ca3af;'>Aucune donnée.</td></tr>";
     if (dbPagingInfo) dbPagingInfo.textContent = "Page 1 / 1";
     return;
   }
@@ -237,6 +238,7 @@ function renderDbTable() {
 
   const keys = Object.keys(pageData[0] || {});
   const headerRow = document.createElement("tr");
+
   keys.forEach(k => {
     const th = document.createElement("th");
     th.textContent = k;
@@ -272,7 +274,12 @@ function renderDbTable() {
       const btnEdit = document.createElement("button");
       btnEdit.className = "btn-mini btn-blue";
       btnEdit.textContent = "Modifier";
-      btnEdit.addEventListener("click", () => openDbModal("edit", row));
+      // btnEdit.addEventListener("click", () => openDbModal("edit", row));
+      btnEdit.addEventListener("click", () => {
+        console.log("EDIT CLICK", row);
+        openDbModal("edit", row);
+      });
+
 
       const btnDel = document.createElement("button");
       btnDel.className = "btn-mini btn-red";
@@ -304,17 +311,62 @@ async function loadDbData() {
   const url = DB_ENDPOINTS[dbCurrentResource];
   if (!url) return setDbStatus("Endpoint non configuré", true);
 
-  setDbStatus("Chargement...");
-  dbTableBody.innerHTML = "<tr><td style='padding:8px;color:#9ca3af;'>Chargement...</td></tr>";
+  setDbStatus(`Chargement: ${dbCurrentResource}...`);
+  dbTableBody.innerHTML =
+    "<tr><td style='padding:10px;color:#9ca3af;'>Chargement...</td></tr>";
 
-  const res = await fetch(url, { method: "GET", credentials: "include" });
-  if (!res.ok) return setDbStatus(`Erreur ${res.status}`, true);
+  try {
+    const res = await fetch(url, {
+      method: "GET",
+      credentials: "include",
+      cache: "no-store"
+    });
 
-  const data = await res.json();
-  dbRawData = Array.isArray(data) ? data : [];
-  setDbStatus(`${dbRawData.length} lignes`);
-  applyDbFilter();
+    const contentType = res.headers.get("content-type") || "";
+    const raw = await res.text();
+
+    // ✅ Debug console ultra utile
+    console.log("[DB] GET", url, "status =", res.status, "ctype =", contentType);
+    console.log("[DB] body =", raw);
+
+    if (!res.ok) {
+      // Affiche l'erreur dans l'UI
+      setDbStatus(`Erreur ${res.status} sur ${dbCurrentResource}`, true);
+      dbTableBody.innerHTML =
+        `<tr><td style="padding:10px;color:#f97373;">${raw || "Erreur inconnue"}</td></tr>`;
+      return;
+    }
+
+    // ✅ Parse JSON robuste
+    let data;
+    try {
+      data = JSON.parse(raw);
+    } catch {
+      setDbStatus("Réponse invalide (JSON attendu)", true);
+      dbTableBody.innerHTML =
+        `<tr><td style="padding:10px;color:#f97373;">Réponse non-JSON : ${raw.slice(0, 250)}</td></tr>`;
+      return;
+    }
+
+    if (!Array.isArray(data)) {
+      setDbStatus("Format inattendu (tableau attendu)", true);
+      dbTableBody.innerHTML =
+        `<tr><td style="padding:10px;color:#f97373;">${JSON.stringify(data).slice(0, 500)}</td></tr>`;
+      return;
+    }
+
+    dbRawData = data;
+    setDbStatus(`${dbRawData.length} lignes`);
+    applyDbFilter();
+
+  } catch (e) {
+    console.error("[DB] exception:", e);
+    setDbStatus("Erreur réseau / CORS / serveur", true);
+    dbTableBody.innerHTML =
+      `<tr><td style="padding:10px;color:#f97373;">${String(e)}</td></tr>`;
+  }
 }
+
 
 function openDbModal(mode, row) {
   if (READ_ONLY_RESOURCES.has(dbCurrentResource)) return alert("Lecture seule.");
@@ -413,7 +465,6 @@ dbModalCancel?.addEventListener("click", closeDbModal);
 dbModalSave?.addEventListener("click", saveDbModal);
 dbModalOverlay?.addEventListener("click", (e) => { if (e.target === dbModalOverlay) closeDbModal(); });
 
-
 // =========================
 // STATS
 // =========================
@@ -445,7 +496,6 @@ function renderStats() {
   statsFiltered.forEach(u => {
     const card = document.createElement("article");
     card.className = "stat-card";
-
     card.innerHTML = `
       <div class="stat-name">${(u.firstName || "")} ${(u.lastName || "")}</div>
       <div class="stat-email">${u.email || ""}</div>
@@ -481,9 +531,6 @@ async function loadStats() {
 btnLoadStats?.addEventListener("click", loadStats);
 statsSearch?.addEventListener("input", applyStatsFilter);
 
-
 // ---------- INIT ----------
 showSection("swagger");
-if (key === "db") loadDbData();
-if (key === "stats") loadStats();
-
+loadAdminUser();
