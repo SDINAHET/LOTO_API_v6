@@ -420,7 +420,7 @@ body{
 /* zone logs: style terminal */
 #logsContainer {
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
-  font-size: 12px;
+  font-size: 10px;
   line-height: 1.35;
   white-space: pre;       /* garde les retours */
   overflow: auto;
@@ -453,3 +453,107 @@ body{
 .log-badge.error { background: rgba(255, 123, 123, .15); color: #ff7b7b; }
 .log-badge.info  { background: rgba(139, 213, 255, .12); color: #8bd5ff; }
 .log-badge.debug { background: rgba(167, 255, 179, .10); color: #a7ffb3; }
+
+.session-expired {
+  color: #ff6b6b !important;
+  font-weight: 700;
+}
+
+#userChip.session-expired::after {
+  content: "⛔";
+  margin-left: 8px;
+  opacity: 0.9;
+}
+
+
+/* ===== Tickets modal (compact + boules) ===== */
+.modal-tickets{
+  width: min(980px, 96vw);
+}
+
+.tickets-wrap{
+  border: 1px solid rgba(255,255,255,.10);
+  border-radius: 14px;
+  background: rgba(2,6,23,.65);
+  overflow: auto;
+  max-height: 66vh;
+}
+
+/* Table plus compacte */
+.tickets-table{
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 860px;
+}
+.tickets-table th,
+.tickets-table td{
+  padding: 8px 10px;              /* ✅ compact */
+  border-bottom: 1px solid rgba(255,255,255,.06);
+  text-align: left;
+  vertical-align: middle;
+  font-size: .86rem;              /* ✅ compact */
+  line-height: 1.2;               /* ✅ compact */
+}
+.tickets-table th{
+  position: sticky;
+  top: 0;
+  background: rgba(255,255,255,.05);
+  color: rgba(255,255,255,.75);
+  font-size: .80rem;
+  letter-spacing: .02em;
+  z-index: 1;
+}
+
+/* LAYOUT boules */
+.ball-row{
+  display:flex;
+  flex-wrap:wrap;
+  gap:6px;
+  align-items:center;
+}
+
+/* ✅ Boules très visibles */
+.ball{
+  width: 28px;
+  height: 28px;
+  border-radius: 999px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  font-weight: 900;
+  font-size: .82rem;
+  user-select:none;
+
+  /* contraste + bord */
+  border: 1px solid rgba(255,255,255,.22);
+  background: rgba(255,255,255,.10);
+  box-shadow: 0 8px 18px rgba(0,0,0,.25);
+}
+
+/* Bleu = numéros */
+.ball.blue{
+  background: rgba(59,130,246,.28);
+  border-color: rgba(59,130,246,.50);
+}
+
+/* Rouge = chance */
+.ball.red{
+  background: rgba(239,68,68,.28);
+  border-color: rgba(239,68,68,.50);
+}
+
+/* Bouton voir tickets (cellule users.tickets) */
+.tickets-open{
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  padding: 7px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(255,255,255,.14);
+  background: rgba(255,255,255,.06);
+  color: var(--text);
+  cursor: pointer;
+  font-weight: 900;
+  font-size: .82rem;
+}
+.tickets-open:hover{ background: rgba(255,255,255,.08); }

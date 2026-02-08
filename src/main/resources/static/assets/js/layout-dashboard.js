@@ -1,37 +1,37 @@
-/* layout-dashboard.js
+/* layout-dashboard.js (ADMIN CRUD FIX)
    - Injecte topbar
    - Burger pilote la sidebar (#sidebar + .is-open + #sidebarOverlay)
    - Logout
-   - ✅ apiFetch() : credentials + CSRF header auto
-   - ✅ debugAuth() : diagnostique cookies/JWT/401 logs
+   - ✅ apiFetch() : credentials + CSRF auto + merge headers
+   - ✅ prewarmCsrf() : force Spring à poser XSRF-TOKEN (si CookieCsrfTokenRepository)
+   - ✅ debugAuth() + debugPutUser() : diagnostics 401/403 CRUD
 */
 (function () {
   "use strict";
 
-  // const HOST = window.location.hostname;
-  // const IS_LOCAL = (HOST === "localhost" || HOST === "127.0.0.1");
-
-  // // ✅ IMPORTANT : API locale forcée sur localhost pour matcher les cookies
-  // const API_BASE = IS_LOCAL
-  //   ? `${window.location.protocol}//${window.location.hostname}:8082`
-  //   : "https://stephanedinahet.fr";
-
+  // ----------------------------
+  // API_BASE (robuste)
+  // ----------------------------
   const HOST = window.location.hostname;
+
+  // Prod si domaine principal OU sous-domaine
   const IS_PROD =
     HOST === "stephanedinahet.fr" ||
-    HOST === "www.stephanedinahet.fr";
+    HOST === "www.stephanedinahet.fr" ||
+    HOST.endsWith(".stephanedinahet.fr");
 
-  // si tu es en local (localhost, 127.0.0.1, 192.168.x.x, etc.)
-  // l’API est sur le même host mais port 8082
+  // ✅ En prod: API via reverse-proxy sur le domaine principal
+  // ✅ En local/réseau: API sur même host mais port 8082
   const API_BASE = IS_PROD
     ? "https://stephanedinahet.fr"
     : `${window.location.protocol}//${HOST}:8082`;
 
-
-
   const USERINFO_PATH = "/api/protected/userinfo";
   const LOGOUT_PATH = "/api/auth/logout";
 
+  // ----------------------------
+  // Styles topbar
+  // ----------------------------
   function ensureLayoutStyles() {
     if (document.getElementById("layoutDashboardStyles")) return;
 
@@ -135,6 +135,8 @@
         transition: transform .15s ease, background .15s ease;
       }
       #logoutBtn:hover{ transform: translateY(-1px); background: rgba(239,68,68,.2); }
+
+      .session-expired { opacity: .75; }
     `;
     document.head.appendChild(style);
   }
@@ -168,42 +170,88 @@
     `;
   }
 
+  // ----------------------------
+  // Cookies + CSRF helpers
+  // ----------------------------
   function getCookie(name) {
     const m = document.cookie.match(new RegExp("(^|;\\s*)" + name + "=([^;]+)"));
     return m ? decodeURIComponent(m[2]) : null;
   }
 
-  // ✅ CSRF token (Spring CookieCsrfTokenRepository -> cookie "XSRF-TOKEN")
+  // Spring CookieCsrfTokenRepository => cookie "XSRF-TOKEN" (NON HttpOnly)
   function getCsrfToken() {
     return getCookie("XSRF-TOKEN");
   }
 
-  // ✅ Wrapper fetch global: credentials + CSRF header auto
+  function isMutating(method) {
+    const m = String(method || "GET").toUpperCase();
+    return m !== "GET" && m !== "HEAD" && m !== "OPTIONS";
+  }
+
+  // ----------------------------
+  // ✅ apiFetch robuste (cookies + CSRF + merge headers)
+  // ----------------------------
   async function apiFetch(path, options = {}) {
     const url = path.startsWith("http") ? path : `${API_BASE}${path}`;
-    const method = (options.method || "GET").toUpperCase();
+    const method = String(options.method || "GET").toUpperCase();
 
-    const headers = new Headers(options.headers || {});
-    if (!headers.has("Accept")) headers.set("Accept", "application/json");
+    // base headers
+    const baseHeaders = new Headers();
+    baseHeaders.set("X-Requested-With", "XMLHttpRequest"); // utile Spring / proxies
 
-    // Ajoute CSRF sur méthodes mutantes
-    if (method !== "GET" && method !== "HEAD" && method !== "OPTIONS") {
+    // merge headers utilisateur
+    const userHeaders = new Headers(options.headers || {});
+    userHeaders.forEach((v, k) => baseHeaders.set(k, v));
+
+    // Accept par défaut si pas défini par l'appelant
+    if (!baseHeaders.has("Accept")) baseHeaders.set("Accept", "application/json");
+
+    // CSRF sur méthodes mutantes
+    if (isMutating(method)) {
       const token = getCsrfToken();
-      if (token) headers.set("X-XSRF-TOKEN", token);
+      if (token) {
+        baseHeaders.set("X-XSRF-TOKEN", token); // standard XSRF cookie
+        baseHeaders.set("X-CSRF-TOKEN", token); // fallback selon configs
+      }
     }
 
-    return fetch(url, {
+    const res = await fetch(url, {
       ...options,
       method,
-      headers,
+      headers: baseHeaders,
       credentials: "include",
       cache: "no-store",
+      mode: "cors",
     });
+
+    // log utile si 401/403 sur PUT/POST
+    if (res.status === 401 || res.status === 403) {
+      console.warn("[apiFetch] AUTH ERROR", {
+        status: res.status,
+        url,
+        method,
+        hasXsrfCookieVisibleToJs: !!getCsrfToken(),
+        host: HOST,
+        apiBase: API_BASE,
+      });
+    }
+
+    return res;
   }
 
   // Expose global (admin-dashboard.js l’utilise)
   window.API_BASE = API_BASE;
   window.apiFetch = apiFetch;
+
+  // ----------------------------
+  // Pré-chauffage CSRF
+  // (Important pour que Spring pose le cookie XSRF-TOKEN)
+  // ----------------------------
+  async function prewarmCsrf() {
+    try {
+      await apiFetch(USERINFO_PATH, { method: "GET" });
+    } catch {}
+  }
 
   async function fetchUserInfo() {
     const res = await apiFetch(USERINFO_PATH, { method: "GET" });
@@ -211,6 +259,9 @@
     return res.json();
   }
 
+  // ----------------------------
+  // Burger
+  // ----------------------------
   function bindBurger() {
     const burger = document.getElementById("burgerBtn");
     const sidebar = document.getElementById("sidebar");
@@ -237,6 +288,9 @@
     });
   }
 
+  // ----------------------------
+  // Auth UI + Logout
+  // ----------------------------
   async function bindAuthUI() {
     const userChip = document.getElementById("userChip");
     const userEmail = document.getElementById("userEmail");
@@ -249,10 +303,9 @@
       userEmail.textContent = label;
       userChip.style.display = "inline-flex";
     } catch {
-      // userChip.style.display = "none";
-      // Affiche un état "Session expirée" au lieu de masquer
       userEmail.textContent = "Session expirée";
       userChip.style.display = "inline-flex";
+      userChip.classList.add("session-expired");
     }
 
     logoutBtn.addEventListener("click", async () => {
@@ -263,45 +316,89 @@
     });
   }
 
-  // ✅ DEBUG : lance ça depuis la console si logs 401
+  // ----------------------------
+  // Debug helpers
+  // ----------------------------
   window.debugAuth = async function debugAuth() {
     console.log("=== DEBUG AUTH ===");
     console.log("HOST:", HOST);
     console.log("API_BASE:", API_BASE);
     console.log("document.cookie (visible JS):", document.cookie || "(vide)");
+    console.log("XSRF-TOKEN visible JS:", !!getCsrfToken());
 
-    // ping public
+    // ping
     try {
-      const ping = await apiFetch("/admin/ping", { method: "GET", headers: { Accept: "application/json" } });
-      console.log("PING /admin/ping:", ping.status, await ping.text());
+      const ping = await apiFetch("/admin/ping", {
+        method: "GET",
+        headers: { Accept: "text/plain" },
+      });
+      console.log("GET /admin/ping:", ping.status, await ping.text());
     } catch (e) {
       console.log("PING error:", e);
     }
 
-    // userinfo (protégé)
+    // userinfo
     try {
-      const u = await apiFetch("/api/protected/userinfo", { method: "GET", headers: { Accept: "application/json" } });
+      const u = await apiFetch("/api/protected/userinfo", {
+        method: "GET",
+        headers: { Accept: "application/json" },
+      });
       console.log("GET /api/protected/userinfo:", u.status, await u.text());
     } catch (e) {
       console.log("userinfo error:", e);
     }
 
-    // logs (protégé admin)
+    // admin users
     try {
-      const l = await apiFetch("/api/admin/logs?lines=50", { method: "GET", headers: { Accept: "text/plain" } });
-      console.log("GET /api/admin/logs:", l.status, await l.text());
+      const r = await apiFetch("/api/admin/users", {
+        method: "GET",
+        headers: { Accept: "application/json" },
+      });
+      console.log("GET /api/admin/users:", r.status, (await r.text()).slice(0, 500));
     } catch (e) {
-      console.log("logs error:", e);
+      console.log("admin users error:", e);
     }
 
     console.log("=== END DEBUG AUTH ===");
   };
 
+  // Test PUT (remplace id + payload si besoin)
+  window.debugPutUser = async function debugPutUser(id, payload) {
+    console.log("=== DEBUG PUT USER ===");
+    console.log("XSRF-TOKEN visible JS:", !!getCsrfToken(), "value:", getCsrfToken());
+
+    const body = payload || { firstName: "Test", lastName: "Admin", email: "test@exemple.com", role: "ROLE_USER", admin: false };
+
+    try {
+      const res = await apiFetch(`/api/admin/users/${encodeURIComponent(id)}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json", Accept: "application/json" },
+        body: JSON.stringify(body),
+      });
+      const txt = await res.text().catch(() => "");
+      console.log("PUT status:", res.status);
+      console.log("PUT body:", txt);
+      console.log("=== END DEBUG PUT USER ===");
+      return { status: res.status, body: txt };
+    } catch (e) {
+      console.error("PUT error:", e);
+      console.log("=== END DEBUG PUT USER ===");
+      return { error: String(e) };
+    }
+  };
+
+  // ----------------------------
   // INIT
+  // ----------------------------
   ensureLayoutStyles();
+
   const headerSlot = document.getElementById("appHeader");
   if (headerSlot) headerSlot.innerHTML = renderHeader();
 
   bindBurger();
-  bindAuthUI();
+
+  // ✅ Important: pré-chauffe CSRF AVANT bindAuthUI + avant tes PUT/POST/DELETE
+  prewarmCsrf().finally(() => {
+    bindAuthUI();
+  });
 })();

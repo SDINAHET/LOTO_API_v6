@@ -209,6 +209,39 @@
           </div>
         </section>
 
+        <!-- TICKETS MODAL -->
+        <div id="ticketsOverlay" class="modal-overlay" aria-hidden="true">
+          <div class="modal modal-tickets" role="dialog" aria-modal="true" aria-labelledby="ticketsTitle">
+            <div class="row" style="justify-content:space-between; align-items:center;">
+              <h2 id="ticketsTitle" class="h2" style="margin:0;">Tickets</h2>
+              <!-- <button id="ticketsClose" type="button" class="btn btn-ghost">Fermer</button> -->
+              <div class="row" style="gap:8px;">
+                <button id="ticketsCopy" type="button" class="btn btn-ghost">Copier</button>
+                <button id="ticketsClose" type="button" class="btn btn-ghost">Fermer</button>
+              </div>
+            </div>
+
+            <div id="ticketsMeta" class="muted small" style="margin:8px 0 10px;"></div>
+
+            <div class="tickets-wrap">
+              <table class="tickets-table">
+                <thead>
+                  <tr>
+                    <th>Grille</th>
+                    <th>Chance</th>
+                    <th>Date</th>
+                    <th>Jour</th>
+                    <th>Créé</th>
+                    <th>Modifié</th>
+                  </tr>
+                </thead>
+                <tbody id="ticketsBody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+
         <!-- STATS -->
         <section id="section-stats" class="panel">
           <div class="card">

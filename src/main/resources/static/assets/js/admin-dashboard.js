@@ -8,6 +8,33 @@
 (() => {
   "use strict";
 
+  function setSessionExpiredUI() {
+    const userEmail = document.getElementById("userEmail");
+    const userChip = document.getElementById("userChip");
+    const logoutBtn = document.getElementById("btnLogout") || document.getElementById("logoutBtn");
+
+    if (userEmail) {
+      userEmail.textContent = "Session expirée";
+      userEmail.classList.add("session-expired");
+    }
+    if (userChip) {
+      userChip.style.display = "inline-flex";
+      userChip.classList.add("session-expired");
+    }
+
+    if (logoutBtn) {
+      logoutBtn.disabled = true;
+      logoutBtn.style.opacity = "0.5";
+      logoutBtn.style.cursor = "not-allowed";
+      logoutBtn.title = "Vous n'êtes plus connecté";
+    }
+
+    // Optionnel : affiche un message dans la console et redirige
+    console.warn("[ADMIN] Session expirée (401/403).");
+    // window.location.href = "/admin-login.html"; // ✅ si tu veux rediriger direct
+  }
+
+
   // ----------------------------
   // BOOTSTRAP (API_BASE + apiFetch)
   // ----------------------------
@@ -26,22 +53,56 @@
   // ----------------------------
   // USER CHIP (topbar)
   // ----------------------------
+  // async function loadAdminUser() {
+  //   try {
+  //     const res = await apiFetch("/api/protected/userinfo", { method: "GET" });
+  //     if (!res.ok) return;
+
+  //     const data = await res.json();
+  //     const label = data.username || data.email || "Administrateur";
+
+  //     const userEmail = document.getElementById("userEmail");
+  //     const userChip = document.getElementById("userChip");
+  //     if (userEmail) userEmail.textContent = label;
+  //     if (userChip) userChip.style.display = "inline-flex";
+  //   } catch (e) {
+  //     console.warn("Impossible de charger l'utilisateur admin", e);
+  //   }
+  // }
   async function loadAdminUser() {
+    const userEmail = document.getElementById("userEmail");
+    const userChip = document.getElementById("userChip");
+
     try {
       const res = await apiFetch("/api/protected/userinfo", { method: "GET" });
-      if (!res.ok) return;
+
+      // ✅ Si pas connecté / token expiré
+      if (res.status === 401 || res.status === 403) {
+        setSessionExpiredUI();
+        showToast("Session expirée", "error");
+        return;
+      }
+
+      if (!res.ok) {
+        // autre erreur (500 etc.)
+        if (userEmail) userEmail.textContent = "Admin";
+        if (userChip) userChip.style.display = "inline-flex";
+        return;
+      }
 
       const data = await res.json();
       const label = data.username || data.email || "Administrateur";
 
-      const userEmail = document.getElementById("userEmail");
-      const userChip = document.getElementById("userChip");
       if (userEmail) userEmail.textContent = label;
       if (userChip) userChip.style.display = "inline-flex";
     } catch (e) {
       console.warn("Impossible de charger l'utilisateur admin", e);
+      // En cas d'erreur réseau, tu peux afficher un état neutre
+      if (userEmail) userEmail.textContent = "Admin";
+      if (userChip) userChip.style.display = "inline-flex";
     }
   }
+
 
   // ----------------------------
   // NAV
@@ -178,6 +239,10 @@ async function refreshLogs() {
       headers: { Accept: "text/plain" }, // ✅ évite les 406 / "No acceptable"
     });
 
+    if (res.status === 401 || res.status === 403) {
+      setSessionExpiredUI();
+    }
+
     const text = await res.text().catch(() => "");
 
     if (!res.ok) {
@@ -198,9 +263,13 @@ async function refreshLogs() {
     }
 
     // ✅ auto-scroll (NE PAS écraser innerHTML)
+    // if (autoScrollLogsCheckbox?.checked) {
+    //   logsContainer.scrollTop = logsContainer.scrollHeight;
+    // }
     if (autoScrollLogsCheckbox?.checked) {
       logsContainer.scrollTop = logsContainer.scrollHeight;
     }
+
   } catch (e) {
     console.error(e);
     logsContainer.innerHTML = colorizeLogText("[ERREUR] Impossible de charger les logs.");
@@ -445,6 +514,10 @@ async function refreshLogs() {
     const pageData = dbFilteredData.slice(start, end);
 
     const keys = Object.keys(pageData[0] || {});
+
+    // =========================
+    // HEADER (th uniquement)
+    // =========================
     const headerRow = document.createElement("tr");
 
     keys.forEach((k) => {
@@ -460,24 +533,52 @@ async function refreshLogs() {
       th.className = "th";
       headerRow.appendChild(th);
     }
+
     dbTableHead.appendChild(headerRow);
 
+    // =========================
+    // BODY (row & tr existent ici)
+    // =========================
     pageData.forEach((row) => {
       const tr = document.createElement("tr");
       tr.className = "tr";
 
       keys.forEach((k) => {
         const td = document.createElement("td");
-        td.textContent = safeCellValue(k, row[k]);
         td.className = "td";
 
+        // ✅ cas spécial users.tickets => bouton + modal
+        if (dbCurrentResource === "users" && k === "tickets") {
+          const tickets = safeJsonParse(row[k]);
+          const list = Array.isArray(tickets) ? tickets : [];
+          lastTicketsForCopy = list;
+          lastTicketsUserEmail = userEmail || "";
+          const count = list.length;
+
+          const btn = document.createElement("button");
+          btn.type = "button";
+          btn.className = "tickets-open";
+          btn.textContent = count ? `Voir (${count})` : "Voir";
+
+          btn.addEventListener("click", () => {
+            openTicketsModal(list, row.email || "");
+          });
+
+          td.appendChild(btn);
+        } else {
+          td.textContent = safeCellValue(k, row[k]);
+        }
+
+        // ✅ affichage tronqué pour id/_id
         if (k === "id" || k === "_id") {
           td.classList.add("td-id");
           td.title = row[k] ? String(row[k]) : "";
         }
+
         tr.appendChild(td);
       });
 
+      // Actions (edit/delete)
       if (!isReadOnly) {
         const td = document.createElement("td");
         td.className = "td td-actions";
@@ -744,6 +845,173 @@ async function refreshLogs() {
   dbModalOverlay?.addEventListener("click", (e) => {
     if (e.target === dbModalOverlay) closeDbModal();
   });
+
+
+
+  // ---------- Tickets modal helpers ----------
+  const ticketsOverlay = document.getElementById("ticketsOverlay");
+  const ticketsClose = document.getElementById("ticketsClose");
+  const ticketsCopy = document.getElementById("ticketsCopy");
+  let lastTicketsForCopy = [];
+  let lastTicketsUserEmail = "";
+  const ticketsBody = document.getElementById("ticketsBody");
+  const ticketsTitle = document.getElementById("ticketsTitle");
+  const ticketsMeta = document.getElementById("ticketsMeta");
+
+  function safeJsonParse(v) {
+    if (v === null || v === undefined) return null;
+    if (Array.isArray(v)) return v;
+    if (typeof v === "object") return v; // déjà objet
+    const s = String(v).trim();
+    if (!s) return null;
+    try { return JSON.parse(s); } catch { return null; }
+  }
+
+  function fmtDateTime(x) {
+    if (!x) return "—";
+    const d = new Date(x);
+    if (Number.isNaN(d.getTime())) return String(x);
+    return d.toLocaleString("fr-FR");
+  }
+
+  function renderBalls(numbers) {
+    const wrap = document.createElement("div");
+    wrap.className = "ball-row";
+    const arr = String(numbers || "")
+      .split("-")
+      .map((n) => n.trim())
+      .filter(Boolean);
+
+    if (!arr.length) {
+      wrap.textContent = "—";
+      return wrap;
+    }
+
+    arr.forEach((n) => {
+      const s = document.createElement("span");
+      s.className = "ball blue";
+      s.textContent = n;
+      wrap.appendChild(s);
+    });
+    return wrap;
+  }
+
+  function openTicketsModal(tickets, userEmail) {
+    if (!ticketsOverlay || !ticketsBody || !ticketsTitle) return;
+
+    const list = Array.isArray(tickets) ? tickets : [];
+    ticketsTitle.textContent = "Tickets";
+    if (ticketsMeta) {
+      ticketsMeta.textContent = `${list.length} ticket(s)` + (userEmail ? ` • ${userEmail}` : "");
+    }
+
+    ticketsBody.innerHTML = "";
+
+    if (!list.length) {
+      ticketsBody.innerHTML = `<tr><td colspan="6" class="muted" style="padding:12px;">Aucun ticket.</td></tr>`;
+    } else {
+      list.forEach((t) => {
+        const tr = document.createElement("tr");
+
+        const tdNumbers = document.createElement("td");
+        tdNumbers.appendChild(renderBalls(t.numbers));  // ✅ boules bleues
+
+        const tdChance = document.createElement("td");
+        const c = document.createElement("span");
+        c.className = "ball red";
+        c.textContent = (t.chanceNumber ?? "—");        // ✅ rouge
+        tdChance.appendChild(c);
+
+
+        const tdDate = document.createElement("td");
+        tdDate.textContent = t.drawDate || "—";
+
+        const tdDay = document.createElement("td");
+        tdDay.textContent = t.drawDay || "—";
+
+        const tdCreated = document.createElement("td");
+        tdCreated.textContent = fmtDateTime(t.createdAt);
+
+        const tdUpdated = document.createElement("td");
+        tdUpdated.textContent = fmtDateTime(t.updatedAt);
+
+        tr.append(tdNumbers, tdChance, tdDate, tdDay, tdCreated, tdUpdated);
+        ticketsBody.appendChild(tr);
+      });
+    }
+
+    ticketsOverlay.style.display = "flex";
+    ticketsOverlay.setAttribute("aria-hidden", "false");
+  }
+
+  function closeTicketsModal() {
+    if (!ticketsOverlay) return;
+    ticketsOverlay.style.display = "none";
+    ticketsOverlay.setAttribute("aria-hidden", "true");
+    if (ticketsBody) ticketsBody.innerHTML = "";
+  }
+
+  ticketsClose?.addEventListener("click", closeTicketsModal);
+  ticketsOverlay?.addEventListener("click", (e) => {
+    if (e.target === ticketsOverlay) closeTicketsModal();
+  });
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") closeTicketsModal();
+  });
+
+
+  function buildTicketsText(list, email) {
+  const lines = [];
+  if (email) lines.push(`Tickets — ${email}`);
+  lines.push(`Total: ${list.length}`);
+  lines.push("");
+
+  // format 1 ligne par ticket
+  list.forEach((t, idx) => {
+    const nums = t.numbers ? String(t.numbers) : "—";
+    const chance = (t.chanceNumber ?? "—");
+    const date = t.drawDate || "—";
+    const day = t.drawDay || "—";
+    const created = fmtDateTime(t.createdAt);
+    const updated = fmtDateTime(t.updatedAt);
+
+    lines.push(
+      `${String(idx + 1).padStart(2, "0")}. ${nums} | Chance:${chance} | ${date} (${day}) | C:${created} | U:${updated}`
+    );
+  });
+
+  return lines.join("\n");
+}
+
+  async function copyToClipboard(text) {
+    try {
+      await navigator.clipboard.writeText(text);
+      return true;
+    } catch {
+      // fallback
+      try {
+        const ta = document.createElement("textarea");
+        ta.value = text;
+        ta.style.position = "fixed";
+        ta.style.left = "-9999px";
+        document.body.appendChild(ta);
+        ta.select();
+        const ok = document.execCommand("copy");
+        ta.remove();
+        return ok;
+      } catch {
+        return false;
+      }
+    }
+  }
+
+  ticketsCopy?.addEventListener("click", async () => {
+    const txt = buildTicketsText(lastTicketsForCopy || [], lastTicketsUserEmail || "");
+    const ok = await copyToClipboard(txt);
+    showToast(ok ? "Tickets copiés ✅" : "Copie impossible ❌", ok ? "success" : "error");
+  });
+
+
 
   // ----------------------------
   // STATS
