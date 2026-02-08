@@ -310,6 +310,8 @@ public class SecurityConfig {
         //     "http://127.0.0.1:*",
             // "http://192.168.*.*:*",
         configuration.setAllowedOrigins(List.of(
+             "http://localhost:*",
+            "http://127.0.0.1:*",
             "http://localhost:8082",
             "http://127.0.0.1:5500", //live server
             "https://stephanedinahet.fr",
