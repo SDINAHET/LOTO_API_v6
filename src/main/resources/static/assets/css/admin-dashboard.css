@@ -415,3 +415,41 @@ body{
 @media (prefers-reduced-motion: reduce){
   .sidebar{ transition:none; }
 }
+
+
+/* zone logs: style terminal */
+#logsContainer {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+  font-size: 12px;
+  line-height: 1.35;
+  white-space: pre;       /* garde les retours */
+  overflow: auto;
+}
+
+/* niveaux */
+.log-trace, .log-debug { opacity: .85; }
+.log-info  { color: #8bd5ff; }   /* bleu clair */
+.log-warn  { color: #ffd479; }   /* jaune */
+.log-error { color: #ff7b7b; }   /* rouge */
+.log-fatal { color: #ff4dff; font-weight: 700; }
+
+/* thread / class */
+.log-thread { color: #a7ffb3; }  /* vert clair */
+.log-class  { color: #c5b3ff; }  /* violet */
+
+/* timestamp */
+.log-time { color: #9aa4b2; }
+
+/* un peu de mise en évidence */
+.log-badge {
+  display: inline-block;
+  padding: 0 6px;
+  border-radius: 6px;
+  margin-right: 6px;
+  font-weight: 700;
+}
+
+.log-badge.warn  { background: rgba(255, 212, 121, .15); color: #ffd479; }
+.log-badge.error { background: rgba(255, 123, 123, .15); color: #ff7b7b; }
+.log-badge.info  { background: rgba(139, 213, 255, .12); color: #8bd5ff; }
+.log-badge.debug { background: rgba(167, 255, 179, .10); color: #a7ffb3; }

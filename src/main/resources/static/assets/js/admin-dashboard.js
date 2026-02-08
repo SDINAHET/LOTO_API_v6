@@ -95,6 +95,60 @@
     window.open(SWAGGER_URL, "_blank", "noopener,noreferrer");
   });
 
+
+// ----------------------------
+// LOG COLORIZER (safe HTML)
+// ----------------------------
+function escapeHtml(str) {
+  return String(str)
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
+}
+
+function classifyLine(line) {
+  if (line.includes(" ERROR ")) return "error";
+  if (line.includes(" WARN ")) return "warn";
+  if (line.includes(" INFO ")) return "info";
+  if (line.includes(" DEBUG ")) return "debug";
+  if (line.includes(" TRACE ")) return "trace";
+  return "";
+}
+
+function colorizeLogText(raw) {
+  const lines = String(raw || "").split("\n");
+
+  return lines
+    .map((line) => {
+      const safe = escapeHtml(line);
+      const level = classifyLine(line);
+
+      // timestamp au début
+      const timeMatch = safe.match(/^(\d{4}-\d{2}-\d{2}\s+\d{2}:\d{2}:\d{2})\s+/);
+      let out = safe;
+
+      if (timeMatch) {
+        out = out.replace(
+          timeMatch[1],
+          `<span class="log-time">${timeMatch[1]}</span>`
+        );
+      }
+
+      // badge niveau
+      let badge = "";
+      if (level) {
+        badge = `<span class="log-badge ${level}">${level.toUpperCase()}</span>`;
+      }
+
+      return level
+        ? `${badge}<span class="log-${level}">${out}</span>`
+        : out;
+    })
+    .join("\n");
+}
+
 // ----------------------------
 // LOGS
 // ----------------------------
@@ -116,14 +170,20 @@ async function refreshLogs() {
   if (!logsContainer) return;
 
   const lines = getSelectedLines();
-  const path = `/api/admin/logs?lines=${encodeURIComponent(lines)}`; // ✅ IMPORTANT
+  const path = `/api/admin/logs?lines=${encodeURIComponent(lines)}`;
 
   try {
-    const res = await apiFetch(path, { method: "GET" });
+    const res = await apiFetch(path, {
+      method: "GET",
+      headers: { Accept: "text/plain" }, // ✅ évite les 406 / "No acceptable"
+    });
+
     const text = await res.text().catch(() => "");
 
     if (!res.ok) {
-      logsContainer.textContent = `[${res.status}] ${text || "Erreur logs"}`;
+      logsContainer.innerHTML = colorizeLogText(
+        `[${res.status}] ${text || "Erreur logs"}`
+      );
       if (logsLastRefresh) {
         logsLastRefresh.textContent =
           "Échec : " + new Date().toLocaleTimeString("fr-FR");
@@ -131,31 +191,25 @@ async function refreshLogs() {
       return;
     }
 
-    logsContainer.textContent = text || "(Aucun log pour le moment)";
+    logsContainer.innerHTML = colorizeLogText(text || "(Aucun log pour le moment)");
     if (logsLastRefresh) {
       logsLastRefresh.textContent =
         "Dernier refresh : " + new Date().toLocaleTimeString("fr-FR");
     }
 
+    // ✅ auto-scroll (NE PAS écraser innerHTML)
     if (autoScrollLogsCheckbox?.checked) {
       logsContainer.scrollTop = logsContainer.scrollHeight;
     }
   } catch (e) {
     console.error(e);
-    logsContainer.textContent = "[ERREUR] Impossible de charger les logs.";
+    logsContainer.innerHTML = colorizeLogText("[ERREUR] Impossible de charger les logs.");
     if (logsLastRefresh) {
       logsLastRefresh.textContent =
         "Échec : " + new Date().toLocaleTimeString("fr-FR");
     }
   }
 }
-
-btnRefreshLogs?.addEventListener("click", refreshLogs);
-logLineCountSelect?.addEventListener("change", refreshLogs);
-
-setInterval(() => {
-  if (autoRefreshLogsCheckbox?.checked) refreshLogs();
-}, 3000);
 
 
   btnRefreshLogs?.addEventListener("click", refreshLogs);
@@ -766,6 +820,55 @@ setInterval(() => {
 
   btnLoadStats?.addEventListener("click", loadStats);
   statsSearch?.addEventListener("input", applyStatsFilter);
+
+  function escapeHtml(str) {
+  return str
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
+}
+
+function classifyLine(line) {
+  // simple heuristique: on détecte INFO/WARN/ERROR/DEBUG/TRACE
+  if (line.includes(" ERROR ")) return "error";
+  if (line.includes(" WARN "))  return "warn";
+  if (line.includes(" INFO "))  return "info";
+  if (line.includes(" DEBUG ")) return "debug";
+  if (line.includes(" TRACE ")) return "trace";
+  return "";
+}
+
+
+function colorizeLogText(raw) {
+  const lines = raw.split("\n");
+
+  return lines.map((line) => {
+    const safe = escapeHtml(line);
+    const level = classifyLine(line);
+
+    // option: extraire timestamp (début de ligne "YYYY-MM-DD HH:mm:ss")
+    const timeMatch = safe.match(/^(\d{4}-\d{2}-\d{2}\s+\d{2}:\d{2}:\d{2})\s+/);
+    let out = safe;
+
+    if (timeMatch) {
+      out = out.replace(timeMatch[1], `<span class="log-time">${timeMatch[1]}</span>`);
+    }
+
+    // badge niveau
+    let badge = "";
+    if (level) {
+      badge = `<span class="log-badge ${level}">${level.toUpperCase()}</span>`;
+    }
+
+    // couleur du reste
+    if (level) {
+      return `${badge}<span class="log-${level}">${out}</span>`;
+    }
+    return out;
+  }).join("\n");
+}
 
   // ----------------------------
   // INIT
