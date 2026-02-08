@@ -116,6 +116,7 @@ public class SecurityConfig {
                     // ✅ CSRF token dans un cookie "XSRF-TOKEN" lisible par le front
                     .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
                     .csrfTokenRequestHandler(requestHandler)
+                    .ignoringRequestMatchers("/api/**")
 
                     // ✅ évite de casser login/register au début
                     // (tu peux ensuite décider de les protéger aussi, mais d’abord: stable)
@@ -125,7 +126,9 @@ public class SecurityConfig {
                         "/api/auth/logout",   // ✅ AJOUTE ÇA
                         "/api/auth/login3",
                         "/api/auth/register",
+                        "/api/admin/logs",
                         // "/api/auth/login4",
+                        // "/admin/**",
                         "/api/health",
                         "/api/hello",
                         "/swagger-ui/**",
@@ -167,10 +170,16 @@ public class SecurityConfig {
 
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(PathRequest.toStaticResources().atCommonLocations()).permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/admin/logs").hasRole("ADMIN")
+                        // .requestMatchers(HttpMethod.GET, "/admin/logs").permitAll()
+                        // .requestMatchers(HttpMethod.GET, "/api/admin/logs").permitAll()
+                        // .requestMatchers("/api/admin/logs").permitAll()
                         .requestMatchers("/admin-login", "/admin-login.html").permitAll()
                         // =====================
                         // 🔓 PUBLIC ENDPOINTS
                         // =====================
+                        .requestMatchers("/admin/ping").hasRole("ADMIN")
+                        // .requestMatchers("/admin/ping").permitAll()
                         .requestMatchers("/actuator/health").permitAll()
                         .requestMatchers(
                             "/api/health",
@@ -211,7 +220,7 @@ public class SecurityConfig {
                             "/assets/**",
                             "/favicon-admin.ico"
                         ).permitAll()
-                        .requestMatchers("/admin/**").hasRole("ADMIN")
+                        // .requestMatchers("/admin/**").hasRole("ADMIN")
 
 
 
@@ -301,8 +310,10 @@ public class SecurityConfig {
         //     "http://127.0.0.1:*",
             // "http://192.168.*.*:*",
         configuration.setAllowedOrigins(List.of(
+            "http://localhost:8082",
             "http://127.0.0.1:5500", //live server
             "https://stephanedinahet.fr",
+            "http://192.168.*.*:*",
             // "http://localhost:8082", // add sd
 	        "http://localhost:5500", // add sd
             "https://www.stephanedinahet.fr", // add sd
@@ -321,7 +332,7 @@ public class SecurityConfig {
 
         // configuration.setAllowedHeaders(List.of("*"));
         // configuration.setAllowedHeaders(List.of("Content-Type","Authorization","X-Requested-With"));
-	configuration.setAllowCredentials(true); // Important pour cookies JWT
+	    configuration.setAllowCredentials(true); // Important pour cookies JWT
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
