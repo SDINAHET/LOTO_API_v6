@@ -328,7 +328,7 @@
 
     // ping
     try {
-      const ping = await apiFetch("/admin/ping", {
+      const ping = await apiFetch("/api/admin/ping", {
         method: "GET",
         headers: { Accept: "text/plain" },
       });

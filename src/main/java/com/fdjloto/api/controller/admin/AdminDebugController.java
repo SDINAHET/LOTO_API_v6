@@ -15,7 +15,8 @@ import java.util.Map;
 @RestController
 public class AdminDebugController {
 
-    @GetMapping("/admin/ping")
+    // @GetMapping("/admin/ping")
+    @GetMapping("/api/admin/ping")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Map<String, Object>> ping(
             @CookieValue(name = "jwtToken", required = false) String jwtCookie,

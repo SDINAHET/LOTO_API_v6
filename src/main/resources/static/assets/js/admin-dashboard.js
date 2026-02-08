@@ -301,7 +301,7 @@ async function refreshLogs() {
     if (pingResult) pingResult.textContent = "…";
 
     try {
-      const res = await apiFetch("/admin/ping", { method: "GET" });
+      const res = await apiFetch("/api/admin/ping", { method: "GET" });
 
       let txt = "";
       try {
