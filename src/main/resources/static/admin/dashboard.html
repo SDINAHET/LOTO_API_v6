@@ -207,7 +207,18 @@
             <div class="row wrap">
               <button id="btnOwaspRun" class="btn btn-primary" type="button">Lancer OWASP (safe)</button>
               <button id="btnOwaspDetail" class="btn btn-ghost" type="button">Lancer OWASP (detail)</button>
+              <button id="btnOwaspExportJson" class="btn btn-ghost" type="button">📥 Export JSON</button>
+              <button id="btnOwaspExportPdf" class="btn btn-ghost" type="button">📄 Export PDF</button>
             </div>
+
+            <div class="muted small" style="margin-top:6px">
+              <span id="owaspExportStatus">-</span>
+            </div>
+
+            <div id="owaspExportTimer" class="export-timer hidden">
+              <div class="export-timer-bar"></div>
+            </div>
+
 
             <div style="margin-top:10px;">
               <div class="muted small">Résultat : <code id="owaspStatus" class="code">-</code></div>

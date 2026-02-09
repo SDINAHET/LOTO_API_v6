@@ -194,60 +194,34 @@ body{
   padding: 6px 8px;
 }
 
-/* =========================
-   Buttons (homogènes)
-   ========================= */
+/* Buttons */
 .btn{
   display:inline-flex;
   align-items:center;
   justify-content:center;
   gap:8px;
-
-  /* ✅ même hauteur / baseline pour tous */
-  min-height: 40px;
-  line-height: 1;
-  white-space: nowrap;
-
-  padding: 10px 16px;
+  padding: 10px 14px;
   border-radius: 999px;
   border:1px solid rgba(255,255,255,.12);
   background: rgba(255,255,255,.06);
   color: var(--text);
   cursor:pointer;
   font-weight:900;
-  font-size: .92rem;
-
-  transition: transform .12s ease, background .12s ease, border-color .12s ease, box-shadow .12s ease;
+  transition: transform .12s ease, background .12s ease;
 }
-.btn:hover{
-  transform: translateY(-1px);
-  background: rgba(255,255,255,.08);
-  border-color: rgba(255,255,255,.18);
-}
-.btn:active{ transform: translateY(0); }
+.btn:hover{ transform: translateY(-1px); background: rgba(255,255,255,.08); }
 
-/* ✅ wrapper optionnel : si tu peux, mets class="debug-actions" sur la row des boutons */
-.debug-actions{
-  display:flex;
-  flex-wrap:wrap;
-  gap:10px;
-  align-items:center;
-}
-.debug-actions .btn{ flex: 0 0 auto; }
-
-/* Bouton principal (Tout tester) */
 .btn-primary{
-  border:1px solid rgba(34,197,94,.45);
+  border:none;
   background: rgba(34,197,94,.90);
   color: #041014;
-  box-shadow: 0 0 0 1px rgba(34,197,94,.12) inset;
 }
 .btn-primary:hover{ background: rgba(34,197,94,1); }
 
-/* Ghost */
-.btn-ghost{ background: rgba(255,255,255,.04); }
+.btn-ghost{
+  background: rgba(255,255,255,.04);
+}
 
-/* Logs */
 .logs{
   min-height: 420px;
   overflow:auto;
@@ -270,7 +244,7 @@ body{
 .table{
   width:100%;
   border-collapse: collapse;
-  min-width: 980px;
+  min-width: 980px; /* ✅ évite l’écrasement sur mobile -> scroll horizontal */
 }
 .th{
   padding:10px 10px;
@@ -292,6 +266,7 @@ body{
 }
 .td-actions{ white-space:nowrap; }
 
+/* ✅ UUID : tronqué + ellipsis + title (hover) */
 .td-id{
   max-width: 180px;
   white-space: nowrap;
@@ -307,7 +282,7 @@ body{
   border:1px solid rgba(255,255,255,.14);
   background: rgba(255,255,255,.06);
   color: var(--text);
-  cursor: pointer;
+  cursor:pointer;
   font-size:.82rem;
   font-weight:900;
   margin-right:8px;
@@ -323,7 +298,7 @@ body{
   background: rgba(0,0,0,.55);
   align-items:center;
   justify-content:center;
-  z-index: 2500;
+  z-index: 2500; /* ✅ AU-DESSUS topbar + tout */
   padding: 14px;
 }
 
@@ -339,7 +314,11 @@ body{
   box-shadow: 0 30px 80px rgba(0,0,0,.55);
 }
 
-.modal-form{ display:flex; flex-direction:column; gap:10px; }
+.modal-form{
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+}
 .modal-field{ display:flex; flex-direction:column; gap:6px; }
 .modal-label{ font-size:.86rem; color: rgba(255,255,255,.70); font-weight:800; }
 
@@ -437,51 +416,60 @@ body{
   .sidebar{ transition:none; }
 }
 
+
 /* zone logs: style terminal */
-#logsContainer{
+#logsContainer {
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
   font-size: 10px;
   line-height: 1.35;
-  white-space: pre;
+  white-space: pre;       /* garde les retours */
   overflow: auto;
 }
 
 /* niveaux */
 .log-trace, .log-debug { opacity: .85; }
-.log-info  { color: #8bd5ff; }
-.log-warn  { color: #ffd479; }
-.log-error { color: #ff7b7b; }
+.log-info  { color: #8bd5ff; }   /* bleu clair */
+.log-warn  { color: #ffd479; }   /* jaune */
+.log-error { color: #ff7b7b; }   /* rouge */
 .log-fatal { color: #ff4dff; font-weight: 700; }
 
-.log-thread { color: #a7ffb3; }
-.log-class  { color: #c5b3ff; }
+/* thread / class */
+.log-thread { color: #a7ffb3; }  /* vert clair */
+.log-class  { color: #c5b3ff; }  /* violet */
 
+/* timestamp */
 .log-time { color: #9aa4b2; }
 
-.log-badge{
+/* un peu de mise en évidence */
+.log-badge {
   display: inline-block;
   padding: 0 6px;
   border-radius: 6px;
   margin-right: 6px;
   font-weight: 700;
 }
+
 .log-badge.warn  { background: rgba(255, 212, 121, .15); color: #ffd479; }
 .log-badge.error { background: rgba(255, 123, 123, .15); color: #ff7b7b; }
 .log-badge.info  { background: rgba(139, 213, 255, .12); color: #8bd5ff; }
 .log-badge.debug { background: rgba(167, 255, 179, .10); color: #a7ffb3; }
 
-.session-expired{
+.session-expired {
   color: #ff6b6b !important;
   font-weight: 700;
 }
-#userChip.session-expired::after{
+
+#userChip.session-expired::after {
   content: "⛔";
   margin-left: 8px;
   opacity: 0.9;
 }
 
+
 /* ===== Tickets modal (compact + boules) ===== */
-.modal-tickets{ width: min(980px, 96vw); }
+.modal-tickets{
+  width: min(980px, 96vw);
+}
 
 .tickets-wrap{
   border: 1px solid rgba(255,255,255,.10);
@@ -491,6 +479,7 @@ body{
   max-height: 66vh;
 }
 
+/* Table plus compacte */
 .tickets-table{
   width: 100%;
   border-collapse: collapse;
@@ -498,12 +487,12 @@ body{
 }
 .tickets-table th,
 .tickets-table td{
-  padding: 8px 10px;
+  padding: 8px 10px;              /* ✅ compact */
   border-bottom: 1px solid rgba(255,255,255,.06);
   text-align: left;
   vertical-align: middle;
-  font-size: .86rem;
-  line-height: 1.2;
+  font-size: .86rem;              /* ✅ compact */
+  line-height: 1.2;               /* ✅ compact */
 }
 .tickets-table th{
   position: sticky;
@@ -515,6 +504,7 @@ body{
   z-index: 1;
 }
 
+/* LAYOUT boules */
 .ball-row{
   display:flex;
   flex-wrap:wrap;
@@ -522,6 +512,7 @@ body{
   align-items:center;
 }
 
+/* ✅ Boules très visibles */
 .ball{
   width: 28px;
   height: 28px;
@@ -532,19 +523,26 @@ body{
   font-weight: 900;
   font-size: .82rem;
   user-select:none;
+
+  /* contraste + bord */
   border: 1px solid rgba(255,255,255,.22);
   background: rgba(255,255,255,.10);
   box-shadow: 0 8px 18px rgba(0,0,0,.25);
 }
+
+/* Bleu = numéros */
 .ball.blue{
   background: rgba(59,130,246,.28);
   border-color: rgba(59,130,246,.50);
 }
+
+/* Rouge = chance */
 .ball.red{
   background: rgba(239,68,68,.28);
   border-color: rgba(239,68,68,.50);
 }
 
+/* Bouton voir tickets (cellule users.tickets) */
 .tickets-open{
   display:inline-flex;
   align-items:center;
@@ -559,6 +557,7 @@ body{
   font-size: .82rem;
 }
 .tickets-open:hover{ background: rgba(255,255,255,.08); }
+
 
 /* Debug output (Infos/Debug) */
 .debug-pre{
@@ -583,8 +582,7 @@ body{
 .btn.is-ok{
   background: linear-gradient(135deg, #22c55e, #16a34a) !important;
   color: #041014 !important;
-  border-color: rgba(34,197,94,.75) !important;
-  box-shadow: 0 0 0 1px rgba(34,197,94,.18) inset !important;
+  border-color: #22c55e !important;
 }
 .btn.is-ok:hover{
   background: linear-gradient(135deg, #4ade80, #22c55e) !important;
@@ -594,8 +592,7 @@ body{
 .btn.is-warn{
   background: linear-gradient(135deg, #facc15, #eab308) !important;
   color: #1f1300 !important;
-  border-color: rgba(250,204,21,.85) !important;
-  box-shadow: 0 0 0 1px rgba(250,204,21,.18) inset !important;
+  border-color: #facc15 !important;
 }
 .btn.is-warn:hover{
   background: linear-gradient(135deg, #fde047, #facc15) !important;
@@ -605,19 +602,17 @@ body{
 .btn.is-err{
   background: linear-gradient(135deg, #ef4444, #dc2626) !important;
   color: #ffffff !important;
-  border-color: rgba(239,68,68,.85) !important;
-  box-shadow: 0 0 0 1px rgba(239,68,68,.18) inset !important;
+  border-color: #ef4444 !important;
 }
 .btn.is-err:hover{
   background: linear-gradient(135deg, #f87171, #ef4444) !important;
 }
 
-/* ACTIVE (clic / run) */
+/* ACTIVE (clic manuel) */
 .btn.is-active{
-  box-shadow:
-    0 0 0 2px rgba(34,197,94,.35),
-    0 12px 30px rgba(0,0,0,.25) !important;
+  box-shadow: 0 0 0 2px rgba(34,197,94,.35) !important;
 }
+
 
 /* Recap table */
 .debug-recap{
@@ -663,6 +658,7 @@ body{
   border-radius: 999px;
   background: rgba(255,255,255,.25);
 }
+
 .badge.ok .dot{ background:#22c55e; }
 .badge.warn .dot{ background:#f59e0b; }
 .badge.err .dot{ background:#ef4444; }
@@ -674,26 +670,37 @@ body{
 /* =========================
    OWASP Export countdown
    ========================= */
-.export-timer{
+.export-timer {
   width: 100%;
   max-width: 420px;
   height: 6px;
-  background: rgba(16, 185, 129, 0.15);
+  background: rgba(16, 185, 129, 0.15); /* vert soft */
   border-radius: 999px;
   margin-top: 6px;
   overflow: hidden;
 }
-.export-timer.hidden{ display: none; }
 
-.export-timer-bar{
+.export-timer.hidden {
+  display: none;
+}
+
+.export-timer-bar {
   height: 100%;
   width: 100%;
-  background: linear-gradient(90deg, #22c55e, #16a34a);
+  background: linear-gradient(
+    90deg,
+    #22c55e,
+    #16a34a
+  );
   transform-origin: left;
   animation: export-countdown 20s linear forwards;
 }
 
-@keyframes export-countdown{
-  from{ transform: scaleX(1); }
-  to{ transform: scaleX(0); }
+@keyframes export-countdown {
+  from {
+    transform: scaleX(1);
+  }
+  to {
+    transform: scaleX(0);
+  }
 }

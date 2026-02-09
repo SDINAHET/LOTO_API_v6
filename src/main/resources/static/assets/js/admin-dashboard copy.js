@@ -11,8 +11,7 @@
   function setSessionExpiredUI() {
     const userEmail = document.getElementById("userEmail");
     const userChip = document.getElementById("userChip");
-    const logoutBtn =
-      document.getElementById("btnLogout") || document.getElementById("logoutBtn");
+    const logoutBtn = document.getElementById("btnLogout") || document.getElementById("logoutBtn");
 
     if (userEmail) {
       userEmail.textContent = "Session expirée";
@@ -30,9 +29,11 @@
       logoutBtn.title = "Vous n'êtes plus connecté";
     }
 
+    // Optionnel : affiche un message dans la console et redirige
     console.warn("[ADMIN] Session expirée (401/403).");
-    // window.location.href = "/admin-login.html";
+    // window.location.href = "/admin-login.html"; // ✅ si tu veux rediriger direct
   }
+
 
   // ----------------------------
   // BOOTSTRAP (API_BASE + apiFetch)
@@ -40,7 +41,7 @@
   const API_BASE = window.API_BASE;
   const apiFetch = window.apiFetch;
 
-  console.log("ADMIN DASHBOARD JS VERSION: 2026-02-09-EXPORT-TIMER-7S");
+  console.log("ADMIN DASHBOARD JS VERSION: 2026-02-08-LOGS-FIX");
 
   if (!API_BASE || typeof apiFetch !== "function") {
     console.error(
@@ -52,6 +53,22 @@
   // ----------------------------
   // USER CHIP (topbar)
   // ----------------------------
+  // async function loadAdminUser() {
+  //   try {
+  //     const res = await apiFetch("/api/protected/userinfo", { method: "GET" });
+  //     if (!res.ok) return;
+
+  //     const data = await res.json();
+  //     const label = data.username || data.email || "Administrateur";
+
+  //     const userEmail = document.getElementById("userEmail");
+  //     const userChip = document.getElementById("userChip");
+  //     if (userEmail) userEmail.textContent = label;
+  //     if (userChip) userChip.style.display = "inline-flex";
+  //   } catch (e) {
+  //     console.warn("Impossible de charger l'utilisateur admin", e);
+  //   }
+  // }
   async function loadAdminUser() {
     const userEmail = document.getElementById("userEmail");
     const userChip = document.getElementById("userChip");
@@ -59,6 +76,7 @@
     try {
       const res = await apiFetch("/api/protected/userinfo", { method: "GET" });
 
+      // ✅ Si pas connecté / token expiré
       if (res.status === 401 || res.status === 403) {
         setSessionExpiredUI();
         showToast("Session expirée", "error");
@@ -66,6 +84,7 @@
       }
 
       if (!res.ok) {
+        // autre erreur (500 etc.)
         if (userEmail) userEmail.textContent = "Admin";
         if (userChip) userChip.style.display = "inline-flex";
         return;
@@ -78,10 +97,12 @@
       if (userChip) userChip.style.display = "inline-flex";
     } catch (e) {
       console.warn("Impossible de charger l'utilisateur admin", e);
+      // En cas d'erreur réseau, tu peux afficher un état neutre
       if (userEmail) userEmail.textContent = "Admin";
       if (userChip) userChip.style.display = "inline-flex";
     }
   }
+
 
   // ----------------------------
   // NAV
@@ -136,125 +157,130 @@
     window.open(SWAGGER_URL, "_blank", "noopener,noreferrer");
   });
 
-  // ----------------------------
-  // LOG COLORIZER (safe HTML)
-  // ----------------------------
-  function escapeHtml(str) {
-    return String(str ?? "")
-      .replaceAll("&", "&amp;")
-      .replaceAll("<", "&lt;")
-      .replaceAll(">", "&gt;")
-      .replaceAll('"', "&quot;")
-      .replaceAll("'", "&#039;");
-  }
 
-  function classifyLine(line) {
-    if (line.includes(" ERROR ")) return "error";
-    if (line.includes(" WARN ")) return "warn";
-    if (line.includes(" INFO ")) return "info";
-    if (line.includes(" DEBUG ")) return "debug";
-    if (line.includes(" TRACE ")) return "trace";
-    return "";
-  }
+// ----------------------------
+// LOG COLORIZER (safe HTML)
+// ----------------------------
+function escapeHtml(str) {
+  return String(str)
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
+}
 
-  function colorizeLogText(raw) {
-    const lines = String(raw || "").split("\n");
+function classifyLine(line) {
+  if (line.includes(" ERROR ")) return "error";
+  if (line.includes(" WARN ")) return "warn";
+  if (line.includes(" INFO ")) return "info";
+  if (line.includes(" DEBUG ")) return "debug";
+  if (line.includes(" TRACE ")) return "trace";
+  return "";
+}
 
-    return lines
-      .map((line) => {
-        const safe = escapeHtml(line);
-        const level = classifyLine(line);
+function colorizeLogText(raw) {
+  const lines = String(raw || "").split("\n");
 
-        const timeMatch = safe.match(
-          /^(\d{4}-\d{2}-\d{2}\s+\d{2}:\d{2}:\d{2})\s+/
+  return lines
+    .map((line) => {
+      const safe = escapeHtml(line);
+      const level = classifyLine(line);
+
+      // timestamp au début
+      const timeMatch = safe.match(/^(\d{4}-\d{2}-\d{2}\s+\d{2}:\d{2}:\d{2})\s+/);
+      let out = safe;
+
+      if (timeMatch) {
+        out = out.replace(
+          timeMatch[1],
+          `<span class="log-time">${timeMatch[1]}</span>`
         );
-        let out = safe;
-
-        if (timeMatch) {
-          out = out.replace(
-            timeMatch[1],
-            `<span class="log-time">${timeMatch[1]}</span>`
-          );
-        }
-
-        let badge = "";
-        if (level) {
-          badge = `<span class="log-badge ${level}">${level.toUpperCase()}</span>`;
-        }
-
-        return level ? `${badge}<span class="log-${level}">${out}</span>` : out;
-      })
-      .join("\n");
-  }
-
-  // ----------------------------
-  // LOGS
-  // ----------------------------
-  const logsContainer = document.getElementById("logsContainer");
-  const btnRefreshLogs = document.getElementById("btnRefreshLogs");
-  const logLineCountSelect = document.getElementById("logLineCount");
-  const autoScrollLogsCheckbox = document.getElementById("autoScrollLogs");
-  const autoRefreshLogsCheckbox = document.getElementById("autoRefreshLogs");
-  const logsLastRefresh = document.getElementById("logsLastRefresh");
-
-  function getSelectedLines() {
-    const allowed = new Set(["5000", "2000", "1000", "800", "400", "200"]);
-    let lines = String(logLineCountSelect?.value || "400").trim();
-    if (!allowed.has(lines)) lines = "400";
-    return lines;
-  }
-
-  async function refreshLogs() {
-    if (!logsContainer) return;
-
-    const lines = getSelectedLines();
-    const path = `/api/admin/logs?lines=${encodeURIComponent(lines)}`;
-
-    try {
-      const res = await apiFetch(path, {
-        method: "GET",
-        headers: { Accept: "text/plain" },
-      });
-
-      if (res.status === 401 || res.status === 403) {
-        setSessionExpiredUI();
       }
 
-      const text = await res.text().catch(() => "");
-
-      if (!res.ok) {
-        logsContainer.innerHTML = colorizeLogText(
-          `[${res.status}] ${text || "Erreur logs"}`
-        );
-        if (logsLastRefresh) {
-          logsLastRefresh.textContent =
-            "Échec : " + new Date().toLocaleTimeString("fr-FR");
-        }
-        return;
+      // badge niveau
+      let badge = "";
+      if (level) {
+        badge = `<span class="log-badge ${level}">${level.toUpperCase()}</span>`;
       }
 
+      return level
+        ? `${badge}<span class="log-${level}">${out}</span>`
+        : out;
+    })
+    .join("\n");
+}
+
+// ----------------------------
+// LOGS
+// ----------------------------
+const logsContainer = document.getElementById("logsContainer");
+const btnRefreshLogs = document.getElementById("btnRefreshLogs");
+const logLineCountSelect = document.getElementById("logLineCount");
+const autoScrollLogsCheckbox = document.getElementById("autoScrollLogs");
+const autoRefreshLogsCheckbox = document.getElementById("autoRefreshLogs");
+const logsLastRefresh = document.getElementById("logsLastRefresh");
+
+function getSelectedLines() {
+  const allowed = new Set(["5000", "2000", "1000", "800", "400", "200"]);
+  let lines = String(logLineCountSelect?.value || "400").trim();
+  if (!allowed.has(lines)) lines = "400";
+  return lines;
+}
+
+async function refreshLogs() {
+  if (!logsContainer) return;
+
+  const lines = getSelectedLines();
+  const path = `/api/admin/logs?lines=${encodeURIComponent(lines)}`;
+
+  try {
+    const res = await apiFetch(path, {
+      method: "GET",
+      headers: { Accept: "text/plain" }, // ✅ évite les 406 / "No acceptable"
+    });
+
+    if (res.status === 401 || res.status === 403) {
+      setSessionExpiredUI();
+    }
+
+    const text = await res.text().catch(() => "");
+
+    if (!res.ok) {
       logsContainer.innerHTML = colorizeLogText(
-        text || "(Aucun log pour le moment)"
-      );
-      if (logsLastRefresh) {
-        logsLastRefresh.textContent =
-          "Dernier refresh : " + new Date().toLocaleTimeString("fr-FR");
-      }
-
-      if (autoScrollLogsCheckbox?.checked) {
-        logsContainer.scrollTop = logsContainer.scrollHeight;
-      }
-    } catch (e) {
-      console.error(e);
-      logsContainer.innerHTML = colorizeLogText(
-        "[ERREUR] Impossible de charger les logs."
+        `[${res.status}] ${text || "Erreur logs"}`
       );
       if (logsLastRefresh) {
         logsLastRefresh.textContent =
           "Échec : " + new Date().toLocaleTimeString("fr-FR");
       }
+      return;
+    }
+
+    logsContainer.innerHTML = colorizeLogText(text || "(Aucun log pour le moment)");
+    if (logsLastRefresh) {
+      logsLastRefresh.textContent =
+        "Dernier refresh : " + new Date().toLocaleTimeString("fr-FR");
+    }
+
+    // ✅ auto-scroll (NE PAS écraser innerHTML)
+    // if (autoScrollLogsCheckbox?.checked) {
+    //   logsContainer.scrollTop = logsContainer.scrollHeight;
+    // }
+    if (autoScrollLogsCheckbox?.checked) {
+      logsContainer.scrollTop = logsContainer.scrollHeight;
+    }
+
+  } catch (e) {
+    console.error(e);
+    logsContainer.innerHTML = colorizeLogText("[ERREUR] Impossible de charger les logs.");
+    if (logsLastRefresh) {
+      logsLastRefresh.textContent =
+        "Échec : " + new Date().toLocaleTimeString("fr-FR");
     }
   }
+}
+
 
   btnRefreshLogs?.addEventListener("click", refreshLogs);
   logLineCountSelect?.addEventListener("change", refreshLogs);
@@ -264,341 +290,372 @@
   }, 3000);
 
   // ----------------------------
-  // INFO (Debug endpoints)
+  // INFO (Ping + API base)
   // ----------------------------
-  const apiBaseEl = document.getElementById("apiBase");
-  if (apiBaseEl) apiBaseEl.textContent = API_BASE;
+  // const apiBaseEl = document.getElementById("apiBase");
+  // if (apiBaseEl) apiBaseEl.textContent = API_BASE;
 
-  const debugStatus = document.getElementById("debugStatus");
-  const debugOutput = document.getElementById("debugOutput");
-  const debugTableBody = document.getElementById("debugTableBody");
+  // const btnPing = document.getElementById("btnPing");
+  // const pingResult = document.getElementById("pingResult");
 
-  const DEBUG_ENDPOINTS = [
-    { name: "Ping", path: "/api/admin/ping", btnId: "btnPing" },
-    { name: "Health", path: "/api/admin/health", btnId: "btnHealth" },
-    { name: "Runtime", path: "/api/admin/runtime", btnId: "btnRuntime" },
-    { name: "Uptime", path: "/api/admin/uptime", btnId: "btnUptime" },
-    { name: "Cookies", path: "/api/admin/cookies", btnId: "btnCookies" },
-    { name: "ReqCtx", path: "/api/admin/request-context", btnId: "btnReqCtx" },
-  ];
+  // btnPing?.addEventListener("click", async () => {
+  //   if (pingResult) pingResult.textContent = "…";
 
-  function pretty(obj) {
-    try {
-      return JSON.stringify(obj, null, 2);
-    } catch {
-      return String(obj);
+  //   try {
+  //     const res = await apiFetch("/api/admin/ping", { method: "GET" });
+
+  //     let txt = "";
+  //     try {
+  //       const data = await res.json();
+  //       txt = data?.status ? `{"status":"${data.status}"}` : JSON.stringify(data);
+  //     } catch {
+  //       txt = await res.text();
+  //     }
+
+  //     if (pingResult) pingResult.textContent = `${res.status} - ${txt}`;
+  //   } catch (e) {
+  //     console.error(e);
+  //     if (pingResult) pingResult.textContent = "Erreur réseau";
+  //   }
+  // });
+
+// ----------------------------
+// INFO (Debug endpoints)
+// ----------------------------
+const apiBaseEl = document.getElementById("apiBase");
+if (apiBaseEl) apiBaseEl.textContent = API_BASE;
+
+const debugStatus = document.getElementById("debugStatus");
+const debugOutput = document.getElementById("debugOutput");
+const debugTableBody = document.getElementById("debugTableBody");
+
+// Map path -> button id
+const DEBUG_ENDPOINTS = [
+  { name: "Ping",    path: "/api/admin/ping",            btnId: "btnPing" },
+  { name: "Health",  path: "/api/admin/health",          btnId: "btnHealth" },
+  { name: "Runtime", path: "/api/admin/runtime",         btnId: "btnRuntime" },
+  { name: "Uptime",  path: "/api/admin/uptime",          btnId: "btnUptime" },
+  { name: "Cookies", path: "/api/admin/cookies",         btnId: "btnCookies" },
+  { name: "ReqCtx",  path: "/api/admin/request-context", btnId: "btnReqCtx" },
+];
+
+function pretty(obj) {
+  try { return JSON.stringify(obj, null, 2); } catch { return String(obj); }
+}
+
+function setDebugUI(statusText, bodyText) {
+  if (debugStatus) debugStatus.textContent = statusText || "-";
+  if (debugOutput) debugOutput.textContent = bodyText || "";
+}
+
+function clearActiveButtons() {
+  DEBUG_ENDPOINTS.forEach(e => {
+    const b = document.getElementById(e.btnId);
+    b?.classList.remove("is-active");
+  });
+}
+
+function setActiveButton(btnId) {
+  clearActiveButtons();
+  document.getElementById(btnId)?.classList.add("is-active");
+}
+
+function clearButtonStates() {
+  DEBUG_ENDPOINTS.forEach(e => {
+    const b = document.getElementById(e.btnId);
+    b?.classList.remove("is-ok", "is-warn", "is-err");
+  });
+}
+
+function setButtonState(btnId, status) {
+  const b = document.getElementById(btnId);
+  if (!b) return;
+
+  b.classList.remove("is-ok", "is-warn", "is-err");
+
+  if (status >= 200 && status < 300) b.classList.add("is-ok");
+  else if (status === 401 || status === 403) b.classList.add("is-warn");
+  else b.classList.add("is-err");
+}
+
+
+function badgeClass(code) {
+  if (code >= 200 && code < 300) return "ok";
+  if (code === 401 || code === 403) return "warn";
+  return "err";
+}
+
+function summarizeBody(body) {
+  if (!body) return "";
+  if (typeof body === "string") return body.slice(0, 140);
+  // JSON common fields
+  if (body.status) return String(body.status);
+  if (body.error) return String(body.error);
+  if (body.message) return String(body.message);
+  if (body.authenticated === false) return "Not authenticated";
+  return "OK";
+}
+
+function renderTable(rows) {
+  if (!debugTableBody) return;
+  debugTableBody.innerHTML = rows.map(r => {
+    const cls = badgeClass(r.status);
+    return `
+      <tr>
+        <td class="mono">${r.path}</td>
+        <td>
+          <span class="badge ${cls}">
+            <span class="dot"></span>
+            <span>${r.status}</span>
+          </span>
+        </td>
+        <td class="mono">${r.ms} ms</td>
+        <td>${r.summary || ""}</td>
+      </tr>
+    `;
+  }).join("");
+}
+
+async function fetchDebug(path) {
+  const t0 = performance.now();
+  try {
+    const res = await apiFetch(path, { method: "GET" });
+    const ms = Math.round(performance.now() - t0);
+
+    const ct = (res.headers.get("content-type") || "").toLowerCase();
+    let body = null;
+
+    if (ct.includes("application/json")) {
+      body = await res.json().catch(() => null);
+    } else {
+      body = await res.text().catch(() => "");
     }
+
+    return {
+      path,
+      status: res.status,
+      ms,
+      body,
+      summary: summarizeBody(body)
+    };
+  } catch (e) {
+    const ms = Math.round(performance.now() - t0);
+    return {
+      path,
+      status: 0,
+      ms,
+      body: String(e),
+      summary: "Erreur réseau"
+    };
   }
+}
 
-  function setDebugUI(statusText, bodyText) {
-    if (debugStatus) debugStatus.textContent = statusText || "-";
-    if (debugOutput) debugOutput.textContent = bodyText || "";
-  }
+// Single test (and highlight the clicked button)
+async function runOne(endpoint) {
+  setActiveButton(endpoint.btnId);
+  setDebugUI("…", "Chargement…");
+  const r = await fetchDebug(endpoint.path);
+  setActiveButton(endpoint.btnId);
+  setButtonState(endpoint.btnId, r.status);
 
-  function clearActiveButtons() {
-    DEBUG_ENDPOINTS.forEach((e) => {
-      document.getElementById(e.btnId)?.classList.remove("is-active");
-    });
-  }
 
-  function setActiveButton(btnId) {
-    clearActiveButtons();
-    document.getElementById(btnId)?.classList.add("is-active");
-  }
+  renderTable([r]); // option: table = 1 ligne si tu veux
+  setDebugUI(`${r.status || "ERR"} - ${endpoint.path}`, typeof r.body === "string" ? r.body : pretty(r.body));
+}
 
-  function setButtonState(btnId, status) {
-    const b = document.getElementById(btnId);
-    if (!b) return;
+// Run all tests
+async function runAll() {
+  clearActiveButtons();
+  document.getElementById("btnAll")?.classList.add("is-active");
 
-    b.classList.remove("is-ok", "is-warn", "is-err");
+  setDebugUI("…", "Tests en cours…");
 
-    if (status >= 200 && status < 300) b.classList.add("is-ok");
-    else if (status === 401 || status === 403) b.classList.add("is-warn");
-    else b.classList.add("is-err");
-  }
+  // Lance en parallèle
+  const results = await Promise.all(DEBUG_ENDPOINTS.map(e => fetchDebug(e.path)));
 
-  function badgeClass(code) {
-    if (code >= 200 && code < 300) return "ok";
-    if (code === 401 || code === 403) return "warn";
-    return "err";
-  }
-
-  function summarizeBody(body) {
-    if (!body) return "";
-    if (typeof body === "string") return body.slice(0, 140);
-    if (body.status) return String(body.status);
-    if (body.error) return String(body.error);
-    if (body.message) return String(body.message);
-    if (body.authenticated === false) return "Not authenticated";
-    return "OK";
-  }
-
-  function renderTable(rows) {
-    if (!debugTableBody) return;
-    debugTableBody.innerHTML = rows
-      .map((r) => {
-        const cls = badgeClass(r.status);
-        return `
-          <tr>
-            <td class="mono">${r.path}</td>
-            <td>
-              <span class="badge ${cls}">
-                <span class="dot"></span>
-                <span>${r.status}</span>
-              </span>
-            </td>
-            <td class="mono">${r.ms} ms</td>
-            <td>${r.summary || ""}</td>
-          </tr>
-        `;
-      })
-      .join("");
-  }
-
-  async function fetchDebug(path) {
-    const t0 = performance.now();
-    try {
-      const res = await apiFetch(path, { method: "GET" });
-      const ms = Math.round(performance.now() - t0);
-
-      const ct = (res.headers.get("content-type") || "").toLowerCase();
-      let body = null;
-
-      if (ct.includes("application/json")) body = await res.json().catch(() => null);
-      else body = await res.text().catch(() => "");
-
-      return { path, status: res.status, ms, body, summary: summarizeBody(body) };
-    } catch (e) {
-      const ms = Math.round(performance.now() - t0);
-      return { path, status: 0, ms, body: String(e), summary: "Erreur réseau" };
-    }
-  }
-
-  async function runOne(endpoint) {
-    setActiveButton(endpoint.btnId);
-    setDebugUI("…", "Chargement…");
-    const r = await fetchDebug(endpoint.path);
-    setActiveButton(endpoint.btnId);
-    setButtonState(endpoint.btnId, r.status);
-
-    renderTable([r]);
-    setDebugUI(
-      `${r.status || "ERR"} - ${endpoint.path}`,
-      typeof r.body === "string" ? r.body : pretty(r.body)
-    );
-  }
-
-  async function runAll() {
-    clearActiveButtons();
-    document.getElementById("btnAll")?.classList.add("is-active");
-    setDebugUI("…", "Tests en cours…");
-
-    const results = await Promise.all(DEBUG_ENDPOINTS.map((e) => fetchDebug(e.path)));
-
-    // ✅ colore chaque bouton selon le status
-    DEBUG_ENDPOINTS.forEach((ep) => {
-      const r = results.find(x => x.path === ep.path);
-      if (r) setButtonState(ep.btnId, r.status);
-    });
-
-    results.sort((a, b) => {
-      const ra =
-        badgeClass(a.status) === "err" ? 0 : badgeClass(a.status) === "warn" ? 1 : 2;
-      const rb =
-        badgeClass(b.status) === "err" ? 0 : badgeClass(b.status) === "warn" ? 1 : 2;
-      return ra - rb;
-    });
-
-    renderTable(results);
-
-    const okCount = results.filter((r) => r.status >= 200 && r.status < 300).length;
-    const warnCount = results.filter((r) => r.status === 401 || r.status === 403).length;
-    const errCount = results.filter(
-      (r) => r.status === 0 || (r.status >= 400 && r.status !== 401 && r.status !== 403)
-    ).length;
-
-    setDebugUI(
-      `OK:${okCount}  WARN:${warnCount}  ERR:${errCount}`,
-      pretty(
-        results.reduce((acc, r) => {
-          acc[r.path] = r.body;
-          return acc;
-        }, {})
-      )
-    );
-
-    setTimeout(() => document.getElementById("btnAll")?.classList.remove("is-active"), 1000);
-  }
-
-  document.getElementById("btnAll")?.addEventListener("click", runAll);
-  DEBUG_ENDPOINTS.forEach((ep) => {
-    document.getElementById(ep.btnId)?.addEventListener("click", () => runOne(ep));
+  // Trie: erreurs d'abord puis warnings puis ok
+  results.sort((a, b) => {
+    const ra = badgeClass(a.status) === "err" ? 0 : badgeClass(a.status) === "warn" ? 1 : 2;
+    const rb = badgeClass(b.status) === "err" ? 0 : badgeClass(b.status) === "warn" ? 1 : 2;
+    return ra - rb;
   });
 
-  // ----------------------------
-  // OWASP Score section
-  // ----------------------------
-  const owaspStatus = document.getElementById("owaspStatus");
-  const owaspTableBody = document.getElementById("owaspTableBody");
-  const owaspTips = document.getElementById("owaspTips");
-  const owaspRaw = document.getElementById("owaspRaw");
+  renderTable(results);
 
-  function scoreToBadge(score) {
-    if (score >= 8) return "ok";
-    if (score >= 5) return "warn";
-    return "err";
-  }
+  const okCount = results.filter(r => r.status >= 200 && r.status < 300).length;
+  const warnCount = results.filter(r => r.status === 401 || r.status === 403).length;
+  const errCount = results.filter(r => r.status === 0 || (r.status >= 400 && r.status !== 401 && r.status !== 403)).length;
 
-  function renderOwaspTable(scores) {
-    if (!owaspTableBody) return;
+  setDebugUI(
+    `OK:${okCount}  WARN:${warnCount}  ERR:${errCount}`,
+    pretty(results.reduce((acc, r) => { acc[r.path] = r.body; return acc; }, {}))
+  );
 
-    const labels = {
-      A01: "Broken Access Control",
-      A02: "Security Misconfiguration (Headers)",
-      A03: "Supply Chain Failures",
-      A04: "Cryptographic Failures",
-      A05: "Injection",
-      A06: "Insecure Design",
-      A07: "Authentication Failures",
-      A08: "Integrity Failures",
-      A09: "Logging & Alerting",
-      A10: "Exceptional Conditions",
-    };
+  // retire le vert du btnAll après 1s si tu veux
+  setTimeout(() => document.getElementById("btnAll")?.classList.remove("is-active"), 1000);
+}
 
-    const keys = Object.keys(labels);
+// Hook buttons
+document.getElementById("btnAll")?.addEventListener("click", runAll);
 
-    owaspTableBody.innerHTML = keys
-      .map((k) => {
-        const v = scores && typeof scores[k] === "number" ? scores[k] : 0;
-        const cls = scoreToBadge(v);
-        return `
-          <tr>
-            <td class="mono">${k} - ${labels[k]}</td>
-            <td>
-              <span class="badge ${cls}">
-                <span class="dot"></span>
-                <span>${v}/10</span>
-              </span>
-            </td>
-            <td>${cls === "ok" ? "Bon" : cls === "warn" ? "À améliorer" : "Faible"}</td>
-          </tr>
-        `;
-      })
-      .join("");
-  }
+DEBUG_ENDPOINTS.forEach(ep => {
+  document.getElementById(ep.btnId)?.addEventListener("click", () => runOne(ep));
+});
 
-  function renderTips(tips) {
-    if (!owaspTips) return;
-    owaspTips.innerHTML = (tips || []).map((t) => `<li>${t}</li>`).join("");
-  }
+// ----------------------------
+// OWASP Score section
+// ----------------------------
+const owaspStatus = document.getElementById("owaspStatus");
+const owaspTableBody = document.getElementById("owaspTableBody");
+const owaspTips = document.getElementById("owaspTips");
+const owaspRaw = document.getElementById("owaspRaw");
 
-  async function runOwasp(detail) {
-    if (owaspStatus) owaspStatus.textContent = "Analyse en cours…";
-    if (owaspRaw) owaspRaw.textContent = "Chargement…";
+function scoreToBadge(score) {
+  // score /10 => ok/warn/err
+  if (score >= 8) return "ok";
+  if (score >= 5) return "warn";
+  return "err";
+}
 
-    try {
-      const res = await apiFetch(
-        `/api/admin/owasp-score?mode=safe&detail=${detail ? "true" : "false"}`,
-        { method: "GET" }
-      );
+function renderOwaspTable(scores) {
+  if (!owaspTableBody) return;
+  const labels = {
+    A01: "Broken Access Control",
+    A02: "Security Misconfiguration (Headers)",
+    A03: "Supply Chain Failures",
+    A04: "Cryptographic Failures",
+    A05: "Injection",
+    A06: "Insecure Design",
+    A07: "Authentication Failures",
+    A08: "Integrity Failures",
+    A09: "Logging & Alerting",
+    A10: "Exceptional Conditions"
+  };
 
-      if (res.status === 401 || res.status === 403) {
-        if (owaspStatus) owaspStatus.textContent = `${res.status} - Accès refusé`;
-        if (owaspRaw) owaspRaw.textContent = "Session expirée / pas ADMIN.";
-        return;
-      }
-
-      const data = await res.json();
-
-      owaspSetLastResult({
-        total: data.total,
-        grade: data.grade,
-        mode: "safe",
-        detail: !!detail,
-        scores: data.scores || {},
-        adviceFront: data.frontTips || [],
-        frontUrl: window.location.origin,
-        apiUrl: API_BASE,
-      });
-
-      const total = data.total;
-      const grade = data.grade || "-";
-      if (owaspStatus)
-        owaspStatus.textContent = `TOTAL: ${total ?? "?"}/100  (Grade: ${grade})`;
-
-      renderOwaspTable(data.scores || {});
-      renderTips(data.frontTips || []);
-
-      if (owaspRaw)
-        owaspRaw.textContent = detail
-          ? data.raw || ""
-          : JSON.stringify(
-              {
-                total: data.total,
-                grade: data.grade,
-                scores: data.scores,
-              },
-              null,
-              2
-            );
-    } catch (e) {
-      if (owaspStatus) owaspStatus.textContent = "Erreur réseau";
-      if (owaspRaw) owaspRaw.textContent = String(e);
-    }
-  }
-
-  document.getElementById("btnOwaspRun")?.addEventListener("click", () => runOwasp(false));
-  document.getElementById("btnOwaspDetail")?.addEventListener("click", () => runOwasp(true));
-
-  // ===============================
-  // OWASP EXPORT (JSON / PDF)
-  // ===============================
-  window.__owaspLast = null;
-
-  function owaspSetLastResult(obj) {
-    window.__owaspLast = {
-      generatedAt: new Date().toISOString(),
-      ...obj,
-    };
-  }
-
-  function downloadJson(filename, dataObj) {
-    const json = JSON.stringify(dataObj, null, 2);
-    const blob = new Blob([json], { type: "application/json;charset=utf-8" });
-    const url = URL.createObjectURL(blob);
-
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = filename;
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-
-    URL.revokeObjectURL(url);
-  }
-
-  function buildOwaspReportHtml(result) {
-    const scores = result?.scores || {};
-    const rows = Object.entries(scores)
-      .map(([k, v]) => {
-        const label = k;
-        const score = `${v}/10`;
-        return `<tr><td>${label}</td><td style="text-align:right">${score}</td></tr>`;
-      })
-      .join("");
-
-    const advice = (result?.adviceFront || [])
-      .map((a) => `<li>${escapeHtml(a)}</li>`)
-      .join("");
-
-    const total = result?.total ?? "-";
-    const grade = result?.grade ?? "-";
-    const mode = result?.mode ?? "safe";
-    const frontUrl = result?.frontUrl ?? "-";
-    const apiUrl = result?.apiUrl ?? "-";
-    const ts = result?.generatedAt ?? new Date().toISOString();
-
+  const keys = Object.keys(labels);
+  owaspTableBody.innerHTML = keys.map(k => {
+    const v = (scores && typeof scores[k] === "number") ? scores[k] : 0;
+    const cls = scoreToBadge(v);
     return `
+      <tr>
+        <td class="mono">${k} - ${labels[k]}</td>
+        <td>
+          <span class="badge ${cls}">
+            <span class="dot"></span>
+            <span>${v}/10</span>
+          </span>
+        </td>
+        <td>${cls === "ok" ? "Bon" : cls === "warn" ? "À améliorer" : "Faible"}</td>
+      </tr>
+    `;
+  }).join("");
+}
+
+function renderTips(tips) {
+  if (!owaspTips) return;
+  owaspTips.innerHTML = (tips || []).map(t => `<li>${t}</li>`).join("");
+}
+
+async function runOwasp(detail) {
+  if (owaspStatus) owaspStatus.textContent = "Analyse en cours…";
+  if (owaspRaw) owaspRaw.textContent = "Chargement…";
+
+  try {
+    const res = await apiFetch(`/api/admin/owasp-score?mode=safe&detail=${detail ? "true" : "false"}`, { method: "GET" });
+
+    if (res.status === 401 || res.status === 403) {
+      if (owaspStatus) owaspStatus.textContent = `${res.status} - Accès refusé`;
+      if (owaspRaw) owaspRaw.textContent = "Session expirée / pas ADMIN.";
+      return;
+    }
+
+    const data = await res.json();
+
+    // ✅ stocke le dernier résultat pour l’export (JSON/PDF)
+    owaspSetLastResult({
+      total: data.total,
+      grade: data.grade,
+      mode: "safe",
+      detail: !!detail,
+      scores: data.scores || {},
+      adviceFront: data.frontTips || [],
+      frontUrl: window.location.origin,
+      apiUrl: API_BASE
+    });
+
+
+    const total = data.total;
+    const grade = data.grade || "-";
+    if (owaspStatus) owaspStatus.textContent = `TOTAL: ${total ?? "?"}/100  (Grade: ${grade})`;
+
+    renderOwaspTable(data.scores || {});
+    renderTips(data.frontTips || []);
+
+    // si detail => affiche raw complet, sinon affiche un résumé
+    if (owaspRaw) owaspRaw.textContent = detail ? (data.raw || "") : JSON.stringify({
+      total: data.total,
+      grade: data.grade,
+      scores: data.scores
+    }, null, 2);
+
+  } catch (e) {
+    if (owaspStatus) owaspStatus.textContent = "Erreur réseau";
+    if (owaspRaw) owaspRaw.textContent = String(e);
+  }
+}
+
+document.getElementById("btnOwaspRun")?.addEventListener("click", () => runOwasp(false));
+document.getElementById("btnOwaspDetail")?.addEventListener("click", () => runOwasp(true));
+
+
+// ===============================
+// OWASP EXPORT (JSON / PDF)
+// ===============================
+window.__owaspLast = null; // <- on stocke le dernier score ici
+
+function owaspSetLastResult(obj) {
+  // obj = { total, grade, mode, generatedAt, scores: {A01:8,...}, adviceFront:[...], frontUrl, apiUrl }
+  window.__owaspLast = {
+    generatedAt: new Date().toISOString(),
+    ...obj,
+  };
+}
+
+// Téléchargement JSON
+function downloadJson(filename, dataObj) {
+  const json = JSON.stringify(dataObj, null, 2);
+  const blob = new Blob([json], { type: "application/json;charset=utf-8" });
+  const url = URL.createObjectURL(blob);
+
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+
+  URL.revokeObjectURL(url);
+}
+
+// Construction HTML du rapport PDF (print)
+function buildOwaspReportHtml(result) {
+  const scores = result?.scores || {};
+  const rows = Object.entries(scores).map(([k, v]) => {
+    const label = k; // ex: "A01"
+    const score = `${v}/10`;
+    return `<tr><td>${label}</td><td style="text-align:right">${score}</td></tr>`;
+  }).join("");
+
+  const advice = (result?.adviceFront || []).map(a => `<li>${escapeHtml(a)}</li>`).join("");
+
+  const total = result?.total ?? "-";
+  const grade = result?.grade ?? "-";
+  const mode = result?.mode ?? "safe";
+  const frontUrl = result?.frontUrl ?? "-";
+  const apiUrl = result?.apiUrl ?? "-";
+  const ts = result?.generatedAt ?? new Date().toISOString();
+
+  return `
 <!doctype html>
 <html lang="fr">
 <head>
@@ -653,148 +710,116 @@
   </div>
 </body>
 </html>`;
+}
+
+function escapeHtml(str) {
+  return String(str)
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
+}
+
+// Export PDF via print
+function exportOwaspPdf(result) {
+  const html = buildOwaspReportHtml(result);
+
+  // ✅ évite les popups : on imprime via iframe cachée
+  const iframe = document.createElement("iframe");
+  iframe.style.position = "fixed";
+  iframe.style.right = "0";
+  iframe.style.bottom = "0";
+  iframe.style.width = "0";
+  iframe.style.height = "0";
+  iframe.style.border = "0";
+  iframe.setAttribute("aria-hidden", "true");
+
+  document.body.appendChild(iframe);
+
+  const doc = iframe.contentDocument || iframe.contentWindow.document;
+  doc.open();
+  doc.write(html);
+  doc.close();
+
+  // Laisse le temps au navigateur de rendre le contenu
+  setTimeout(() => {
+    iframe.contentWindow.focus();
+    iframe.contentWindow.print();
+
+    // cleanup
+    setTimeout(() => iframe.remove(), 1000);
+  }, 250);
+}
+
+
+// Wiring boutons
+document.addEventListener("DOMContentLoaded", () => {
+  const btnJson = document.getElementById("btnOwaspExportJson");
+  const btnPdf = document.getElementById("btnOwaspExportPdf");
+  const status = document.getElementById("owaspExportStatus");
+
+  function setStatus(msg) {
+    if (status) status.textContent = msg;
   }
 
-  function exportOwaspPdf(result) {
-    const html = buildOwaspReportHtml(result);
-
-    const iframe = document.createElement("iframe");
-    iframe.style.position = "fixed";
-    iframe.style.right = "0";
-    iframe.style.bottom = "0";
-    iframe.style.width = "0";
-    iframe.style.height = "0";
-    iframe.style.border = "0";
-    iframe.setAttribute("aria-hidden", "true");
-
-    document.body.appendChild(iframe);
-
-    const doc = iframe.contentDocument || iframe.contentWindow.document;
-    doc.open();
-    doc.write(html);
-    doc.close();
-
-    setTimeout(() => {
-      iframe.contentWindow.focus();
-      iframe.contentWindow.print();
-      setTimeout(() => iframe.remove(), 1000);
-    }, 250);
-  }
-
-  // ----------------------------
-  // Export status timer (7s) - CENTRALIZED
-  // ----------------------------
-  document.addEventListener("DOMContentLoaded", () => {
-    const btnJson = document.getElementById("btnOwaspExportJson");
-    const btnPdf = document.getElementById("btnOwaspExportPdf");
-    const status = document.getElementById("owaspExportStatus");
-
-    const DEFAULT_MS = 7000;
-    let statusTimerId = null;
-
-    function setStatus(msg, opts = {}) {
-      const { autoClearMs = DEFAULT_MS, showTimer = true, clearTo = "-" } = opts;
-
-      if (status) status.textContent = msg ?? "";
-
-      const timer = document.getElementById("owaspExportTimer");
-      const bar = timer?.querySelector(".export-timer-bar");
-
-      // stop précédent countdown
-      if (statusTimerId) {
-        clearTimeout(statusTimerId);
-        statusTimerId = null;
-      }
-
-      // pas de barre => on cache, et éventuellement auto clear simple
-      if (!showTimer) {
-        timer?.classList.add("hidden");
-        if (autoClearMs > 0) {
-          statusTimerId = setTimeout(() => {
-            if (status) status.textContent = clearTo;
-            statusTimerId = null;
-          }, autoClearMs);
+  if (btnJson) {
+    btnJson.addEventListener("click", () => {
+      try {
+        if (!window.__owaspLast) {
+          setStatus("⚠️ Aucun résultat OWASP à exporter");
+          return;
         }
-        return;
-      }
+        const name = `owasp_score_${new Date().toISOString().slice(0,19).replaceAll(":","-")}.json`;
+        downloadJson(name, window.__owaspLast);
+        // setStatus("✅ JSON exporté");
+        setStatus("✅ JSON exporté");
 
-      // reset animation + show
-      if (bar) {
-        bar.style.animation = "none";
-        bar.offsetHeight; // force reflow
-        bar.style.animation = `export-countdown ${autoClearMs / 1000}s linear forwards`;
-      }
-      timer?.classList.remove("hidden");
+        const timer = document.getElementById("owaspExportTimer");
+        const bar = timer?.querySelector(".export-timer-bar");
 
-      // auto clear après X ms
-      if (autoClearMs > 0) {
-        statusTimerId = setTimeout(() => {
-          if (status) status.textContent = clearTo;
+        // reset animation
+        if (bar) {
+          bar.style.animation = "none";
+          bar.offsetHeight; // force reflow
+          bar.style.animation = "export-countdown 20s linear forwards";
+        }
+
+        timer?.classList.remove("hidden");
+
+        // auto clear après 20s
+        setTimeout(() => {
+          setStatus("-");
           timer?.classList.add("hidden");
-          statusTimerId = null;
-        }, autoClearMs);
+        }, 20_000);
+
+      } catch (e) {
+        setStatus("❌ Erreur export JSON");
+        console.error(e);
       }
-    }
+    });
+  }
 
-    if (btnJson) {
-      btnJson.addEventListener("click", () => {
-        try {
-          if (!window.__owaspLast) {
-            setStatus("⚠️ Aucun résultat OWASP à exporter", {
-              autoClearMs: DEFAULT_MS,
-              showTimer: true,
-            });
-            return;
-          }
-
-          const name = `owasp_score_${new Date()
-            .toISOString()
-            .slice(0, 19)
-            .replaceAll(":", "-")}.json`;
-
-          downloadJson(name, window.__owaspLast);
-
-          setStatus("✅ JSON exporté", {
-            autoClearMs: DEFAULT_MS, // ✅ 7s
-            showTimer: true,
-          });
-        } catch (e) {
-          console.error(e);
-          setStatus("❌ Erreur export JSON", {
-            autoClearMs: DEFAULT_MS,
-            showTimer: true,
-          });
+  if (btnPdf) {
+    btnPdf.addEventListener("click", () => {
+      try {
+        if (!window.__owaspLast) {
+          setStatus("⚠️ Aucun résultat OWASP à exporter");
+          return;
         }
-      });
-    }
+        exportOwaspPdf(window.__owaspLast);
+        setStatus("✅ PDF prêt (impression)");
+      } catch (e) {
+        setStatus("❌ Erreur export PDF");
+        console.error(e);
+      }
+    });
+  }
+});
 
-    if (btnPdf) {
-      btnPdf.addEventListener("click", () => {
-        try {
-          if (!window.__owaspLast) {
-            setStatus("⚠️ Aucun résultat OWASP à exporter", {
-              autoClearMs: DEFAULT_MS,
-              showTimer: true,
-            });
-            return;
-          }
 
-          exportOwaspPdf(window.__owaspLast);
 
-          setStatus("✅ PDF prêt (impression)", {
-            autoClearMs: DEFAULT_MS, // ✅ 7s
-            showTimer: true,
-          });
-        } catch (e) {
-          console.error(e);
-          setStatus("❌ Erreur export PDF", {
-            autoClearMs: DEFAULT_MS,
-            showTimer: true,
-          });
-        }
-      });
-    }
-  });
+
 
   // ----------------------------
   // DB CRUD
@@ -889,7 +914,9 @@
     const q = (dbSearch?.value || "").toLowerCase().trim();
     dbFilteredData = !q
       ? dbRawData.slice()
-      : dbRawData.filter((r) => JSON.stringify(r).toLowerCase().includes(q));
+      : dbRawData.filter((r) =>
+          JSON.stringify(r).toLowerCase().includes(q)
+        );
     dbCurrentPage = 0;
     renderDbTable();
   }
@@ -923,7 +950,11 @@
 
     const keys = Object.keys(pageData[0] || {});
 
+    // =========================
+    // HEADER (th uniquement)
+    // =========================
     const headerRow = document.createElement("tr");
+
     keys.forEach((k) => {
       const th = document.createElement("th");
       th.textContent = k;
@@ -940,6 +971,9 @@
 
     dbTableHead.appendChild(headerRow);
 
+    // =========================
+    // BODY (row & tr existent ici)
+    // =========================
     pageData.forEach((row) => {
       const tr = document.createElement("tr");
       tr.className = "tr";
@@ -948,14 +982,12 @@
         const td = document.createElement("td");
         td.className = "td";
 
+        // ✅ cas spécial users.tickets => bouton + modal
         if (dbCurrentResource === "users" && k === "tickets") {
           const tickets = safeJsonParse(row[k]);
           const list = Array.isArray(tickets) ? tickets : [];
-
-          // ✅ fix: email de la ligne (pas une variable inexistante)
           lastTicketsForCopy = list;
-          lastTicketsUserEmail = row.email || "";
-
+          lastTicketsUserEmail = userEmail || "";
           const count = list.length;
 
           const btn = document.createElement("button");
@@ -972,6 +1004,7 @@
           td.textContent = safeCellValue(k, row[k]);
         }
 
+        // ✅ affichage tronqué pour id/_id
         if (k === "id" || k === "_id") {
           td.classList.add("td-id");
           td.title = row[k] ? String(row[k]) : "";
@@ -980,6 +1013,7 @@
         tr.appendChild(td);
       });
 
+      // Actions (edit/delete)
       if (!isReadOnly) {
         const td = document.createElement("td");
         td.className = "td td-actions";
@@ -1027,7 +1061,8 @@
       dbTableBody.appendChild(tr);
     });
 
-    if (dbPagingInfo) dbPagingInfo.textContent = `Page ${dbCurrentPage + 1} / ${totalPages}`;
+    if (dbPagingInfo)
+      dbPagingInfo.textContent = `Page ${dbCurrentPage + 1} / ${totalPages}`;
   }
 
   async function loadDbData() {
@@ -1090,7 +1125,9 @@
       console.error("[DB] exception:", e);
       setDbStatus("Erreur réseau / CORS / serveur", true);
       if (dbTableBody) {
-        dbTableBody.innerHTML = `<tr><td style="padding:10px;color:#f97373;">${String(e)}</td></tr>`;
+        dbTableBody.innerHTML = `<tr><td style="padding:10px;color:#f97373;">${String(
+          e
+        )}</td></tr>`;
       }
     }
   }
@@ -1216,6 +1253,7 @@
     showToast("Enregistré ✅", "success");
   }
 
+  // DB events
   btnLoadData?.addEventListener("click", loadDbData);
   dbSearch?.addEventListener("input", applyDbFilter);
   dbPageSize?.addEventListener("change", () => {
@@ -1243,6 +1281,8 @@
     if (e.target === dbModalOverlay) closeDbModal();
   });
 
+
+
   // ---------- Tickets modal helpers ----------
   const ticketsOverlay = document.getElementById("ticketsOverlay");
   const ticketsClose = document.getElementById("ticketsClose");
@@ -1256,14 +1296,10 @@
   function safeJsonParse(v) {
     if (v === null || v === undefined) return null;
     if (Array.isArray(v)) return v;
-    if (typeof v === "object") return v;
+    if (typeof v === "object") return v; // déjà objet
     const s = String(v).trim();
     if (!s) return null;
-    try {
-      return JSON.parse(s);
-    } catch {
-      return null;
-    }
+    try { return JSON.parse(s); } catch { return null; }
   }
 
   function fmtDateTime(x) {
@@ -1301,8 +1337,7 @@
     const list = Array.isArray(tickets) ? tickets : [];
     ticketsTitle.textContent = "Tickets";
     if (ticketsMeta) {
-      ticketsMeta.textContent =
-        `${list.length} ticket(s)` + (userEmail ? ` • ${userEmail}` : "");
+      ticketsMeta.textContent = `${list.length} ticket(s)` + (userEmail ? ` • ${userEmail}` : "");
     }
 
     ticketsBody.innerHTML = "";
@@ -1314,13 +1349,14 @@
         const tr = document.createElement("tr");
 
         const tdNumbers = document.createElement("td");
-        tdNumbers.appendChild(renderBalls(t.numbers));
+        tdNumbers.appendChild(renderBalls(t.numbers));  // ✅ boules bleues
 
         const tdChance = document.createElement("td");
         const c = document.createElement("span");
         c.className = "ball red";
-        c.textContent = t.chanceNumber ?? "—";
+        c.textContent = (t.chanceNumber ?? "—");        // ✅ rouge
         tdChance.appendChild(c);
+
 
         const tdDate = document.createElement("td");
         tdDate.textContent = t.drawDate || "—";
@@ -1358,33 +1394,36 @@
     if (e.key === "Escape") closeTicketsModal();
   });
 
+
   function buildTicketsText(list, email) {
-    const lines = [];
-    if (email) lines.push(`Tickets — ${email}`);
-    lines.push(`Total: ${list.length}`);
-    lines.push("");
+  const lines = [];
+  if (email) lines.push(`Tickets — ${email}`);
+  lines.push(`Total: ${list.length}`);
+  lines.push("");
 
-    list.forEach((t, idx) => {
-      const nums = t.numbers ? String(t.numbers) : "—";
-      const chance = t.chanceNumber ?? "—";
-      const date = t.drawDate || "—";
-      const day = t.drawDay || "—";
-      const created = fmtDateTime(t.createdAt);
-      const updated = fmtDateTime(t.updatedAt);
+  // format 1 ligne par ticket
+  list.forEach((t, idx) => {
+    const nums = t.numbers ? String(t.numbers) : "—";
+    const chance = (t.chanceNumber ?? "—");
+    const date = t.drawDate || "—";
+    const day = t.drawDay || "—";
+    const created = fmtDateTime(t.createdAt);
+    const updated = fmtDateTime(t.updatedAt);
 
-      lines.push(
-        `${String(idx + 1).padStart(2, "0")}. ${nums} | Chance:${chance} | ${date} (${day}) | C:${created} | U:${updated}`
-      );
-    });
+    lines.push(
+      `${String(idx + 1).padStart(2, "0")}. ${nums} | Chance:${chance} | ${date} (${day}) | C:${created} | U:${updated}`
+    );
+  });
 
-    return lines.join("\n");
-  }
+  return lines.join("\n");
+}
 
   async function copyToClipboard(text) {
     try {
       await navigator.clipboard.writeText(text);
       return true;
     } catch {
+      // fallback
       try {
         const ta = document.createElement("textarea");
         ta.value = text;
@@ -1406,6 +1445,8 @@
     const ok = await copyToClipboard(txt);
     showToast(ok ? "Tickets copiés ✅" : "Copie impossible ❌", ok ? "success" : "error");
   });
+
+
 
   // ----------------------------
   // STATS
@@ -1438,7 +1479,7 @@
       const card = document.createElement("article");
       card.className = "stat-card";
       card.innerHTML = `
-        <div class="stat-name">${u.firstName || ""} ${u.lastName || ""}</div>
+        <div class="stat-name">${(u.firstName || "")} ${(u.lastName || "")}</div>
         <div class="stat-email">${u.email || ""}</div>
         <div class="stat-footer">
           Tickets: <b>${u.ticketsCount || 0}</b> • Gain total: <b>${u.totalGain || 0}€</b>
@@ -1452,7 +1493,9 @@
     const q = (statsSearch?.value || "").toLowerCase().trim();
     statsFiltered = !q
       ? statsRaw.slice()
-      : statsRaw.filter((u) => (u.email || "").toLowerCase().includes(q));
+      : statsRaw.filter((u) =>
+          (u.email || "").toLowerCase().includes(q)
+        );
     renderStats();
   }
 
@@ -1480,6 +1523,55 @@
 
   btnLoadStats?.addEventListener("click", loadStats);
   statsSearch?.addEventListener("input", applyStatsFilter);
+
+  function escapeHtml(str) {
+    return String(str ?? "")
+      .replaceAll("&", "&amp;")
+      .replaceAll("<", "&lt;")
+      .replaceAll(">", "&gt;")
+      .replaceAll('"', "&quot;")
+      .replaceAll("'", "&#039;");
+  }
+
+function classifyLine(line) {
+  // simple heuristique: on détecte INFO/WARN/ERROR/DEBUG/TRACE
+  if (line.includes(" ERROR ")) return "error";
+  if (line.includes(" WARN "))  return "warn";
+  if (line.includes(" INFO "))  return "info";
+  if (line.includes(" DEBUG ")) return "debug";
+  if (line.includes(" TRACE ")) return "trace";
+  return "";
+}
+
+
+function colorizeLogText(raw) {
+  const lines = raw.split("\n");
+
+  return lines.map((line) => {
+    const safe = escapeHtml(line);
+    const level = classifyLine(line);
+
+    // option: extraire timestamp (début de ligne "YYYY-MM-DD HH:mm:ss")
+    const timeMatch = safe.match(/^(\d{4}-\d{2}-\d{2}\s+\d{2}:\d{2}:\d{2})\s+/);
+    let out = safe;
+
+    if (timeMatch) {
+      out = out.replace(timeMatch[1], `<span class="log-time">${timeMatch[1]}</span>`);
+    }
+
+    // badge niveau
+    let badge = "";
+    if (level) {
+      badge = `<span class="log-badge ${level}">${level.toUpperCase()}</span>`;
+    }
+
+    // couleur du reste
+    if (level) {
+      return `${badge}<span class="log-${level}">${out}</span>`;
+    }
+    return out;
+  }).join("\n");
+}
 
   // ----------------------------
   // INIT
