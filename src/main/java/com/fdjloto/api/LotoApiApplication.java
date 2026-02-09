@@ -114,7 +114,7 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
-import org.springframework.web.servlet.config.annotation.EnableWebMvc;
+// import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 
 import io.swagger.v3.oas.annotations.OpenAPIDefinition;
 import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
@@ -128,7 +128,7 @@ import io.swagger.v3.oas.models.info.License;
 import io.swagger.v3.oas.models.servers.Server;
 
 
-@EnableWebMvc
+// @EnableWebMvc
 @ComponentScan(basePackages = "com.fdjloto.api")
 @SpringBootApplication(scanBasePackages = {"com.fdjloto"})
 @OpenAPIDefinition(
@@ -306,8 +306,8 @@ public class LotoApiApplication {
                         ))
                 .addServersItem(new Server().url("http://localhost:8082").description("Serveur local"))
                 .addServersItem(new Server().url("http://127.0.0.1:5500").description("Serveur local (Live Server)"))
-                .addServersItem(new Server().url("http://localhost:8082/swagger-ui/index.html").description("Serveur local"))
-                .addServersItem(new Server().url("http://127.0.0.1:5500/src/main/resources/static/index.html").description("Serveur local (Live Server)"))
+                // .addServersItem(new Server().url("http://localhost:8082/swagger-ui/index.html").description("Serveur local"))
+                // .addServersItem(new Server().url("http://127.0.0.1:5500/src/main/resources/static/index.html").description("Serveur local (Live Server)"))
                 .addServersItem(new Server().url("https://stephanedinahet.fr").description("Serveur Production"))
                 .addServersItem(new Server().url("https://stephanedinahet.fr/swagger-ui/index.html").description("Serveur Production - documentation Swagger"));
     }

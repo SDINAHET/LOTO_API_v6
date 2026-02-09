@@ -112,6 +112,7 @@
     swagger: document.getElementById("section-swagger"),
     logs: document.getElementById("section-logs"),
     info: document.getElementById("section-info"),
+    owasp: document.getElementById("section-owasp"),
     db: document.getElementById("section-db"),
     stats: document.getElementById("section-stats"),
   };
@@ -291,100 +292,309 @@ async function refreshLogs() {
   // ----------------------------
   // INFO (Ping + API base)
   // ----------------------------
-  const apiBaseEl = document.getElementById("apiBase");
-  if (apiBaseEl) apiBaseEl.textContent = API_BASE;
+  // const apiBaseEl = document.getElementById("apiBase");
+  // if (apiBaseEl) apiBaseEl.textContent = API_BASE;
 
-  const btnPing = document.getElementById("btnPing");
-  const pingResult = document.getElementById("pingResult");
+  // const btnPing = document.getElementById("btnPing");
+  // const pingResult = document.getElementById("pingResult");
 
-  btnPing?.addEventListener("click", async () => {
-    if (pingResult) pingResult.textContent = "…";
+  // btnPing?.addEventListener("click", async () => {
+  //   if (pingResult) pingResult.textContent = "…";
 
-    try {
-      const res = await apiFetch("/api/admin/ping", { method: "GET" });
+  //   try {
+  //     const res = await apiFetch("/api/admin/ping", { method: "GET" });
 
-      let txt = "";
-      try {
-        const data = await res.json();
-        txt = data?.status ? `{"status":"${data.status}"}` : JSON.stringify(data);
-      } catch {
-        txt = await res.text();
-      }
+  //     let txt = "";
+  //     try {
+  //       const data = await res.json();
+  //       txt = data?.status ? `{"status":"${data.status}"}` : JSON.stringify(data);
+  //     } catch {
+  //       txt = await res.text();
+  //     }
 
-      if (pingResult) pingResult.textContent = `${res.status} - ${txt}`;
-    } catch (e) {
-      console.error(e);
-      if (pingResult) pingResult.textContent = "Erreur réseau";
+  //     if (pingResult) pingResult.textContent = `${res.status} - ${txt}`;
+  //   } catch (e) {
+  //     console.error(e);
+  //     if (pingResult) pingResult.textContent = "Erreur réseau";
+  //   }
+  // });
+
+// ----------------------------
+// INFO (Debug endpoints)
+// ----------------------------
+const apiBaseEl = document.getElementById("apiBase");
+if (apiBaseEl) apiBaseEl.textContent = API_BASE;
+
+const debugStatus = document.getElementById("debugStatus");
+const debugOutput = document.getElementById("debugOutput");
+const debugTableBody = document.getElementById("debugTableBody");
+
+// Map path -> button id
+const DEBUG_ENDPOINTS = [
+  { name: "Ping",    path: "/api/admin/ping",            btnId: "btnPing" },
+  { name: "Health",  path: "/api/admin/health",          btnId: "btnHealth" },
+  { name: "Runtime", path: "/api/admin/runtime",         btnId: "btnRuntime" },
+  { name: "Uptime",  path: "/api/admin/uptime",          btnId: "btnUptime" },
+  { name: "Cookies", path: "/api/admin/cookies",         btnId: "btnCookies" },
+  { name: "ReqCtx",  path: "/api/admin/request-context", btnId: "btnReqCtx" },
+];
+
+function pretty(obj) {
+  try { return JSON.stringify(obj, null, 2); } catch { return String(obj); }
+}
+
+function setDebugUI(statusText, bodyText) {
+  if (debugStatus) debugStatus.textContent = statusText || "-";
+  if (debugOutput) debugOutput.textContent = bodyText || "";
+}
+
+function clearActiveButtons() {
+  DEBUG_ENDPOINTS.forEach(e => {
+    const b = document.getElementById(e.btnId);
+    b?.classList.remove("is-active");
+  });
+}
+
+function setActiveButton(btnId) {
+  clearActiveButtons();
+  document.getElementById(btnId)?.classList.add("is-active");
+}
+
+function clearButtonStates() {
+  DEBUG_ENDPOINTS.forEach(e => {
+    const b = document.getElementById(e.btnId);
+    b?.classList.remove("is-ok", "is-warn", "is-err");
+  });
+}
+
+function setButtonState(btnId, status) {
+  const b = document.getElementById(btnId);
+  if (!b) return;
+
+  b.classList.remove("is-ok", "is-warn", "is-err");
+
+  if (status >= 200 && status < 300) b.classList.add("is-ok");
+  else if (status === 401 || status === 403) b.classList.add("is-warn");
+  else b.classList.add("is-err");
+}
+
+
+function badgeClass(code) {
+  if (code >= 200 && code < 300) return "ok";
+  if (code === 401 || code === 403) return "warn";
+  return "err";
+}
+
+function summarizeBody(body) {
+  if (!body) return "";
+  if (typeof body === "string") return body.slice(0, 140);
+  // JSON common fields
+  if (body.status) return String(body.status);
+  if (body.error) return String(body.error);
+  if (body.message) return String(body.message);
+  if (body.authenticated === false) return "Not authenticated";
+  return "OK";
+}
+
+function renderTable(rows) {
+  if (!debugTableBody) return;
+  debugTableBody.innerHTML = rows.map(r => {
+    const cls = badgeClass(r.status);
+    return `
+      <tr>
+        <td class="mono">${r.path}</td>
+        <td>
+          <span class="badge ${cls}">
+            <span class="dot"></span>
+            <span>${r.status}</span>
+          </span>
+        </td>
+        <td class="mono">${r.ms} ms</td>
+        <td>${r.summary || ""}</td>
+      </tr>
+    `;
+  }).join("");
+}
+
+async function fetchDebug(path) {
+  const t0 = performance.now();
+  try {
+    const res = await apiFetch(path, { method: "GET" });
+    const ms = Math.round(performance.now() - t0);
+
+    const ct = (res.headers.get("content-type") || "").toLowerCase();
+    let body = null;
+
+    if (ct.includes("application/json")) {
+      body = await res.json().catch(() => null);
+    } else {
+      body = await res.text().catch(() => "");
     }
+
+    return {
+      path,
+      status: res.status,
+      ms,
+      body,
+      summary: summarizeBody(body)
+    };
+  } catch (e) {
+    const ms = Math.round(performance.now() - t0);
+    return {
+      path,
+      status: 0,
+      ms,
+      body: String(e),
+      summary: "Erreur réseau"
+    };
+  }
+}
+
+// Single test (and highlight the clicked button)
+async function runOne(endpoint) {
+  setActiveButton(endpoint.btnId);
+  setDebugUI("…", "Chargement…");
+  const r = await fetchDebug(endpoint.path);
+  setActiveButton(endpoint.btnId);
+  setButtonState(endpoint.btnId, r.status);
+
+
+  renderTable([r]); // option: table = 1 ligne si tu veux
+  setDebugUI(`${r.status || "ERR"} - ${endpoint.path}`, typeof r.body === "string" ? r.body : pretty(r.body));
+}
+
+// Run all tests
+async function runAll() {
+  clearActiveButtons();
+  document.getElementById("btnAll")?.classList.add("is-active");
+
+  setDebugUI("…", "Tests en cours…");
+
+  // Lance en parallèle
+  const results = await Promise.all(DEBUG_ENDPOINTS.map(e => fetchDebug(e.path)));
+
+  // Trie: erreurs d'abord puis warnings puis ok
+  results.sort((a, b) => {
+    const ra = badgeClass(a.status) === "err" ? 0 : badgeClass(a.status) === "warn" ? 1 : 2;
+    const rb = badgeClass(b.status) === "err" ? 0 : badgeClass(b.status) === "warn" ? 1 : 2;
+    return ra - rb;
   });
 
-  // ----------------------------
-  // UI helpers (Toast + Confirm)
-  // ----------------------------
-  const toastEl = document.getElementById("toast");
-  let toastTimer = null;
+  renderTable(results);
 
-  function showToast(message, type = "info") {
-    if (!toastEl) return;
-    toastEl.textContent = message;
-    toastEl.dataset.type = type;
-    toastEl.classList.add("show");
-    clearTimeout(toastTimer);
-    toastTimer = setTimeout(() => toastEl.classList.remove("show"), 2800);
+  const okCount = results.filter(r => r.status >= 200 && r.status < 300).length;
+  const warnCount = results.filter(r => r.status === 401 || r.status === 403).length;
+  const errCount = results.filter(r => r.status === 0 || (r.status >= 400 && r.status !== 401 && r.status !== 403)).length;
+
+  setDebugUI(
+    `OK:${okCount}  WARN:${warnCount}  ERR:${errCount}`,
+    pretty(results.reduce((acc, r) => { acc[r.path] = r.body; return acc; }, {}))
+  );
+
+  // retire le vert du btnAll après 1s si tu veux
+  setTimeout(() => document.getElementById("btnAll")?.classList.remove("is-active"), 1000);
+}
+
+// Hook buttons
+document.getElementById("btnAll")?.addEventListener("click", runAll);
+
+DEBUG_ENDPOINTS.forEach(ep => {
+  document.getElementById(ep.btnId)?.addEventListener("click", () => runOne(ep));
+});
+
+// ----------------------------
+// OWASP Score section
+// ----------------------------
+const owaspStatus = document.getElementById("owaspStatus");
+const owaspTableBody = document.getElementById("owaspTableBody");
+const owaspTips = document.getElementById("owaspTips");
+const owaspRaw = document.getElementById("owaspRaw");
+
+function scoreToBadge(score) {
+  // score /10 => ok/warn/err
+  if (score >= 8) return "ok";
+  if (score >= 5) return "warn";
+  return "err";
+}
+
+function renderOwaspTable(scores) {
+  if (!owaspTableBody) return;
+  const labels = {
+    A01: "Broken Access Control",
+    A02: "Security Misconfiguration (Headers)",
+    A03: "Supply Chain Failures",
+    A04: "Cryptographic Failures",
+    A05: "Injection",
+    A06: "Insecure Design",
+    A07: "Authentication Failures",
+    A08: "Integrity Failures",
+    A09: "Logging & Alerting",
+    A10: "Exceptional Conditions"
+  };
+
+  const keys = Object.keys(labels);
+  owaspTableBody.innerHTML = keys.map(k => {
+    const v = (scores && typeof scores[k] === "number") ? scores[k] : 0;
+    const cls = scoreToBadge(v);
+    return `
+      <tr>
+        <td class="mono">${k} - ${labels[k]}</td>
+        <td>
+          <span class="badge ${cls}">
+            <span class="dot"></span>
+            <span>${v}/10</span>
+          </span>
+        </td>
+        <td>${cls === "ok" ? "Bon" : cls === "warn" ? "À améliorer" : "Faible"}</td>
+      </tr>
+    `;
+  }).join("");
+}
+
+function renderTips(tips) {
+  if (!owaspTips) return;
+  owaspTips.innerHTML = (tips || []).map(t => `<li>${t}</li>`).join("");
+}
+
+async function runOwasp(detail) {
+  if (owaspStatus) owaspStatus.textContent = "Analyse en cours…";
+  if (owaspRaw) owaspRaw.textContent = "Chargement…";
+
+  try {
+    const res = await apiFetch(`/api/admin/owasp-score?mode=safe&detail=${detail ? "true" : "false"}`, { method: "GET" });
+
+    if (res.status === 401 || res.status === 403) {
+      if (owaspStatus) owaspStatus.textContent = `${res.status} - Accès refusé`;
+      if (owaspRaw) owaspRaw.textContent = "Session expirée / pas ADMIN.";
+      return;
+    }
+
+    const data = await res.json();
+
+    const total = data.total;
+    const grade = data.grade || "-";
+    if (owaspStatus) owaspStatus.textContent = `TOTAL: ${total ?? "?"}/100  (Grade: ${grade})`;
+
+    renderOwaspTable(data.scores || {});
+    renderTips(data.frontTips || []);
+
+    // si detail => affiche raw complet, sinon affiche un résumé
+    if (owaspRaw) owaspRaw.textContent = detail ? (data.raw || "") : JSON.stringify({
+      total: data.total,
+      grade: data.grade,
+      scores: data.scores
+    }, null, 2);
+
+  } catch (e) {
+    if (owaspStatus) owaspStatus.textContent = "Erreur réseau";
+    if (owaspRaw) owaspRaw.textContent = String(e);
   }
+}
 
-  const confirmOverlay = document.getElementById("confirmOverlay");
-  const confirmTitle = document.getElementById("confirmTitle");
-  const confirmText = document.getElementById("confirmText");
-  const confirmCancel = document.getElementById("confirmCancel");
-  const confirmOk = document.getElementById("confirmOk");
+document.getElementById("btnOwaspRun")?.addEventListener("click", () => runOwasp(false));
+document.getElementById("btnOwaspDetail")?.addEventListener("click", () => runOwasp(true));
 
-  function confirmDialog({
-    title = "Confirmation",
-    message = "Confirmer ?",
-    okText = "Confirmer",
-    danger = false,
-  } = {}) {
-    return new Promise((resolve) => {
-      if (!confirmOverlay) return resolve(false);
 
-      confirmTitle.textContent = title;
-      confirmText.textContent = message;
-      confirmOk.textContent = okText;
-      confirmOk.classList.toggle("danger", !!danger);
-
-      confirmOverlay.style.display = "flex";
-      confirmOverlay.setAttribute("aria-hidden", "false");
-
-      const cleanup = () => {
-        confirmOverlay.style.display = "none";
-        confirmOverlay.setAttribute("aria-hidden", "true");
-        confirmCancel.removeEventListener("click", onCancel);
-        confirmOk.removeEventListener("click", onOk);
-        confirmOverlay.removeEventListener("click", onBg);
-        document.removeEventListener("keydown", onKey);
-      };
-      const onCancel = () => {
-        cleanup();
-        resolve(false);
-      };
-      const onOk = () => {
-        cleanup();
-        resolve(true);
-      };
-      const onBg = (e) => {
-        if (e.target === confirmOverlay) onCancel();
-      };
-      const onKey = (e) => {
-        if (e.key === "Escape") onCancel();
-      };
-
-      confirmCancel.addEventListener("click", onCancel);
-      confirmOk.addEventListener("click", onOk);
-      confirmOverlay.addEventListener("click", onBg);
-      document.addEventListener("keydown", onKey);
-    });
-  }
 
   // ----------------------------
   // DB CRUD

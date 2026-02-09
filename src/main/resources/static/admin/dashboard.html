@@ -41,6 +41,17 @@
           <span>Infos / Debug</span>
         </button>
 
+        <button class="nav-item" data-section="owasp" type="button">
+          <span class="nav-ico" aria-hidden="true">
+            <svg viewBox="0 0 24 24">
+              <path d="M12 1l9 4v6c0 5-3.8 9.7-9 11-5.2-1.3-9-6-9-11V5l9-4z"/>
+              <path d="M9 12l2 2 4-4"/>
+            </svg>
+          </span>
+          <span>Sécurité OWASP</span>
+        </button>
+
+
         <button class="nav-item" data-section="db" type="button">
           <span class="nav-ico" aria-hidden="true">
             <svg viewBox="0 0 24 24"><ellipse cx="12" cy="5" rx="8" ry="3"/><path d="M4 5v6c0 1.7 3.6 3 8 3s8-1.3 8-3V5"/><path d="M4 11v6c0 1.7 3.6 3 8 3s8-1.3 8-3v-6"/></svg>
@@ -127,7 +138,7 @@
         </section>
 
         <!-- INFO -->
-        <section id="section-info" class="panel">
+        <!-- <section id="section-info" class="panel">
           <div class="card">
             <h2 class="h2">Debug</h2>
             <p class="muted">Vérifie que le backend répond et que le cookie JWT est bien envoyé.</p>
@@ -141,7 +152,90 @@
               API utilisée par ce dashboard : <code id="apiBase" class="code">-</code>
             </div>
           </div>
+        </section> -->
+
+        <!-- INFO -->
+        <section id="section-info" class="panel">
+          <div class="card">
+            <h2 class="h2">Debug</h2>
+            <p class="muted">Vérifie que le backend répond et que le cookie JWT est bien envoyé.</p>
+
+            <div class="row wrap">
+              <button id="btnAll" class="btn btn-primary" type="button">Tout tester</button>
+              <button id="btnPing" class="btn btn-primary" type="button">/api/admin/ping</button>
+              <button id="btnHealth" class="btn btn-ghost" type="button">/api/admin/health</button>
+              <button id="btnRuntime" class="btn btn-ghost" type="button">/api/admin/runtime</button>
+              <button id="btnUptime" class="btn btn-ghost" type="button">/api/admin/uptime</button>
+              <button id="btnCookies" class="btn btn-ghost" type="button">/api/admin/cookies</button>
+              <button id="btnReqCtx" class="btn btn-ghost" type="button">/api/admin/request-context</button>
+            </div>
+
+            <div style="margin-top:10px;">
+              <div class="muted small">
+                API utilisée par ce dashboard : <code id="apiBase" class="code">-</code>
+              </div>
+              <div class="muted small" style="margin-top:8px;">
+                Résultat : <code id="debugStatus" class="code">-</code>
+                <div class="debug-recap">
+                  <table class="debug-table">
+                    <thead>
+                      <tr>
+                        <th>Endpoint</th>
+                        <th>Code</th>
+                        <th>Durée</th>
+                        <th>Résumé</th>
+                      </tr>
+                    </thead>
+                    <tbody id="debugTableBody">
+                      <!-- rempli en JS -->
+                    </tbody>
+                  </table>
+                </div>
+
+              </div>
+              <pre id="debugOutput" class="debug-pre">Clique un bouton pour tester…</pre>
+            </div>
+          </div>
         </section>
+
+        <!-- OWASP SCORE -->
+        <section id="section-owasp" class="panel">
+          <div class="card">
+            <h2 class="h2">OWASP Score (SAFE)</h2>
+            <p class="muted">Lance owasp_score_detail.sh (mode SAFE, non destructif) et affiche le score + conseils front.</p>
+
+            <div class="row wrap">
+              <button id="btnOwaspRun" class="btn btn-primary" type="button">Lancer OWASP (safe)</button>
+              <button id="btnOwaspDetail" class="btn btn-ghost" type="button">Lancer OWASP (detail)</button>
+            </div>
+
+            <div style="margin-top:10px;">
+              <div class="muted small">Résultat : <code id="owaspStatus" class="code">-</code></div>
+            </div>
+
+            <div class="debug-recap" style="margin-top:12px;">
+              <table class="debug-table">
+                <thead>
+                  <tr>
+                    <th>Catégorie</th>
+                    <th>Score</th>
+                    <th>Commentaire</th>
+                  </tr>
+                </thead>
+                <tbody id="owaspTableBody"></tbody>
+              </table>
+            </div>
+
+            <div style="margin-top:12px;">
+              <h3 class="h3">Conseils d’amélioration (Front)</h3>
+              <ul id="owaspTips" style="margin:8px 0 0; padding-left: 20px;"></ul>
+            </div>
+
+            <pre id="owaspRaw" class="debug-pre" style="margin-top:12px;">-</pre>
+          </div>
+        </section>
+
+
 
         <!-- DB CRUD -->
         <section id="section-db" class="panel">
