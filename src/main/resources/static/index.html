@@ -4,26 +4,36 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Loto Tracker — Résultats</title>
+  <style>html,body{background:#0a101c;}</style>
+
 
   <link rel="icon" type="image/png" href="/assets/img/loto_tracker.png">
 
   <!-- Font Awesome + Bootstrap -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+  <!-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"> -->
+  <link rel="stylesheet" href="/assets/vendors/bootstrap/bootstrap.min.css">
+  <link rel="stylesheet" href="/assets/vendors/fontawesome/css/all.min.css">
 
   <!-- Leaflet -->
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+  <!-- <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/> -->
+  <link rel="stylesheet" href="/assets/vendors/leaflet/leaflet.css">
 
   <link rel="stylesheet" href="/assets/css/styles.css">
 
-
   <!-- Axios + Moment -->
-  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+  <!-- <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/moment/min/moment.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/moment-timezone/builds/moment-timezone-with-data.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/moment-timezone/builds/moment-timezone-with-data.min.js"></script> -->
+
+  <script src="/assets/vendors/axios/axios.min.js"></script>
+  <script src="/assets/vendors/moment/moment.min.js"></script>
+  <script src="/assets/vendors/moment/moment-timezone-with-data.min.js"></script>
+  <script src="/assets/vendors/leaflet/leaflet.js"></script>
 
   <!-- Chart.js -->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- <script src="https://cdn.jsdelivr.net/npm/chart.js"></script> -->
+  <script src="/assets/vendors/chartjs/chart.min.js"></script>
 
   <!-- ✅ Layout (header/footer) -->
   <script src="assets/js/layout.js"></script>
@@ -256,8 +266,10 @@
 
 
   <!-- Bootstrap + Leaflet -->
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <!-- <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script> -->
+  <script src="/assets/vendors/bootstrap/bootstrap.bundle.min.js"></script>
+  <script src="/assets/vendors/leaflet/leaflet.js"></script>
 
 
 
@@ -266,5 +278,16 @@
 
   <!-- IA (si tu l'utilises) -->
   <script src="assets/js/ai-loader.js"></script>
+
+  <!-- <script>
+    // Désactiver GoatCounter hors production
+    if (
+      !location.hostname.endsWith("stephanedinahet.fr")
+    ) {
+      window.goatcounter = { no_onload: true };
+    }
+  </script>
+  <script data-goatcounter="https://lototracker.goatcounter.com/count"
+        async src="//gc.zgo.at/count.js"></script> -->
 </body>
 </html>

@@ -334,3 +334,21 @@
       }
       .sidebar.open{ transform: translateX(0); }
     }
+
+    /* Caché par défaut
+    .footer-statistiques {
+      display: none;
+    }*/
+
+    /* Visible uniquement sur la page Mentions légales */
+    /* .page-mentions-legales .footer-statistiques {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 8px 16px;
+      border-radius: 999px;
+      background: #7c5cff;
+      color: #fff;
+      font-weight: 700;
+      text-decoration: none;
+    } */

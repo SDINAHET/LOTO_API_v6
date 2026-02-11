@@ -937,3 +937,28 @@ body.page.has-fixed-footer{
     border-radius: 10px;
   }
 }
+
+
+.footer-stat-site{
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  padding:6px 14px;
+  border-radius:999px;
+  background:#7c5cff;
+  color:#fff;
+  font-weight:800;
+  text-decoration:none;
+}
+
+.footer-stat-site:hover{
+  opacity:.9;
+}
+
+
+.footer-status-site {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+

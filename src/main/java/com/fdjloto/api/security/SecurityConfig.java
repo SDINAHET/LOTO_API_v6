@@ -129,6 +129,7 @@ public class SecurityConfig {
                         "/api/admin/logs",
                         // "/api/auth/login4",
                         // "/admin/**",
+                        "/api/admin/**",
                         "/api/health",
                         "/api/hello",
                         "/swagger-ui/**",

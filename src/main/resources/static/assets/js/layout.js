@@ -332,6 +332,16 @@
     document.head.appendChild(style);
   }
 
+  function isLegalPage() {
+    const path = (window.location.pathname || "").toLowerCase();
+    return (
+      path.endsWith("mentions_legales.html") ||
+      path.endsWith("conditions_utilisation.html") ||
+      path.endsWith("politique_confidentialite.html")
+    );
+  }
+
+
   /* =========================================================
      Refresh helper (utilise originalFetch pour éviter boucle)
   ========================================================= */
@@ -574,9 +584,68 @@
           API
         </span>
         <span><span id="visitCount">—</span> visites</span>
+
+        ${isLegalPage() ? `
+        <a href="https://lototracker.goatcounter.com/"
+           target="_blank"
+           rel="noopener noreferrer"
+           class="footer-stat-site">
+           <i class="fa-solid fa-chart-simple"></i> Stat du site
+        </a>
+
+        <a href="https://status.stephanedinahet.fr/status/loto"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="footer-status-site">
+          <i class="fa-solid fa-signal"></i> Statut Loto
+        </a>
+      ` : ""}
       </footer>
     `;
   }
+
+  function isTrackingExcludedPage() {
+    const path = (location.pathname || "").toLowerCase();
+
+    // Liste des pages à EXCLURE du tracking
+    const excludedPages = [
+      "admin-login.html",
+      "admin.html",
+      "login.html",
+      "register.html"
+    ];
+
+    return excludedPages.some(page => path.endsWith(page));
+  }
+
+  function loadGoatCounter() {
+    // ❌ Ne pas tracker certaines pages
+    if (isTrackingExcludedPage()) {
+      window.goatcounter = { no_onload: true };
+      return;
+    }
+
+    // ❌ Ne pas tracker hors production
+    if (!location.hostname.endsWith("stephanedinahet.fr")) {
+      window.goatcounter = { no_onload: true };
+      return;
+    }
+
+    // Évite les doublons
+    if (document.querySelector('script[data-goatcounter]')) return;
+
+    // (Optionnel) forcer un chemin canonique
+    window.goatcounter = window.goatcounter || {};
+    window.goatcounter.path = location.pathname;
+
+    const s = document.createElement("script");
+    s.setAttribute("data-goatcounter", "https://lototracker.goatcounter.com/count");
+    s.async = true;
+    s.src = "//gc.zgo.at/count.js";
+    document.body.appendChild(s);
+  }
+
+
 
 
   /* =========================================================
@@ -975,6 +1044,9 @@ function setAdminInBurger(isAdmin) {
     if (headerMount) headerMount.innerHTML = renderHeader();
     if (footerMount) footerMount.innerHTML = renderFooter();
 
+    // ✅ GOATCOUNTER : tracking global, avec exclusions
+    loadGoatCounter();
+
     // ✅ Patch fetch/axios très tôt
     setupFetchFastPatch();
     setupAxiosFastPatch();
@@ -1069,3 +1141,7 @@ function setAdminInBurger(isAdmin) {
 
   document.addEventListener("DOMContentLoaded", injectLayout);
 })();
+
+
+
+

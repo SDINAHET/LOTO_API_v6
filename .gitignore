@@ -56,3 +56,7 @@ build/
 /ai-service/data
 lotodb_backup.sql
 lotodb_data.sql
+/reports
+/reports/*
+/local_speed_audit
+

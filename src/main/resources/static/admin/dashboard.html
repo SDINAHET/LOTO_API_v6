@@ -157,7 +157,7 @@
         <!-- INFO -->
         <section id="section-info" class="panel">
           <div class="card">
-            <h2 class="h2">Debug</h2>
+            <h2 class="h2">Supervision et diagnostic</h2>
             <p class="muted">Vérifie que le backend répond et que le cookie JWT est bien envoyé.</p>
 
             <div class="row wrap">
@@ -193,7 +193,7 @@
                 </div>
 
               </div>
-              <pre id="debugOutput" class="debug-pre">Clique un bouton pour tester…</pre>
+              <!-- <pre id="debugOutput" class="debug-pre">Clique un bouton pour tester…</pre> -->
             </div>
           </div>
         </section>
@@ -202,11 +202,23 @@
         <section id="section-owasp" class="panel">
           <div class="card">
             <h2 class="h2">OWASP Score (SAFE)</h2>
-            <p class="muted">Lance owasp_score_detail.sh (mode SAFE, non destructif) et affiche le score + conseils front.</p>
+            <!-- <p class="muted">Lance owasp_score_detail.sh (mode SAFE, non destructif) et affiche le score + conseils front.</p> -->
 
-            <div class="row wrap">
+            <!-- <div class="row wrap">
               <button id="btnOwaspRun" class="btn btn-primary" type="button">Lancer OWASP (safe)</button>
               <button id="btnOwaspDetail" class="btn btn-ghost" type="button">Lancer OWASP (detail)</button>
+              <button id="btnOwaspExportJson" class="btn btn-ghost" type="button">📥 Export JSON</button>
+              <button id="btnOwaspExportPdf" class="btn btn-ghost" type="button">📄 Export PDF</button>
+            </div> -->
+
+            <div class="row wrap">
+              <!-- ✅ Lecture seule -->
+              <button id="btnOwaspView" class="btn btn-primary" type="button">Voir le dernier rapport</button>
+              <button id="btnOwaspViewDetail" class="btn btn-ghost" type="button">Voir détails</button>
+
+              <!-- ✅ Action contrôlée (POST) : “Rafraîchir” -->
+              <button id="btnOwaspRefresh" class="btn btn-ghost" type="button">Rafraîchir le rapport</button>
+
               <button id="btnOwaspExportJson" class="btn btn-ghost" type="button">📥 Export JSON</button>
               <button id="btnOwaspExportPdf" class="btn btn-ghost" type="button">📄 Export PDF</button>
             </div>
@@ -242,7 +254,7 @@
               <ul id="owaspTips" style="margin:8px 0 0; padding-left: 20px;"></ul>
             </div>
 
-            <pre id="owaspRaw" class="debug-pre" style="margin-top:12px;">-</pre>
+            <!-- <pre id="owaspRaw" class="debug-pre" style="margin-top:12px;">-</pre> -->
           </div>
         </section>
 

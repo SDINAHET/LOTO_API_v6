@@ -44,111 +44,111 @@
 //     }
 
 
-//     // @GetMapping("/api/admin/auth-info")
-//     // @PreAuthorize("hasRole('ADMIN')")
-//     // public ResponseEntity<Map<String, Object>> authInfo(Authentication authentication) {
+    // @GetMapping("/api/admin/auth-info")
+    // @PreAuthorize("hasRole('ADMIN')")
+    // public ResponseEntity<Map<String, Object>> authInfo(Authentication authentication) {
 
-//     //     List<String> roles = authentication == null
-//     //             ? List.of()
-//     //             : authentication.getAuthorities().stream()
-//     //                 .map(GrantedAuthority::getAuthority)
-//     //                 .toList();
+    //     List<String> roles = authentication == null
+    //             ? List.of()
+    //             : authentication.getAuthorities().stream()
+    //                 .map(GrantedAuthority::getAuthority)
+    //                 .toList();
 
-//     //     return ResponseEntity.ok(Map.of(
-//     //             "authenticated", authentication != null && authentication.isAuthenticated(),
-//     //             "user", authentication != null ? authentication.getName() : null,
-//     //             "roles", roles,
-//     //             "authClass", authentication != null ? authentication.getClass().getSimpleName() : null,
-//     //             "timestamp", OffsetDateTime.now().toString()
-//     //     ));
-//     // }
-
-
-//     // @GetMapping("/api/admin/health")
-//     // @PreAuthorize("hasRole('ADMIN')")
-//     // public ResponseEntity<Map<String, Object>> health() {
-
-//     //     Runtime rt = Runtime.getRuntime();
-
-//     //     return ResponseEntity.ok(Map.of(
-//     //             "status", "UP",
-//     //             "serverTime", OffsetDateTime.now().toString(),
-//     //             "memoryUsedMB", (rt.totalMemory() - rt.freeMemory()) / 1024 / 1024,
-//     //             "memoryMaxMB", rt.maxMemory() / 1024 / 1024,
-//     //             "processors", rt.availableProcessors()
-//     //     ));
-//     // }
+    //     return ResponseEntity.ok(Map.of(
+    //             "authenticated", authentication != null && authentication.isAuthenticated(),
+    //             "user", authentication != null ? authentication.getName() : null,
+    //             "roles", roles,
+    //             "authClass", authentication != null ? authentication.getClass().getSimpleName() : null,
+    //             "timestamp", OffsetDateTime.now().toString()
+    //     ));
+    // }
 
 
-//     // @GetMapping("/api/admin/runtime")
-//     // @PreAuthorize("hasRole('ADMIN')")
-//     // public ResponseEntity<Map<String, Object>> runtime() {
+    // @GetMapping("/api/admin/health")
+    // @PreAuthorize("hasRole('ADMIN')")
+    // public ResponseEntity<Map<String, Object>> health() {
 
-//     //     return ResponseEntity.ok(Map.of(
-//     //             "javaVersion", System.getProperty("java.version"),
-//     //             "javaVendor", System.getProperty("java.vendor"),
-//     //             "osName", System.getProperty("os.name"),
-//     //             "osArch", System.getProperty("os.arch"),
-//     //             "osVersion", System.getProperty("os.version"),
-//     //             "timezone", System.getProperty("user.timezone")
-//     //     ));
-//     // }
+    //     Runtime rt = Runtime.getRuntime();
 
-
-//     // @GetMapping("/api/admin/request-context")
-//     // @PreAuthorize("hasRole('ADMIN')")
-//     // public ResponseEntity<Map<String, Object>> requestContext(
-//     //         jakarta.servlet.http.HttpServletRequest request
-//     // ) {
-//     //     return ResponseEntity.ok(Map.of(
-//     //             "method", request.getMethod(),
-//     //             "uri", request.getRequestURI(),
-//     //             "remoteAddr", request.getRemoteAddr(),
-//     //             "remoteHost", request.getRemoteHost(),
-//     //             "userAgent", request.getHeader("User-Agent"),
-//     //             "referer", request.getHeader("Referer")
-//     //     ));
-//     // }
+    //     return ResponseEntity.ok(Map.of(
+    //             "status", "UP",
+    //             "serverTime", OffsetDateTime.now().toString(),
+    //             "memoryUsedMB", (rt.totalMemory() - rt.freeMemory()) / 1024 / 1024,
+    //             "memoryMaxMB", rt.maxMemory() / 1024 / 1024,
+    //             "processors", rt.availableProcessors()
+    //     ));
+    // }
 
 
-//     // @GetMapping("/api/admin/cookies")
-//     // @PreAuthorize("hasRole('ADMIN')")
-//     // public ResponseEntity<Map<String, Object>> cookies(
-//     //         jakarta.servlet.http.HttpServletRequest request
-//     // ) {
-//     //     var cookies = request.getCookies();
+    // @GetMapping("/api/admin/runtime")
+    // @PreAuthorize("hasRole('ADMIN')")
+    // public ResponseEntity<Map<String, Object>> runtime() {
 
-//     //     if (cookies == null) {
-//     //         return ResponseEntity.ok(Map.of("cookies", List.of()));
-//     //     }
-
-//     //     List<Map<String, Object>> result = List.of(cookies).stream()
-//     //             .map(c -> Map.of(
-//     //                     "name", c.getName(),
-//     //                     "httpOnly", c.isHttpOnly(),
-//     //                     "secure", c.getSecure(),
-//     //                     "path", c.getPath()
-//     //             ))
-//     //             .toList();
-
-//     //     return ResponseEntity.ok(Map.of("cookies", result));
-//     // }
+    //     return ResponseEntity.ok(Map.of(
+    //             "javaVersion", System.getProperty("java.version"),
+    //             "javaVendor", System.getProperty("java.vendor"),
+    //             "osName", System.getProperty("os.name"),
+    //             "osArch", System.getProperty("os.arch"),
+    //             "osVersion", System.getProperty("os.version"),
+    //             "timezone", System.getProperty("user.timezone")
+    //     ));
+    // }
 
 
-//     // private static final long START_TIME = System.currentTimeMillis();
+    // @GetMapping("/api/admin/request-context")
+    // @PreAuthorize("hasRole('ADMIN')")
+    // public ResponseEntity<Map<String, Object>> requestContext(
+    //         jakarta.servlet.http.HttpServletRequest request
+    // ) {
+    //     return ResponseEntity.ok(Map.of(
+    //             "method", request.getMethod(),
+    //             "uri", request.getRequestURI(),
+    //             "remoteAddr", request.getRemoteAddr(),
+    //             "remoteHost", request.getRemoteHost(),
+    //             "userAgent", request.getHeader("User-Agent"),
+    //             "referer", request.getHeader("Referer")
+    //     ));
+    // }
 
-//     // @GetMapping("/api/admin/uptime")
-//     // @PreAuthorize("hasRole('ADMIN')")
-//     // public ResponseEntity<Map<String, Object>> uptime() {
 
-//     //     long uptimeSeconds = (System.currentTimeMillis() - START_TIME) / 1000;
+    // @GetMapping("/api/admin/cookies")
+    // @PreAuthorize("hasRole('ADMIN')")
+    // public ResponseEntity<Map<String, Object>> cookies(
+    //         jakarta.servlet.http.HttpServletRequest request
+    // ) {
+    //     var cookies = request.getCookies();
 
-//     //     return ResponseEntity.ok(Map.of(
-//     //             "uptimeSeconds", uptimeSeconds,
-//     //             "uptimeMinutes", uptimeSeconds / 60,
-//     //             "uptimeHours", uptimeSeconds / 3600
-//     //     ));
-//     // }
+    //     if (cookies == null) {
+    //         return ResponseEntity.ok(Map.of("cookies", List.of()));
+    //     }
+
+    //     List<Map<String, Object>> result = List.of(cookies).stream()
+    //             .map(c -> Map.of(
+    //                     "name", c.getName(),
+    //                     "httpOnly", c.isHttpOnly(),
+    //                     "secure", c.getSecure(),
+    //                     "path", c.getPath()
+    //             ))
+    //             .toList();
+
+    //     return ResponseEntity.ok(Map.of("cookies", result));
+    // }
+
+
+    // private static final long START_TIME = System.currentTimeMillis();
+
+    // @GetMapping("/api/admin/uptime")
+    // @PreAuthorize("hasRole('ADMIN')")
+    // public ResponseEntity<Map<String, Object>> uptime() {
+
+    //     long uptimeSeconds = (System.currentTimeMillis() - START_TIME) / 1000;
+
+    //     return ResponseEntity.ok(Map.of(
+    //             "uptimeSeconds", uptimeSeconds,
+    //             "uptimeMinutes", uptimeSeconds / 60,
+    //             "uptimeHours", uptimeSeconds / 3600
+    //     ));
+    // }
 
 
 
@@ -435,3 +435,5 @@ public class AdminDebugController {
         ));
     }
 }
+
+

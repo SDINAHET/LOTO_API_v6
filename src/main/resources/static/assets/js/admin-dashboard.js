@@ -119,6 +119,8 @@
     if (pageSubtitle) pageSubtitle.textContent = subtitles[key] || "";
 
     if (key === "logs") refreshLogs();
+    if (key === "owasp") fetchOwaspLast(false);
+
   }
 
   navItems.forEach((btn) =>
@@ -492,13 +494,68 @@
     owaspTips.innerHTML = (tips || []).map((t) => `<li>${t}</li>`).join("");
   }
 
-  async function runOwasp(detail) {
-    if (owaspStatus) owaspStatus.textContent = "Analyse en cours…";
+  // async function runOwasp(detail) {
+  //   if (owaspStatus) owaspStatus.textContent = "Analyse en cours…";
+  //   if (owaspRaw) owaspRaw.textContent = "Chargement…";
+
+  //   try {
+  //     const res = await apiFetch(
+  //       `/api/admin/owasp-score?mode=safe&detail=${detail ? "true" : "false"}`,
+  //       { method: "GET" }
+  //     );
+
+  //     if (res.status === 401 || res.status === 403) {
+  //       if (owaspStatus) owaspStatus.textContent = `${res.status} - Accès refusé`;
+  //       if (owaspRaw) owaspRaw.textContent = "Session expirée / pas ADMIN.";
+  //       return;
+  //     }
+
+  //     const data = await res.json();
+
+  //     owaspSetLastResult({
+  //       total: data.total,
+  //       grade: data.grade,
+  //       mode: "safe",
+  //       detail: !!detail,
+  //       scores: data.scores || {},
+  //       adviceFront: data.frontTips || [],
+  //       frontUrl: window.location.origin,
+  //       apiUrl: API_BASE,
+  //     });
+
+  //     const total = data.total;
+  //     const grade = data.grade || "-";
+  //     if (owaspStatus)
+  //       owaspStatus.textContent = `TOTAL: ${total ?? "?"}/100  (Grade: ${grade})`;
+
+  //     renderOwaspTable(data.scores || {});
+  //     renderTips(data.frontTips || []);
+
+  //     if (owaspRaw)
+  //       owaspRaw.textContent = detail
+  //         ? data.raw || ""
+  //         : JSON.stringify(
+  //             {
+  //               total: data.total,
+  //               grade: data.grade,
+  //               scores: data.scores,
+  //             },
+  //             null,
+  //             2
+  //           );
+  //   } catch (e) {
+  //     if (owaspStatus) owaspStatus.textContent = "Erreur réseau";
+  //     if (owaspRaw) owaspRaw.textContent = String(e);
+  //   }
+  // }
+
+  async function fetchOwaspLast(detail) {
+    if (owaspStatus) owaspStatus.textContent = "Chargement du dernier rapport…";
     if (owaspRaw) owaspRaw.textContent = "Chargement…";
 
     try {
       const res = await apiFetch(
-        `/api/admin/owasp-score?mode=safe&detail=${detail ? "true" : "false"}`,
+        `/api/admin/owasp-score?detail=${detail ? "true" : "false"}`,
         { method: "GET" }
       );
 
@@ -508,17 +565,27 @@
         return;
       }
 
+      // si pas encore de rapport => 404 propre
+      if (res.status === 404) {
+        if (owaspStatus) owaspStatus.textContent = "Aucun rapport disponible";
+        if (owaspRaw)
+          owaspRaw.textContent =
+            "Aucun audit n’a encore été généré. Utilise « Rafraîchir l’audit ».";
+        renderOwaspTable({});
+        renderTips([]);
+        return;
+      }
+
       const data = await res.json();
 
       owaspSetLastResult({
         total: data.total,
         grade: data.grade,
-        mode: "safe",
         detail: !!detail,
         scores: data.scores || {},
         adviceFront: data.frontTips || [],
-        frontUrl: window.location.origin,
-        apiUrl: API_BASE,
+        frontUrl: data.frontUrl || window.location.origin,
+        apiUrl: data.apiUrl || API_BASE,
       });
 
       const total = data.total;
@@ -529,26 +596,87 @@
       renderOwaspTable(data.scores || {});
       renderTips(data.frontTips || []);
 
-      if (owaspRaw)
+      if (owaspRaw) {
         owaspRaw.textContent = detail
           ? data.raw || ""
           : JSON.stringify(
-              {
-                total: data.total,
-                grade: data.grade,
-                scores: data.scores,
-              },
+              { total: data.total, grade: data.grade, scores: data.scores },
               null,
               2
             );
+      }
     } catch (e) {
       if (owaspStatus) owaspStatus.textContent = "Erreur réseau";
       if (owaspRaw) owaspRaw.textContent = String(e);
     }
   }
 
-  document.getElementById("btnOwaspRun")?.addEventListener("click", () => runOwasp(false));
-  document.getElementById("btnOwaspDetail")?.addEventListener("click", () => runOwasp(true));
+  async function runOwaspAudit(detail) {
+    if (owaspStatus) owaspStatus.textContent = "Exécution audit (SAFE)…";
+    if (owaspRaw) owaspRaw.textContent = "Analyse en cours…";
+
+    try {
+      const res = await apiFetch(
+        `/api/admin/owasp-score/run?detail=${detail ? "true" : "false"}`,
+        { method: "POST" }
+      );
+
+      if (res.status === 401 || res.status === 403) {
+        if (owaspStatus) owaspStatus.textContent = `${res.status} - Accès refusé`;
+        if (owaspRaw) owaspRaw.textContent = "Session expirée / pas ADMIN.";
+        return;
+      }
+
+      const data = await res.json().catch(() => null);
+
+      if (!res.ok) {
+        if (owaspStatus) owaspStatus.textContent = `Erreur ${res.status}`;
+        if (owaspRaw) owaspRaw.textContent = JSON.stringify(data, null, 2);
+        return;
+      }
+
+      // Après run, on affiche le résultat (retourne déjà latest)
+      owaspSetLastResult({
+        total: data.total,
+        grade: data.grade,
+        detail: !!detail,
+        scores: data.scores || {},
+        adviceFront: data.frontTips || [],
+        frontUrl: data.frontUrl || window.location.origin,
+        apiUrl: data.apiUrl || API_BASE,
+      });
+
+      const total = data.total;
+      const grade = data.grade || "-";
+      if (owaspStatus)
+        owaspStatus.textContent = `TOTAL: ${total ?? "?"}/100  (Grade: ${grade})`;
+
+      renderOwaspTable(data.scores || {});
+      renderTips(data.frontTips || []);
+
+      if (owaspRaw) {
+        owaspRaw.textContent = detail
+          ? data.raw || ""
+          : JSON.stringify(
+              { total: data.total, grade: data.grade, scores: data.scores },
+              null,
+              2
+            );
+      }
+    } catch (e) {
+      if (owaspStatus) owaspStatus.textContent = "Erreur réseau";
+      if (owaspRaw) owaspRaw.textContent = String(e);
+    }
+  }
+
+
+  // document.getElementById("btnOwaspRun")?.addEventListener("click", () => runOwasp(false));
+  // document.getElementById("btnOwaspDetail")?.addEventListener("click", () => runOwasp(true));
+  // document.getElementById("btnOwaspRun")?.addEventListener("click", () => fetchOwaspLast(false));
+  // document.getElementById("btnOwaspDetail")?.addEventListener("click", () => fetchOwaspLast(true));
+  document.getElementById("btnOwaspView")?.addEventListener("click", () => fetchOwaspLast(false));
+  document.getElementById("btnOwaspViewDetail")?.addEventListener("click", () => fetchOwaspLast(true));
+  document.getElementById("btnOwaspRefresh")?.addEventListener("click", () => runOwaspAudit(false));
 
   // ===============================
   // OWASP EXPORT (JSON / PDF)

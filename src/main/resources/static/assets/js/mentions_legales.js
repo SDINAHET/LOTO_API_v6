@@ -85,3 +85,28 @@
       setTimeout(applyAuthOnly, 800);
     });
   })();
+
+// document.addEventListener("layout:ready", () => {
+//   // uniquement sur la page mentions légales
+//   if (!document.body.classList.contains("page-mentions-legales")) return;
+
+//   const footer = document.getElementById("appFooter");
+//   if (!footer) return;
+
+//   // évite les doublons
+//   if (footer.querySelector(".footer-statistiques")) return;
+
+//   const a = document.createElement("a");
+//   a.href = "https://lototracker.goatcounter.com/";
+//   a.target = "_blank"; // optionnel : ouvre dans un nouvel onglet
+//   a.rel = "noopener noreferrer";
+//   a.className = "footer-statistiques";
+//   a.textContent = "Statistiques";
+
+//   // tu peux choisir où l'insérer :
+//   // - à la fin :
+//   footer.appendChild(a);
+
+//   // ou au début :
+//   // footer.prepend(a);
+// });
