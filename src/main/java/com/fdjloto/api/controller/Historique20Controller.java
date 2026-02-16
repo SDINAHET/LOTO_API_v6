@@ -16,8 +16,8 @@ import java.util.List;
 /**
  * **Controller for retrieving historical lottery results.**
  */
-// @CrossOrigin(origins = "http://127.0.0.1:5500") // 🔥 Allows CORS for Live Server
-@CrossOrigin(origins = {"http://127.0.0.1:5500", "http://localhost:5500", "https://stephanedinahet.fr", "http://loto-tracker.fr"})
+@CrossOrigin(origins = "http://127.0.0.1:5500") // 🔥 Allows CORS for Live Server
+// @CrossOrigin(origins = {"http://127.0.0.1:5500", "http://localhost:5500", "https://stephanedinahet.fr", "https://loto-tracker.fr"})
 @RestController
 @RequestMapping("/api/historique")
 @Tag(name = "Lottery History", description = "Endpoints for retrieving historical lottery results.")
