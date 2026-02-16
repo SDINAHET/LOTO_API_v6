@@ -28,6 +28,29 @@
 
     //   console.log("API_BASE:", API_BASE);
 
+    // (function () {
+    //   const HOST = window.location.hostname;
+
+    //   const PROD_DOMAINS = ["stephanedinahet.fr", "loto-tracker.fr"];
+
+    //   const IS_PROD = PROD_DOMAINS.some(d =>
+    //     HOST === d ||
+    //     HOST === `www.${d}` ||
+    //     HOST.endsWith(`.${d}`)
+    //   );
+
+    //   // ✅ Local => API sur 8082 du même host (localhost/127.0.0.1)
+    //   // ✅ Prod => même origin (fonctionne pour stephanedinahet.fr ET loto-tracker.fr)
+    //   const API_BASE_PRIMARY = (HOST === "localhost" || HOST === "127.0.0.1")
+    //     ? `http://${HOST}:8082`
+    //     : (IS_PROD ? window.location.origin : "https://stephanedinahet.fr"); // fallback sécurité
+
+    //   window.API_BASE = API_BASE_PRIMARY;
+    //   window.getApiBase = () => window.API_BASE;
+
+    //   console.log("API_BASE =", window.API_BASE);
+    // })();
+
     (function () {
       const HOST = window.location.hostname;
 
@@ -39,17 +62,22 @@
         HOST.endsWith(`.${d}`)
       );
 
-      // ✅ Local => API sur 8082 du même host (localhost/127.0.0.1)
-      // ✅ Prod => même origin (fonctionne pour stephanedinahet.fr ET loto-tracker.fr)
-      const API_BASE_PRIMARY = (HOST === "localhost" || HOST === "127.0.0.1")
-        ? `http://${HOST}:8082`
-        : (IS_PROD ? window.location.origin : "https://stephanedinahet.fr"); // fallback sécurité
+      // ✅ Local => API sur 8082 du même host
+      // ✅ Prod => même origin
+      const API_BASE_PRIMARY =
+        (HOST === "localhost" || HOST === "127.0.0.1")
+          ? `http://${HOST}:8082`
+          : (IS_PROD ? window.location.origin : "https://stephanedinahet.fr");
 
       window.API_BASE = API_BASE_PRIMARY;
       window.getApiBase = () => window.API_BASE;
 
       console.log("API_BASE =", window.API_BASE);
-// })();
+    })();
+
+    const API_BASE = window.API_BASE; // ✅ maintenant API_BASE existe partout dans ce fichier
+
+
 
 
 
@@ -207,7 +235,7 @@
           applyAuthOnly();
         }, 800);
       });
-    })();
+    // })();
 
 
 
@@ -215,10 +243,10 @@
 /* =========================
       API BASE (local / prod)
     ========================== */
-    const API_BASE =
-      (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1")
-        ? "http://localhost:8082"
-        : "https://stephanedinahet.fr";
+    // const API_BASE =
+    //   (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1")
+    //     ? "http://localhost:8082"
+    //     : "https://stephanedinahet.fr";
 
     /* =========================
       Countdown next draw
