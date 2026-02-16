@@ -19,23 +19,35 @@
   const IS_LOCAL =
     HOST === "localhost" ||
     HOST === "127.0.0.1" ||
+    HOST === "::1" ||
     HOST.startsWith("192.168.") ||
     HOST.startsWith("10.") ||
+    /^172\.(1[6-9]|2\d|3[0-1])\./.test(HOST) ||
     HOST.endsWith(".local");
 
-  window.API_BASE = IS_LOCAL ? `http://${HOST}:8082` : window.location.origin;
+  // Local => :8082, Prod => same-origin (marche pour stephanedinahet.fr ET loto-tracker.fr)
+  window.API_BASE = IS_LOCAL ? `${window.location.protocol}//${HOST}:8082` : window.location.origin;
+
+  // 🔥 IMPORTANT: on reset tout override précédent (ancienne page / autre script)
+  window.__API_BASE_ACTIVE__ = window.API_BASE;
+
   console.log("API_BASE =", window.API_BASE);
 
-  const API_BASE_FALLBACK = null; // optionnel, laisse null
-
-  const USERINFO_PATH = "/api/protected/userinfo";
-  const LOGOUT_PATH = "/api/auth/logout";
-  const CSRF_PATH = "/api/auth/csrf";
-  const REFRESH_PATH = "/api/auth/refresh";
-
   function getActiveBase() {
-    return window.__API_BASE_ACTIVE__ || window.API_BASE || window.location.origin;
+    const candidate = window.__API_BASE_ACTIVE__ || window.API_BASE || window.location.origin;
+
+    // 🔒 En prod: interdit de sortir du domaine courant (évite stephanedinahet.fr depuis loto-tracker.fr)
+    if (!IS_LOCAL) {
+      try {
+        const candOrigin = new URL(candidate, window.location.origin).origin;
+        if (candOrigin !== window.location.origin) return window.location.origin;
+      } catch {
+        return window.location.origin;
+      }
+    }
+    return candidate;
   }
+
 
   /* =========================================================
      Cookies helpers
@@ -375,15 +387,31 @@
     refreshWaiters = [];
   }
 
+  // function isApiUrl(input) {
+  //   const base = getActiveBase();
+  //   const url = typeof input === "string" ? input : input?.url;
+  //   if (!url) return false;
+
+  //   if (url.startsWith(base)) return true; // URL absolue backend
+  //   if (url.startsWith("/api/")) return true; // URL relative API
+  //   return false;
+  // }
   function isApiUrl(input) {
-    const base = getActiveBase();
     const url = typeof input === "string" ? input : input?.url;
     if (!url) return false;
 
-    if (url.startsWith(base)) return true; // URL absolue backend
-    if (url.startsWith("/api/")) return true; // URL relative API
-    return false;
+    // Toutes les URLs relatives /api/...
+    if (url.startsWith("/api/")) return true;
+
+    // Les URLs absolues qui visent l'origin courant UNIQUEMENT
+    try {
+      const u = new URL(url, window.location.origin);
+      return u.origin === window.location.origin && u.pathname.startsWith("/api/");
+    } catch {
+      return false;
+    }
   }
+
 
   async function apiFetch(input, init = {}) {
     const base = getActiveBase();
