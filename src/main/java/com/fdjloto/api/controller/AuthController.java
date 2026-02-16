@@ -52,7 +52,7 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 @Tag(name = "Authentication", description = "Endpoints for user authentication, login, logout, and account management.")
 @CrossOrigin(
-        origins = {"http://127.0.0.1:5500", "http://localhost:5500", "https://stephanedinahet.fr", "https://loto-tracker.fr"},
+        origins = {"http://127.0.0.1:5500", "http://localhost:5500", "https://stephanedinahet.fr", "http://loto-tracker.fr"},
         allowCredentials = "true"
 )
 @Slf4j
