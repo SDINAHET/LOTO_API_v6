@@ -89,7 +89,7 @@ public class SecurityConfig {
                         "img-src 'self' data:; " +
                         "font-src 'self'; " +
                         // "connect-src 'self' https://stephanedinahet.fr https://www.stephanedinahet.fr http://localhost:8082; " +
-                        "connect-src 'self' http://localhost:8082 http://127.0.0.1:8082 https://stephanedinahet.fr https://www.stephanedinahet.fr; " +
+                        "connect-src 'self' http://localhost:8082 http://127.0.0.1:8082 https://stephanedinahet.fr https://www.stephanedinahet.fr https://loto-tracker.fr https://www.loto-tracker.fr; " +
                         "frame-ancestors 'self'; " +
                         "base-uri 'self'; " +
                         "form-action 'self'"
@@ -319,6 +319,7 @@ public class SecurityConfig {
             "http://127.0.0.1:5500", //live server
             "https://stephanedinahet.fr",
             "https://loto-tracker.fr",
+            "https://www.loto-tracker.fr",
             "http://192.168.*.*:*",
             // "http://localhost:8082", // add sd
 	        "http://localhost:5500", // add sd
