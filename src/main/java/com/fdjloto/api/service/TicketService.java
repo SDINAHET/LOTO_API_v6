@@ -136,13 +136,27 @@ public class TicketService {
     }
 
 
+    // public List<TicketDTO> getAllTickets() {
+    //     return ticketRepository.findAll().stream().map(ticket -> new TicketDTO(ticket)).toList();
+    // }
     public List<TicketDTO> getAllTickets() {
-        return ticketRepository.findAll().stream().map(ticket -> new TicketDTO(ticket)).toList();
+        return ticketRepository.findAllSorted()
+                .stream()
+                .map(TicketDTO::new)
+                .toList();
     }
 
+
+    // public List<TicketDTO> getTicketsByUserId(String userId) {
+    //     return ticketRepository.findByUserId(userId).stream().map(ticket -> new TicketDTO(ticket)).toList();
+    // }
     public List<TicketDTO> getTicketsByUserId(String userId) {
-        return ticketRepository.findByUserId(userId).stream().map(ticket -> new TicketDTO(ticket)).toList();
+        return ticketRepository.findByUserId(userId)
+                .stream()
+                .map(TicketDTO::new)
+                .toList();
     }
+
 
     public Ticket getTicketById(String ticketId) {
         return ticketRepository.findById(ticketId)

@@ -66,6 +66,9 @@ echo "⬇️  Moment.js"
 dl "https://cdn.jsdelivr.net/npm/moment/min/moment.min.js" \
    "$BASE_DIR/moment/moment.min.js"
 
+dl "https://cdn.jsdelivr.net/npm/moment/min/moment-with-locales.min.js" \
+   "$BASE_DIR/moment/moment-with-locales.min.js"
+
 dl "https://cdn.jsdelivr.net/npm/moment-timezone/builds/moment-timezone-with-data.min.js" \
    "$BASE_DIR/moment/moment-timezone-with-data.min.js"
 

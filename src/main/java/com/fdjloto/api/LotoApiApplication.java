@@ -308,8 +308,9 @@ public class LotoApiApplication {
                 .addServersItem(new Server().url("http://127.0.0.1:5500").description("Serveur local (Live Server)"))
                 // .addServersItem(new Server().url("http://localhost:8082/swagger-ui/index.html").description("Serveur local"))
                 // .addServersItem(new Server().url("http://127.0.0.1:5500/src/main/resources/static/index.html").description("Serveur local (Live Server)"))
-                .addServersItem(new Server().url("https://stephanedinahet.fr").description("Serveur Production"))
-                .addServersItem(new Server().url("https://stephanedinahet.fr/swagger-ui/index.html").description("Serveur Production - documentation Swagger"));
+                .addServersItem(new Server().url("https://stephanedinahet.fr").description("Serveur Production1"))
+                .addServersItem(new Server().url("https://loto-tracker.fr").description("Serveur Production2"));
+                // .addServersItem(new Server().url("https://stephanedinahet.fr/swagger-ui/index.html").description("Serveur Production - documentation Swagger"));
     }
 
 }

@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+  <title>Loto Tracker - Inscription</title>
+  <style>html,body{background:#0a101c;}</style>
+
+  <link rel="icon" type="image/png" href="assets/img/loto_tracker.png" />
+
+  <!-- Inject header/footer -->
+  <script defer src="assets/js/layout.js"></script>
+  <link rel="stylesheet" href="assets/css/styles.css">
+  <link rel="stylesheet" href="assets/css/register.css">
+
+</head>
+
+<body>
+  <div id="appHeader"></div>
+
+  <div class="page">
+    <div class="container">
+      <h2>Loto Tracker -<br>Inscription</h2>
+
+      <form id="registerForm" novalidate>
+        <div class="input-group">
+          <label for="firstName">Prénom</label>
+          <div class="field" id="firstNameField">
+            <input type="text" id="firstName" required autocomplete="given-name" placeholder="Prénom" />
+          </div>
+        </div>
+
+        <div class="input-group">
+          <label for="lastName">Nom</label>
+          <div class="field" id="lastNameField">
+            <input type="text" id="lastName" required autocomplete="family-name" placeholder="Nom" />
+          </div>
+        </div>
+
+        <div class="input-group">
+          <label for="email">Email</label>
+          <div class="field" id="emailField">
+            <input type="email" id="email" required autocomplete="email" placeholder="Email" />
+            <div class="right-icons" aria-hidden="true">
+              <svg id="emailOkIcon" viewBox="0 0 24 24" class="status-icon ok hidden">
+                <circle cx="12" cy="12" r="10"></circle>
+                <path d="M8 12.5l2.5 2.5L16 9"></path>
+              </svg>
+              <svg id="emailBadIcon" viewBox="0 0 24 24" class="status-icon bad hidden">
+                <circle cx="12" cy="12" r="10"></circle>
+                <path d="M9 9l6 6"></path>
+                <path d="M15 9l-6 6"></path>
+              </svg>
+            </div>
+          </div>
+        </div>
+
+        <div class="input-group">
+          <label for="password">Mot de passe</label>
+          <div class="field" id="passwordField">
+            <input type="password" id="password" required autocomplete="new-password" placeholder="Mot de passe" />
+            <div class="right-icons">
+              <button type="button" class="icon-btn" id="togglePassword" aria-label="Afficher / Masquer" title="Afficher / Masquer">
+                <svg id="eyeOpen" class="eye-icon hidden" viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"/>
+                  <path d="M12 9a3 3 0 100 6 3 3 0 000-6z"/>
+                </svg>
+                <svg id="eyeClosed" class="eye-icon" viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"/>
+                  <path d="M12 9a3 3 0 100 6 3 3 0 000-6z"/>
+                  <path d="M4 4l16 16"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+
+          <div class="strength" aria-hidden="true">
+            <div class="bar-wrap"><div class="bar" id="pwBar"></div></div>
+            <div class="strength-text" id="pwText">—</div>
+          </div>
+        </div>
+
+        <div class="input-group">
+          <label for="confirmPassword">Confirmer</label>
+          <div class="field" id="confirmField">
+            <input type="password" id="confirmPassword" required autocomplete="new-password" placeholder="Confirmer le mot de passe" />
+            <div class="right-icons">
+              <svg id="confirmOkIcon" viewBox="0 0 24 24" class="status-icon ok hidden" aria-hidden="true">
+                <circle cx="12" cy="12" r="10"></circle>
+                <path d="M8 12.5l2.5 2.5L16 9"></path>
+              </svg>
+              <svg id="confirmBadIcon" viewBox="0 0 24 24" class="status-icon bad hidden" aria-hidden="true">
+                <circle cx="12" cy="12" r="10"></circle>
+                <path d="M9 9l6 6"></path>
+                <path d="M15 9l-6 6"></path>
+              </svg>
+
+              <button type="button" class="icon-btn" id="toggleConfirmPassword" aria-label="Afficher / Masquer" title="Afficher / Masquer">
+                <svg id="eyeOpenConfirm" class="eye-icon hidden" viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"/>
+                  <path d="M12 9a3 3 0 100 6 3 3 0 000-6z"/>
+                </svg>
+                <svg id="eyeClosedConfirm" class="eye-icon" viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"/>
+                  <path d="M12 9a3 3 0 100 6 3 3 0 000-6z"/>
+                  <path d="M4 4l16 16"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <button type="submit" class="btn" id="submitBtn">Créer un compte</button>
+        <div class="msg" id="feedback" aria-live="polite"></div>
+
+        <div class="register-link">
+          Déjà un compte ? <a href="login.html">Se connecter</a>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div id="appFooter"></div>
+
+  <div class="balls" id="ballsLayer" aria-hidden="true"></div>
+
+  <script src="assets/js/register.js">  </script>
+
+  <script src="assets/js/cookies.js"></script>
+
+  <!-- <script>
+    // Désactiver GoatCounter hors production
+    if (
+      !location.hostname.endsWith("stephanedinahet.fr")
+    ) {
+      window.goatcounter = { no_onload: true };
+    }
+  </script>
+  <script data-goatcounter="https://lototracker.goatcounter.com/count"
+        async src="//gc.zgo.at/count.js"></script> -->
+</body>
+</html>

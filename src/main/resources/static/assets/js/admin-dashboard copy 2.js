@@ -964,7 +964,10 @@
           btn.textContent = count ? `Voir (${count})` : "Voir";
 
           btn.addEventListener("click", () => {
-            openTicketsModal(list, row.email || "");
+            // openTicketsModal(list, row.email || "");
+            const uid = row.id || row._id || "";
+            openTicketsModal(list, row.email || "", uid);
+
           });
 
           td.appendChild(btn);
@@ -1295,7 +1298,13 @@
     return wrap;
   }
 
-  function openTicketsModal(tickets, userEmail) {
+  // function openTicketsModal(tickets, userEmail) {
+  function openTicketsModal(tickets, userEmail, userId = "") {
+    window.__ticketsModalCtx = {
+      email: userEmail || "",
+      userId: userId || (tickets?.[0]?.userId ?? "")
+    };
+
     if (!ticketsOverlay || !ticketsBody || !ticketsTitle) return;
 
     const list = Array.isArray(tickets) ? tickets : [];
@@ -1334,7 +1343,82 @@
         const tdUpdated = document.createElement("td");
         tdUpdated.textContent = fmtDateTime(t.updatedAt);
 
-        tr.append(tdNumbers, tdChance, tdDate, tdDay, tdCreated, tdUpdated);
+        // tr.append(tdNumbers, tdChance, tdDate, tdDay, tdCreated, tdUpdated);
+
+        // ✅ Actions (Modifier / Supprimer)
+        const tdActions = document.createElement("td");
+        const actions = document.createElement("div");
+        actions.className = "tickets-actions";
+
+        const btnEdit = document.createElement("button");
+        btnEdit.type = "button";
+        btnEdit.className = "btn-mini";
+        btnEdit.textContent = "Modifier";
+
+        btnEdit.addEventListener("click", () => {
+          if (!t?.id) {
+            showToast("Ticket sans id (impossible à modifier)", "error");
+            return;
+          }
+
+          // contexte: on veut refresh le modal tickets après save
+          window.__ticketsModalCtx = { email: userEmail };
+
+          // On bascule sur la ressource tickets pour réutiliser TON CRUD existant
+          // (openDbModal utilise dbCurrentResource pour construire le form)
+          const sel = document.getElementById("dbResourceSelect");
+          if (sel) sel.value = "tickets";
+          dbCurrentResource = "tickets";
+
+          // Option: fermer le modal Tickets pour éviter superposition
+          closeTicketsModal();
+
+          // Ouvre le CRUD en mode edit sur CE ticket
+          openDbModal("edit", t);
+        });
+
+        const btnDel = document.createElement("button");
+        btnDel.type = "button";
+        btnDel.className = "btn-mini btn-danger";
+        btnDel.textContent = "Supprimer";
+
+        btnDel.addEventListener("click", async () => {
+          if (!t?.id) {
+            showToast("Ticket sans id (impossible à supprimer)", "error");
+            return;
+          }
+
+          const ok = confirm("Supprimer ce ticket ?");
+          if (!ok) return;
+
+          try {
+            const res = await apiFetch(`/api/admin/tickets/${t.id}`, { method: "DELETE" });
+            if (!res.ok) {
+              const body = await res.text().catch(() => "");
+              console.error("DELETE ticket error:", res.status, body);
+              showToast(`Erreur suppression (${res.status})`, "error");
+              return;
+            }
+
+            showToast("Ticket supprimé ✅", "success");
+
+            // refresh du modal tickets (tu as déjà cette fonction dans ton code)
+            if (userEmail) {
+              await refreshTicketsModalForEmail(userEmail);
+            }
+          } catch (e) {
+            console.error(e);
+            showToast("Erreur réseau", "error");
+          }
+        });
+
+        actions.append(btnEdit, btnDel);
+        tdActions.appendChild(actions);
+
+        // ✅ ajoute tdActions à la fin
+        tr.append(tdNumbers, tdChance, tdDate, tdDay, tdCreated, tdUpdated, tdActions);
+
+
         ticketsBody.appendChild(tr);
       });
     }
@@ -1405,6 +1489,38 @@
     const txt = buildTicketsText(lastTicketsForCopy || [], lastTicketsUserEmail || "");
     const ok = await copyToClipboard(txt);
     showToast(ok ? "Tickets copiés ✅" : "Copie impossible ❌", ok ? "success" : "error");
+
+    const ticketsAdd = document.getElementById("ticketsAdd");
+
+ticketsAdd?.addEventListener("click", () => {
+  const ctx = window.__ticketsModalCtx || {};
+  if (!ctx.userId) {
+    showToast("userId manquant (impossible de créer)", "error");
+    return;
+  }
+
+  // Basculer le CRUD sur tickets
+  const sel = document.getElementById("dbResourceSelect");
+  if (sel) sel.value = "tickets";
+  dbCurrentResource = "tickets";
+
+  // Pré-remplir le ticket pour ce user
+  const draft = {
+    userId: ctx.userId,
+    numbers: "",
+    chanceNumber: "",
+    drawDate: "",
+  };
+
+  // Fermer le modal tickets pour éviter superposition
+  closeTicketsModal();
+
+  // Ouvre le modal CRUD “create”
+  openDbModal("create", draft);
+});
+
+
+
   });
 
   // ----------------------------

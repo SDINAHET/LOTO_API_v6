@@ -30,10 +30,15 @@ public class UserServiceImpl implements UserService, UserDetailsService {
         this.passwordEncoder = passwordEncoder;
     }
 
+    // @Override
+    // public List<User> getAllUsers() {
+    //     return userRepository.findAll();
+    // }
     @Override
     public List<User> getAllUsers() {
-        return userRepository.findAll();
+        return userRepository.findAllByOrderByCreatedAtDesc();
     }
+
 
     @Override
     public Optional<User> getUserById(UUID id) { // ✅ Garde UUID

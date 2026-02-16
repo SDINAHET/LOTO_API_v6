@@ -19,7 +19,8 @@ public class CorsConfig {
                             "http://127.0.0.1:5500",
                             "http://localhost:5500",
                             "https://stephanedinahet.fr",
-                            "https://www.stephanedinahet.fr"
+                            "https://www.stephanedinahet.fr",
+                            "https://loto-tracker.fr"
                         )
                         .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
                         .allowedHeaders("*") // 🔥 Autorise tous les headers

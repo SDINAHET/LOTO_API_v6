@@ -3,6 +3,8 @@ package com.fdjloto.api.repository;
 import com.fdjloto.api.model.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
+
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID; // ✅ Ensure UUID import
 
@@ -20,4 +22,7 @@ public interface UserRepository extends JpaRepository<User, String> { // ✅ Str
      * @return An **Optional<User>** containing the user if found, otherwise empty.
      */
     Optional<User> findByEmail(String email);
+
+    List<User> findAllByOrderByCreatedAtDesc();
+
 }

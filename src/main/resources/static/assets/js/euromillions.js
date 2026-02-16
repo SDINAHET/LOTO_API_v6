@@ -1,8 +1,49 @@
+    // (function () {
+    //   const API_BASE =
+    //     (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1")
+    //       ? "http://localhost:8082"
+    //       : "https://stephanedinahet.fr";
+
+
+    // (function () {
+    //   const HOST = window.location.hostname;
+
+    //   const PROD_DOMAINS = [
+    //     "stephanedinahet.fr",
+    //     "loto-tracker.fr"
+    //   ];
+
+    //   const IS_PROD = PROD_DOMAINS.some(domain =>
+    //     HOST === domain ||
+    //     HOST === `www.${domain}` ||
+    //     HOST.endsWith(`.${domain}`)
+    //   );
+
+    //   const API_BASE = IS_PROD
+    //     ? window.location.origin
+    //     : `${window.location.protocol}//${HOST}:8082`;
+
+    //   // On rend API_BASE global
+    //   window.API_BASE = API_BASE;
+
+    //   console.log("API_BASE:", API_BASE);
+    // })();
+
     (function () {
-      const API_BASE =
-        (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1")
-          ? "http://localhost:8082"
-          : "https://stephanedinahet.fr";
+      const host = window.location.hostname;
+
+      const isLocal = (host === "localhost" || host === "127.0.0.1");
+      const isLotoTracker = host === "loto-tracker.fr" || host === "www.loto-tracker.fr";
+
+      const API_BASE = isLocal
+        ? "http://localhost:8082"
+        : (isLotoTracker ? "https://loto-tracker.fr" : "https://stephanedinahet.fr");
+
+      window.API_BASE = API_BASE;
+      window.getApiBase = () => window.API_BASE;
+
+      console.log("API_BASE =", window.API_BASE);
+      
 
       function renderSidebar() {
         const path = (window.location.pathname || "").toLowerCase();

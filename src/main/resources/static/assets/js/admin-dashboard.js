@@ -8,6 +8,180 @@
 (() => {
   "use strict";
 
+  // Fallback si showToast n'existe pas
+  if (typeof window.showToast !== "function") {
+    window.showToast = function (msg, type = "info") {
+      console.log(`[${type}]`, msg);
+    };
+  }
+
+  // ===============================
+  // ✅ Status panel (encadré bas-droite)
+  // Usage:
+  //   const sp = getStatusPanel();
+  //   sp.show("✅ OK", { variant:"ok", ms:5000, status:200 });
+  //   sp.show("❌ Forbidden", { variant:"err", ms:8000, status:403, details:"JWT expired" });
+  // ===============================
+  // function getStatusPanel() {
+  //   let wrap = document.getElementById("adminStatusPanel");
+
+  //   if (!wrap) {
+  //     wrap = document.createElement("div");
+  //     wrap.id = "adminStatusPanel";
+  //     wrap.className = "status-panel hidden";
+  //     wrap.innerHTML = `
+  //       <div class="status-panel-head">
+  //         <span class="status-panel-badge">—</span>
+  //         <span class="status-panel-title">Statut</span>
+  //         <button type="button" class="status-panel-close" aria-label="Fermer">×</button>
+  //       </div>
+  //       <div class="status-panel-msg">—</div>
+  //       <div class="status-panel-details"></div>
+  //     `;
+  //     document.body.appendChild(wrap);
+
+  //     const btnClose = wrap.querySelector(".status-panel-close");
+  //     btnClose?.addEventListener("click", () => wrap.classList.add("hidden"));
+  //   }
+
+  //   let timerId = null;
+
+  //   // function notifyAction({ variant = "ok", title = "Action", status = 200, message = "", details = "", ms = 7000 }) {
+  //   //   const sp = getStatusPanel();
+  //   //   sp.show(message, { variant, title, status, details, ms });
+  //   // }
+
+
+  //   function show(message, options = {}) {
+  //     const {
+  //       variant = "ok",       // ok | warn | err
+  //       ms = 6000,            // durée
+  //       status = null,        // code HTTP
+  //       details = "",         // texte complémentaire (body)
+  //       title = "Statut",     // titre
+  //     } = options;
+
+  //     const badgeEl = wrap.querySelector(".status-panel-badge");
+  //     const titleEl = wrap.querySelector(".status-panel-title");
+  //     const msgEl = wrap.querySelector(".status-panel-msg");
+  //     const detEl = wrap.querySelector(".status-panel-details");
+
+  //     wrap.classList.remove("hidden", "ok", "warn", "err");
+  //     wrap.classList.add(variant);
+
+  //     if (badgeEl) badgeEl.textContent = status != null ? String(status) : "—";
+  //     if (titleEl) titleEl.textContent = title;
+  //     if (msgEl) msgEl.textContent = message ?? "";
+
+  //     if (detEl) {
+  //       detEl.textContent = details ? String(details).slice(0, 500) : "";
+  //       detEl.style.display = details ? "block" : "none";
+  //     }
+
+  //     if (timerId) clearTimeout(timerId);
+  //     timerId = setTimeout(() => {
+  //       wrap.classList.add("hidden");
+  //       timerId = null;
+  //     }, ms);
+  //   }
+
+  //   return { show };
+  // }
+
+  const getStatusPanel = (() => {
+    let instance = null;  // ✅ singleton
+    let timerId = null;
+
+    return function () {
+      if (instance) return instance;
+
+      let wrap = document.getElementById("adminStatusPanel");
+
+      if (!wrap) {
+        wrap = document.createElement("div");
+        wrap.id = "adminStatusPanel";
+        wrap.className = "status-panel hidden";
+        wrap.innerHTML = `
+          <div class="status-panel-head">
+            <span class="status-panel-badge">—</span>
+            <span class="status-panel-title">Statut</span>
+            <button type="button" class="status-panel-close" aria-label="Fermer">×</button>
+          </div>
+          <div class="status-panel-msg">—</div>
+          <div class="status-panel-details"></div>
+        `;
+        document.body.appendChild(wrap);
+
+        wrap.querySelector(".status-panel-close")
+          ?.addEventListener("click", () => wrap.classList.add("hidden"));
+      }
+
+      function show(message, options = {}) {
+        const {
+          variant = "ok",
+          ms = 6000,
+          status = null,
+          details = "",
+          title = "Statut",
+        } = options;
+
+        const badgeEl = wrap.querySelector(".status-panel-badge");
+        const titleEl = wrap.querySelector(".status-panel-title");
+        const msgEl = wrap.querySelector(".status-panel-msg");
+        const detEl = wrap.querySelector(".status-panel-details");
+
+        wrap.classList.remove("hidden", "ok", "warn", "err");
+        wrap.classList.add(variant);
+
+        if (badgeEl) badgeEl.textContent = status != null ? String(status) : "—";
+        if (titleEl) titleEl.textContent = title;
+        if (msgEl) msgEl.textContent = message ?? "";
+
+        if (detEl) {
+          detEl.textContent = details ? String(details).slice(0, 500) : "";
+          detEl.style.display = details ? "block" : "none";
+        }
+
+        if (timerId) clearTimeout(timerId);
+        timerId = setTimeout(() => {
+          wrap.classList.add("hidden");
+          timerId = null;
+        }, ms);
+      }
+
+      instance = { show };
+      return instance;
+    };
+  })();
+
+  function notifyModal({ message="", type="success", ms=5000 } = {}) {
+    setDbModalSaveStatus(message, type, ms);
+  }
+
+
+
+  // ✅ helper global (utilisable partout)
+  function notifyAction({
+    variant = "ok",
+    title = "Action",
+    status = 200,
+    message = "",
+    details = "",
+    ms = 7000
+  } = {}) {
+    getStatusPanel().show(message, { variant, title, status, details, ms });
+  }
+
+  function notifyDashboard({ variant="ok", title="Info", status=null, message="", details="", ms=7000 } = {}) {
+    getStatusPanel().show(message, { variant, title, status, details, ms });
+  }
+
+
+
+  // ✅ rester dans le modal "Modifier" après save (cas Tickets)
+  let __stayInEditAfterSave = false;
+
+
   function setSessionExpiredUI() {
     const userEmail = document.getElementById("userEmail");
     const userChip = document.getElementById("userChip");
@@ -48,6 +222,26 @@
     );
     return;
   }
+
+  function notify({ where="dashboard", ...payload } = {}) {
+    // where: "dashboard" | "modal" | "both"
+    if (where === "dashboard" || where === "both") {
+      notifyDashboard(payload);
+    }
+    if (where === "modal" || where === "both") {
+      // on mappe variant -> type
+      const type =
+        payload.variant === "err"  ? "error" :
+        payload.variant === "warn" ? "warn"  : "success";
+
+      notifyModal({
+        message: payload.message || "",
+        type,
+        ms: payload.ms ?? 5000
+      });
+    }
+  }
+
 
   // ----------------------------
   // USER CHIP (topbar)
@@ -188,6 +382,71 @@
       })
       .join("\n");
   }
+
+// ----------------------------
+// ✅ Confirm dialog (Promise<boolean>)
+// Compatible avec: await confirmDialog({title,message,okText,danger})
+// ----------------------------
+function confirmDialog(opts = {}) {
+  const {
+    title = "Confirmation",
+    message = "Confirmer ?",
+    okText = "OK",
+    cancelText = "Annuler",
+    danger = false,
+  } = opts;
+
+  return new Promise((resolve) => {
+    const overlay = document.createElement("div");
+    overlay.className = "modal-overlay";
+    overlay.style.display = "flex";
+    overlay.style.alignItems = "center";
+    overlay.style.justifyContent = "center";
+
+    const modal = document.createElement("div");
+    modal.className = "modal modal-confirm";
+    modal.setAttribute("role", "dialog");
+    modal.setAttribute("aria-modal", "true");
+    modal.setAttribute("aria-label", title);
+
+    modal.innerHTML = `
+      <h3 style="margin:0 0 10px;font-weight:900;">${escapeHtml(title)}</h3>
+      <p style="margin:0 0 14px;color:rgba(255,255,255,.8);">${escapeHtml(message)}</p>
+      <div style="display:flex;justify-content:flex-end;gap:10px;">
+        <button type="button" class="btn btn-ghost" data-action="cancel">${escapeHtml(cancelText)}</button>
+        <button type="button" class="btn ${danger ? "danger" : "btn-primary"}" data-action="ok">${escapeHtml(okText)}</button>
+      </div>
+    `;
+
+    overlay.appendChild(modal);
+    document.body.appendChild(overlay);
+
+    const okBtn = modal.querySelector('[data-action="ok"]');
+    const cancelBtn = modal.querySelector('[data-action="cancel"]');
+
+    function cleanup(result) {
+      document.removeEventListener("keydown", onKeyDown, true);
+      overlay.remove();
+      resolve(result);
+    }
+
+    function onKeyDown(e) {
+      if (e.key === "Escape") cleanup(false);
+      if (e.key === "Enter") cleanup(true);
+    }
+
+    overlay.addEventListener("click", (e) => {
+      if (e.target === overlay) cleanup(false);
+    });
+
+    okBtn?.addEventListener("click", () => cleanup(true));
+    cancelBtn?.addEventListener("click", () => cleanup(false));
+    document.addEventListener("keydown", onKeyDown, true);
+
+    (okBtn || cancelBtn)?.focus?.();
+  });
+}
+
 
   // ----------------------------
   // LOGS
@@ -489,10 +748,17 @@
       .join("");
   }
 
+  // function renderTips(tips) {
+  //   if (!owaspTips) return;
+  //   owaspTips.innerHTML = (tips || []).map((t) => `<li>${t}</li>`).join("");
+  // }
   function renderTips(tips) {
     if (!owaspTips) return;
-    owaspTips.innerHTML = (tips || []).map((t) => `<li>${t}</li>`).join("");
+    owaspTips.innerHTML = (tips || [])
+      .map((t) => `<li>${escapeHtml(t)}</li>`)
+      .join("");
   }
+
 
   // async function runOwasp(detail) {
   //   if (owaspStatus) owaspStatus.textContent = "Analyse en cours…";
@@ -951,7 +1217,13 @@
     refresh_tokens: `/api/admin/refresh-tokens`,
   };
 
-  const READ_ONLY_RESOURCES = new Set(["refresh_tokens"]);
+  // const READ_ONLY_RESOURCES = new Set(["refresh_tokens"]);
+  const READ_ONLY_RESOURCES = new Set([
+    "refresh_tokens",
+    "ticket_gains",   // 👈 AJOUTE ÇA
+    // "tickets"
+  ]);
+
   const SENSITIVE_PARTS = [
     "password",
     "hashed",
@@ -966,6 +1238,158 @@
     "cookie",
     "reset",
   ];
+
+  // ----------------------------
+// USERS INDEX (pour badge + filtre tickets)
+// ----------------------------
+let __usersIndexLoaded = false;
+let __userById = new Map();          // id -> user
+let __deletedUserIds = new Set();    // ids "deleted"
+
+// Détection soft-delete / anonymisation
+function isUserDeleted(u) {
+  if (!u) return false;
+  const email = String(u.email || "").toLowerCase();
+  const first = String(u.firstName || "").toUpperCase();
+
+  // règles demandées + un fallback robuste
+  if (email.startsWith("deleted_")) return true;
+  if (first === "DELETED") return true;
+
+  // si tu as un champ enabled un jour
+  if (u.enabled === false) return true;
+
+  // si tu utilises un status
+  const status = String(u.status || "").toUpperCase();
+  if (status === "DELETED" || status === "DISABLED") return true;
+
+  return false;
+}
+
+async function ensureUsersIndex() {
+  if (__usersIndexLoaded) return;
+
+  try {
+    const res = await apiFetch(DB_ENDPOINTS.users, { method: "GET" });
+    const data = await res.json().catch(() => null);
+    if (!res.ok || !Array.isArray(data)) {
+      console.warn("[USERS INDEX] impossible de charger users");
+      __usersIndexLoaded = true; // évite boucle
+      return;
+    }
+
+    __userById = new Map();
+    __deletedUserIds = new Set();
+
+    data.forEach((u) => {
+      const id = u.id || u._id;
+      if (!id) return;
+      __userById.set(String(id), u);
+      if (isUserDeleted(u)) __deletedUserIds.add(String(id));
+    });
+
+    __usersIndexLoaded = true;
+  } catch (e) {
+    console.warn("[USERS INDEX] erreur", e);
+    __usersIndexLoaded = true;
+  }
+}
+
+
+
+let usersFilter = localStorage.getItem("usersFilter") || "active";
+
+function ensureUsersFilterUI() {
+  const search = document.getElementById("dbSearch");
+  if (!search) return;
+
+  const shouldShow = dbCurrentResource === "users";
+  const existing = document.getElementById("usersFilterWrap");
+
+  if (existing) {
+    existing.style.display = shouldShow ? "inline-flex" : "none";
+    const sel = existing.querySelector("#usersFilter");
+    if (sel) sel.value = usersFilter;
+    return;
+  }
+
+  const wrap = document.createElement("label");
+  wrap.id = "usersFilterWrap";
+  wrap.className = "db-toggle";
+  wrap.style.display = shouldShow ? "inline-flex" : "none";
+
+  wrap.innerHTML = `
+    <span class="db-toggle-label">Users</span>
+    <select id="usersFilter" class="select select-sm">
+      <option value="active">Actifs</option>
+      <option value="all">Tous</option>
+      <option value="disabled">Désactivés</option>
+    </select>
+  `;
+
+  search.parentElement?.appendChild(wrap);
+
+  const sel = wrap.querySelector("#usersFilter");
+  sel.value = usersFilter;
+
+  sel.addEventListener("change", () => {
+    usersFilter = sel.value;
+    localStorage.setItem("usersFilter", usersFilter);
+    applyDbFilter();
+  });
+}
+
+// ----------------------------
+// Toggle: masquer tickets de users deleted
+// ----------------------------
+// Filtre tickets : "all" | "active" | "disabled"
+let ticketsUserFilter = localStorage.getItem("ticketsUserFilter") || "active";
+// "active" par défaut = RNCP-friendly (les deleted ne s'affichent pas)
+
+function ensureDeletedToggleUI() {
+  const search = document.getElementById("dbSearch");
+  if (!search) return;
+
+  const shouldShow = dbCurrentResource === "tickets";
+
+  // déjà injecté => on montre/cache + sync value
+  const existing = document.getElementById("ticketsUserFilterWrap");
+  if (existing) {
+    existing.style.display = shouldShow ? "inline-flex" : "none";
+    const sel = existing.querySelector("#ticketsUserFilter");
+    if (sel) sel.value = ticketsUserFilter;
+    return;
+  }
+
+  // injection UI (discrète)
+  const wrap = document.createElement("label");
+  wrap.id = "ticketsUserFilterWrap";
+  wrap.className = "db-toggle";
+  wrap.style.display = shouldShow ? "inline-flex" : "none";
+
+  wrap.innerHTML = `
+    <span class="db-toggle-label">Comptes</span>
+    <select id="ticketsUserFilter" class="select select-sm">
+      <option value="active">Actifs</option>
+      <option value="all">Tous</option>
+      <option value="disabled">Désactivés</option>
+    </select>
+  `;
+
+
+  search.parentElement?.appendChild(wrap);
+
+  const sel = wrap.querySelector("#ticketsUserFilter");
+  sel.value = ticketsUserFilter;
+
+  sel.addEventListener("change", () => {
+    ticketsUserFilter = sel.value;
+    localStorage.setItem("ticketsUserFilter", ticketsUserFilter);
+    applyDbFilter();
+  });
+}
+
+
 
   function isSensitiveKey(key) {
     const k = String(key || "").toLowerCase();
@@ -994,8 +1418,13 @@
 
   const EDITABLE_FIELDS = {
     users: ["firstName", "lastName", "email", "role", "admin"],
-    tickets: ["numbers", "chanceNumber", "drawDate", "drawDay", "userEmail"],
+    tickets: ["numbers", "chanceNumber", "drawDate", "drawDay", "userId"],
+    // tickets: ["numbers", "chanceNumber", "drawDate", "drawDay", "userEmail"],
     ticket_gains: ["ticketId", "rank", "gainAmount", "drawDate", "userEmail"],
+  };
+
+  const HIDDEN_FIELDS_BY_RESOURCE = {
+    tickets: new Set(["drawDay"]),
   };
 
   const PROTECTED_FIELDS = new Set([
@@ -1013,14 +1442,60 @@
   let dbCurrentPage = 0;
   let dbEditingRow = null;
 
+  // function applyDbFilter() {
+  //   const q = (dbSearch?.value || "").toLowerCase().trim();
+  //   dbFilteredData = !q
+  //     ? dbRawData.slice()
+  //     : dbRawData.filter((r) => JSON.stringify(r).toLowerCase().includes(q));
+  //   dbCurrentPage = 0;
+  //   renderDbTable();
+  // }
+
+  function updateUsersFilterDot(value) {
+  const el = document.getElementById("usersFilterDot");
+  if (!el) return;
+  el.className = `status-dot ${value === "disabled" ? "red" : "green"}`;
+  el.title = value === "disabled" ? "Comptes désactivés" : "Comptes actifs";
+}
+
+
   function applyDbFilter() {
     const q = (dbSearch?.value || "").toLowerCase().trim();
-    dbFilteredData = !q
+
+    let arr = !q
       ? dbRawData.slice()
       : dbRawData.filter((r) => JSON.stringify(r).toLowerCase().includes(q));
+
+    // ✅ filtre tickets selon l'état (all / active / disabled)
+    if (dbCurrentResource === "tickets" && ticketsUserFilter !== "all") {
+      arr = arr.filter((r) => {
+        const uid = String(r.userid || r.userId || r.user_id || "").trim();
+        if (!uid) return true;
+
+        const isDisabled = __deletedUserIds.has(uid);
+
+        if (ticketsUserFilter === "active") return !isDisabled;
+        if (ticketsUserFilter === "disabled") return isDisabled;
+        return true;
+      });
+    }
+
+    // ✅ filtre users selon l'état (all / active / disabled)  <-- AJOUT
+    if (dbCurrentResource === "users" && usersFilter !== "all") {
+      arr = arr.filter((u) => {
+        const disabled = isUserDeleted(u);
+        if (usersFilter === "active") return !disabled;
+        if (usersFilter === "disabled") return disabled;
+        return true;
+      });
+    }
+
+    dbFilteredData = arr;
     dbCurrentPage = 0;
     renderDbTable();
   }
+
+
 
   function renderDbTable() {
     if (!dbTableHead || !dbTableBody) return;
@@ -1028,6 +1503,7 @@
     dbTableBody.innerHTML = "";
 
     const isReadOnly = READ_ONLY_RESOURCES.has(dbCurrentResource);
+
     if (btnNewRow) {
       btnNewRow.disabled = isReadOnly;
       btnNewRow.style.opacity = isReadOnly ? "0.45" : "1";
@@ -1041,7 +1517,7 @@
       return;
     }
 
-    const pageSize = parseInt(dbPageSize?.value || "20", 10);
+    const pageSize = parseInt(dbPageSize?.value || "8", 10);
     const totalPages = Math.max(1, Math.ceil(dbFilteredData.length / pageSize));
     dbCurrentPage = Math.min(dbCurrentPage, totalPages - 1);
 
@@ -1049,15 +1525,40 @@
     const end = Math.min(start + pageSize, dbFilteredData.length);
     const pageData = dbFilteredData.slice(start, end);
 
-    const keys = Object.keys(pageData[0] || {});
+    // const keys = Object.keys(pageData[0] || {});
+    const baseKeys = EDITABLE_FIELDS[dbCurrentResource] || [];
+    const pageKeys = new Set();
 
+    pageData.forEach((r) => {
+      Object.keys(r || {}).forEach((k) => pageKeys.add(k));
+    });
+
+    // colonnes: id/_id en premier, puis tes champs attendus, puis le reste
+    const keys = [
+      ...["id", "_id"].filter((k) => pageKeys.has(k)),
+      ...baseKeys.filter((k) => pageKeys.has(k)),
+      ...Array.from(pageKeys).filter((k) => !["id", "_id"].includes(k) && !baseKeys.includes(k)),
+    ];
+
+    const hidden = HIDDEN_FIELDS_BY_RESOURCE[dbCurrentResource] || new Set();
+    const keysFiltered = keys.filter(k => !hidden.has(k));
+
+
+    // HEADER
     const headerRow = document.createElement("tr");
-    keys.forEach((k) => {
+    // keys.forEach((k) => {
+    //   const th = document.createElement("th");
+    //   th.textContent = k;
+    //   th.className = "th";
+    //   headerRow.appendChild(th);
+    // });
+    keysFiltered.forEach((k) => {
       const th = document.createElement("th");
       th.textContent = k;
       th.className = "th";
       headerRow.appendChild(th);
     });
+
 
     if (!isReadOnly) {
       const th = document.createElement("th");
@@ -1068,35 +1569,82 @@
 
     dbTableHead.appendChild(headerRow);
 
+    // ROWS
     pageData.forEach((row) => {
       const tr = document.createElement("tr");
       tr.className = "tr";
 
-      keys.forEach((k) => {
+      // keys.forEach((k) => {
+      keysFiltered.forEach((k) => {
         const td = document.createElement("td");
         td.className = "td";
 
+        // ✅ users.tickets => bouton Voir(...)
         if (dbCurrentResource === "users" && k === "tickets") {
           const tickets = safeJsonParse(row[k]);
           const list = Array.isArray(tickets) ? tickets : [];
-
-          // ✅ fix: email de la ligne (pas une variable inexistante)
-          lastTicketsForCopy = list;
-          lastTicketsUserEmail = row.email || "";
-
           const count = list.length;
 
           const btn = document.createElement("button");
           btn.type = "button";
           btn.className = "tickets-open";
           btn.textContent = count ? `Voir (${count})` : "Voir";
-
-          btn.addEventListener("click", () => {
-            openTicketsModal(list, row.email || "");
-          });
-
+          // btn.addEventListener("click", () => openTicketsModal(list, row.email || ""));
+          btn.addEventListener("click", () => openTicketsModal(list, row.email || "", row.id || row._id || ""));
           td.appendChild(btn);
-        } else {
+        }
+
+        // ✅ tickets.userid => badge ok/del + mini id
+        else if (
+          dbCurrentResource === "tickets" &&
+          (k === "userid" || k === "userId" || k === "user_id")
+        ) {
+          const uid = String(row[k] || "").trim();
+          const isDel =
+            uid &&
+            typeof __deletedUserIds !== "undefined" &&
+            __deletedUserIds.has(uid);
+
+          const badge = document.createElement("span");
+          badge.className = `user-badge ${isDel ? "del" : "ok"}`;
+
+          // RNCP-friendly : visible uniquement si "all" ou "disabled"
+          const showBadge = ticketsUserFilter !== "active";
+
+          badge.innerHTML = showBadge
+            ? `<span class="dot"></span><span class="label"></span>`
+            : `<span class="dot"></span><span class="label"></span>`;
+
+          const mono = document.createElement("span");
+          mono.className = "mono";
+          mono.style.marginLeft = "10px";
+          mono.style.opacity = ".85";
+          mono.textContent = uid ? uid.slice(0, 8) + "…" : "—";
+
+          td.appendChild(badge);
+          td.appendChild(mono);
+        }
+
+        // ✅ users.email => dot actif/désactivé
+        else if (dbCurrentResource === "users" && k === "email") {
+          const disabled = isUserDeleted(row);
+
+          const wrapper = document.createElement("div");
+          wrapper.className = "user-status-cell";
+
+          const dot = document.createElement("span");
+          dot.className = `status-dot ${disabled ? "red" : "green"}`;
+          dot.title = disabled ? "Compte désactivé" : "Compte actif";
+
+          const email = document.createElement("span");
+          email.textContent = safeCellValue(k, row[k]);
+
+          wrapper.append(dot, email);
+          td.appendChild(wrapper);
+        }
+
+        // ✅ default cell
+        else {
           td.textContent = safeCellValue(k, row[k]);
         }
 
@@ -1108,6 +1656,7 @@
         tr.appendChild(td);
       });
 
+      // ACTIONS
       if (!isReadOnly) {
         const td = document.createElement("td");
         td.className = "td td-actions";
@@ -1119,34 +1668,86 @@
         btnEdit.textContent = "Modifier";
         btnEdit.addEventListener("click", () => openDbModal("edit", row));
 
+        // const btnDel = document.createElement("button");
+        // btnDel.className = "btn-mini btn-red";
+        // btnDel.textContent = "Supprimer";
+
         const btnDel = document.createElement("button");
+        btnDel.type = "button";
         btnDel.className = "btn-mini btn-red";
         btnDel.textContent = "Supprimer";
+
         btnDel.addEventListener("click", async () => {
-          if (!id) return showToast("ID introuvable.", "error");
+          const id = row?.id || row?._id;
+          if (!id) {
+            showToast("Ligne sans id (impossible à supprimer)", "error");
+            return;
+          }
+
+          const label =
+            dbCurrentResource === "users" ? "l’utilisateur" :
+            dbCurrentResource === "tickets" ? "le ticket" :
+            "cette ligne";
 
           const ok = await confirmDialog({
-            title: "Supprimer",
-            message: `Supprimer ${dbCurrentResource} #${id} ?`,
+            title: `Supprimer ${label}`,
+            message: `Supprimer ${label} (#${id}) ?`,
             okText: "Supprimer",
+            cancelText: "Annuler",
             danger: true,
           });
           if (!ok) return;
 
-          const url = `${DB_ENDPOINTS[dbCurrentResource]}/${id}`;
-          const res = await apiFetch(url, { method: "DELETE" });
-          const body = await res.text().catch(() => "");
-
-          if (!res.ok) {
-            showToast(`Erreur ${res.status} suppression`, "error");
-            console.error("DELETE error:", res.status, body);
+          const base = DB_ENDPOINTS[dbCurrentResource];
+          if (!base) {
+            showToast("Endpoint non configuré", "error");
             return;
           }
 
-          dbRawData = dbRawData.filter((r) => (r.id || r._id) !== id);
-          applyDbFilter();
-          showToast("Suppression OK", "success");
+          const url = `${base}/${encodeURIComponent(String(id))}`;
+
+          try {
+            const res = await apiFetch(url, { method: "DELETE" });
+            const body = await res.text().catch(() => "");
+
+            if (!res.ok) {
+              console.error("DELETE error:", dbCurrentResource, res.status, body);
+              showToast(`Erreur suppression (${res.status})`, "error");
+              return;
+            }
+
+            showToast("Suppression ✅", "success");
+
+            notifyAction({
+              variant: "ok",
+              title: "Suppression",
+              status: res.status,
+              message:
+                dbCurrentResource === "tickets"
+                  ? `🗑️ Ticket #${id} supprimé`
+                  : dbCurrentResource === "users"
+                  ? `🗑️ User #${id} supprimé`
+                  : `🗑️ Suppression effectuée (#${id})`,
+              ms: 7000,
+            });
+
+
+            // si suppression user -> refresh index users
+            if (dbCurrentResource === "users") {
+              __usersIndexLoaded = false;
+              await ensureUsersIndex().catch(() => {});
+            }
+
+            await loadDbData();
+          } catch (e) {
+            console.error(e);
+            showToast("Erreur réseau", "error");
+          }
         });
+
+
+
+
 
         td.append(btnEdit, btnDel);
         tr.appendChild(td);
@@ -1155,12 +1756,24 @@
       dbTableBody.appendChild(tr);
     });
 
-    if (dbPagingInfo) dbPagingInfo.textContent = `Page ${dbCurrentPage + 1} / ${totalPages}`;
+    if (dbPagingInfo) {
+      dbPagingInfo.textContent = `Page ${dbCurrentPage + 1} / ${totalPages}`;
+    }
   }
+
 
   async function loadDbData() {
     if (!dbResourceSelect) return;
     dbCurrentResource = dbResourceSelect.value;
+
+    // ✅ toggles UI (montrer/cacher selon la ressource)
+    ensureUsersFilterUI();     // <-- AJOUT
+    ensureDeletedToggleUI();   // ticketsUserFilter (actifs/tous/désactivés)
+
+    // ✅ index users nécessaire pour filtrer les tickets "désactivés"
+    if (dbCurrentResource === "tickets") {
+      await ensureUsersIndex();
+    }
 
     const url = DB_ENDPOINTS[dbCurrentResource];
     if (!url) return setDbStatus("Endpoint non configuré", true);
@@ -1233,12 +1846,22 @@
 
     const sample = row || dbRawData[0] || {};
     const allKeys = Object.keys(sample);
-    const allowed = EDITABLE_FIELDS[dbCurrentResource] || allKeys;
+    const hidden = HIDDEN_FIELDS_BY_RESOURCE[dbCurrentResource] || new Set();
+    const safeAllKeys = allKeys.filter(k => !hidden.has(k));
+    // const allowed = EDITABLE_FIELDS[dbCurrentResource] || allKeys;
+    let allowed = EDITABLE_FIELDS[dbCurrentResource] || allKeys;
+
+    // ✅ Exception: en création de user, on ajoute password
+    if (dbCurrentResource === "users" && mode === "create") {
+      if (!allowed.includes("password")) allowed = [...allowed, "password"];
+    }
+
 
     const displayKeys = [
-      ...allKeys.filter((k) => k === "id" || k === "_id"),
+      ...safeAllKeys.filter((k) => k === "id" || k === "_id"),
       ...allowed.filter((k) => !["id", "_id"].includes(k)),
-    ].filter((v, i, a) => a.indexOf(v) === i);
+    ].filter((v, i, a) => a.indexOf(v) === i)
+    .filter(k => !hidden.has(k));
 
     displayKeys.forEach((k) => {
       const label = document.createElement("label");
@@ -1250,6 +1873,54 @@
         input = document.createElement("select");
         input.className = "modal-input";
         input.name = k;
+
+        // =============================
+        // ✅ VALIDATIONS (Admin modal)
+        // =============================
+        if (dbCurrentResource === "users") {
+          if (k === "email") {
+            input.type = "email";
+            input.required = true;
+            // simple + efficace
+            input.pattern = "^[^\\s@]+@[^\\s@]+\\.[^\\s@]{2,}$";
+            input.title = "Email invalide";
+          }
+
+          if (k === "password") {
+            input.type = "password";
+            input.required = true;
+            // Exemple: 8+ avec 1 maj, 1 min, 1 chiffre (à adapter)
+            input.pattern = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d).{8,}$";
+            input.title = "8+ caractères, 1 majuscule, 1 minuscule, 1 chiffre";
+          }
+        }
+
+        if (dbCurrentResource === "tickets") {
+          // 5 numéros de 1 à 49 au format "1-2-3-4-5" (ou "01-02-...")
+          if (k === "numbers") {
+            input.type = "text";
+            input.required = true;
+            input.pattern =
+              "^(0?[1-9]|[1-3][0-9]|4[0-9])-(0?[1-9]|[1-3][0-9]|4[0-9])-(0?[1-9]|[1-3][0-9]|4[0-9])-(0?[1-9]|[1-3][0-9]|4[0-9])-(0?[1-9]|[1-3][0-9]|4[0-9])$";
+            input.title = "Format: 5 numéros 1-49 séparés par des tirets (ex: 7-12-23-34-45)";
+          }
+
+          // chance 1..10
+          if (k === "chanceNumber") {
+            input.type = "text";
+            input.required = true;
+            input.pattern = "^([1-9]|10)$";
+            input.title = "Chance entre 1 et 10";
+          }
+
+          // date
+          if (k === "drawDate") {
+            input.type = "date";
+            input.required = true;
+          }
+        }
+
+
         input.innerHTML = `<option value="true">true</option><option value="false">false</option>`;
         input.value = row ? String(!!row[k]) : "false";
       } else if (k === "role") {
@@ -1258,26 +1929,119 @@
         input.name = k;
         input.innerHTML = `<option value="ROLE_USER">ROLE_USER</option><option value="ROLE_ADMIN">ROLE_ADMIN</option>`;
         input.value = row?.[k] ? String(row[k]) : "ROLE_USER";
+
+        // ✅ role en lecture seule pour users
+        if (dbCurrentResource === "users") {
+          input.disabled = true;
+          input.style.opacity = "0.6";
+          input.title = "Modification du rôle désactivée";
+        }
+      // } else {
+      //   input = document.createElement("input");
+      //   input.className = "modal-input";
+      //   input.name = k;
+      //   const v = row ? row[k] ?? "" : "";
+      //   input.value = typeof v === "object" ? JSON.stringify(v) : String(v ?? "");
+      // }
       } else {
         input = document.createElement("input");
         input.className = "modal-input";
         input.name = k;
-        const v = row ? row[k] ?? "" : "";
-        input.value = typeof v === "object" ? JSON.stringify(v) : String(v ?? "");
+
+        // ✅ password field (create user)
+        if (dbCurrentResource === "users" && mode === "create" && k === "password") {
+          input.type = "password";
+          input.placeholder = "Mot de passe";
+          input.value = "";
+        } else {
+          input.type = "text";
+          const v = row ? row[k] ?? "" : "";
+          input.value = typeof v === "object" ? JSON.stringify(v) : String(v ?? "");
+        }
       }
 
+
+      // // ✅ tickets.userId => readonly (on ne change pas le propriétaire d'un ticket)
+      // if (
+      //   dbCurrentResource === "tickets" &&
+      //   ["userid", "userId", "user_id"].includes(k)
+      // ) {
+      //   input.disabled = true;
+      //   input.style.opacity = "0.6";
+      //   input.title = "Lecture seule (lié à l'utilisateur)";
+      // }
+
+      // // ✅ tickets.userId : readonly en EDIT, mais editable en CREATE
+      // if (
+      //   dbCurrentResource === "tickets" &&
+      //   ["userid", "userId", "user_id"].includes(k)
+      // ) {
+      //   if (mode === "edit") {
+      //     input.disabled = true;
+      //     input.style.opacity = "0.6";
+      //     input.title = "Lecture seule (propriétaire du ticket)";
+      //   } else {
+      //     // CREATE: obligatoire
+      //     input.disabled = false;
+      //     input.placeholder = "UUID utilisateur (obligatoire)";
+      //     input.title = "UUID utilisateur requis pour créer un ticket";
+      //   }
+      // }
+      // ✅ tickets.userId :
+      // - EDIT => readonly
+      // - CREATE depuis "Voir tickets" => readonly (pré-rempli)
+      // - CREATE depuis CRUD tickets => éditable (obligatoire)
       if (
-        PROTECTED_FIELDS.has(k) ||
-        isSensitiveKey(k) ||
-        (EDITABLE_FIELDS[dbCurrentResource] &&
-          !allowed.includes(k) &&
-          k !== "id" &&
-          k !== "_id")
+        dbCurrentResource === "tickets" &&
+        ["userid", "userId", "user_id"].includes(k)
+      ) {
+        const fromUserTicketsModal = (mode === "create" && __stayInEditAfterSave);
+
+        if (mode === "edit" || fromUserTicketsModal) {
+          input.disabled = true;
+          input.style.opacity = "0.6";
+          input.title = "Lecture seule (lié à l'utilisateur)";
+        } else {
+          input.disabled = false;
+          input.placeholder = "UUID utilisateur (obligatoire)";
+          input.title = "UUID utilisateur requis pour créer un ticket";
+        }
+      }
+
+
+
+
+      // if (
+      //   PROTECTED_FIELDS.has(k) ||
+      //   isSensitiveKey(k) ||
+      //   (EDITABLE_FIELDS[dbCurrentResource] &&
+      //     !allowed.includes(k) &&
+      //     k !== "id" &&
+      //     k !== "_id")
+      // ) {
+      //   input.disabled = true;
+      //   input.style.opacity = "0.6";
+      //   if (isSensitiveKey(k)) input.value = maskValue(input.value);
+      // }
+
+      const isCreateUserPassword =
+        dbCurrentResource === "users" && mode === "create" && k === "password";
+
+      if (
+        !isCreateUserPassword && (
+          PROTECTED_FIELDS.has(k) ||
+          isSensitiveKey(k) ||
+          (EDITABLE_FIELDS[dbCurrentResource] &&
+            !allowed.includes(k) &&
+            k !== "id" &&
+            k !== "_id")
+        )
       ) {
         input.disabled = true;
         input.style.opacity = "0.6";
         if (isSensitiveKey(k)) input.value = maskValue(input.value);
       }
+
 
       const wrap = document.createElement("div");
       wrap.className = "modal-field";
@@ -1297,16 +2061,119 @@
     dbModalOverlay.style.display = "none";
     dbModalOverlay.setAttribute("aria-hidden", "true");
     dbEditingRow = null;
+
+    // ✅ reset
+    __stayInEditAfterSave = false;
   }
+
+
+  // ===============================
+  // ✅ Modal SAVE status (5s) sous le bouton "Enregistrer"
+  // ===============================
+  let __modalStatusTimerId = null;
+
+  function ensureDbModalStatusUI() {
+    const saveBtn = document.getElementById("dbModalSave");
+    if (!saveBtn) return;
+
+    // déjà créé
+    if (document.getElementById("dbModalSaveStatusWrap")) return;
+
+    // container sous le bouton Save
+    const wrap = document.createElement("div");
+    wrap.id = "dbModalSaveStatusWrap";
+    wrap.style.marginTop = "10px";
+    wrap.style.display = "none";
+
+    wrap.innerHTML = `
+      <div id="dbModalSaveStatusText" style="font-size:13px;font-weight:700;"></div>
+      <div id="dbModalSaveStatusBar" style="
+        margin-top:6px;
+        height:4px;
+        border-radius:999px;
+        overflow:hidden;
+        background: rgba(255,255,255,.12);
+      ">
+        <div id="dbModalSaveStatusBarInner" style="
+          height:100%;
+          width:100%;
+          transform-origin:left;
+        "></div>
+      </div>
+    `;
+
+    // inject juste après le bouton
+    saveBtn.parentElement?.appendChild(wrap);
+
+    // inject CSS keyframes une seule fois
+    if (!document.getElementById("dbModalSaveStatusStyle")) {
+      const style = document.createElement("style");
+      style.id = "dbModalSaveStatusStyle";
+      style.textContent = `
+        @keyframes modal-status-countdown {
+          from { transform: scaleX(1); }
+          to   { transform: scaleX(0); }
+        }
+      `;
+      document.head.appendChild(style);
+    }
+  }
+
+  function setDbModalSaveStatus(msg, type = "success", ms = 5000) {
+    ensureDbModalStatusUI();
+
+    const wrap = document.getElementById("dbModalSaveStatusWrap");
+    const text = document.getElementById("dbModalSaveStatusText");
+    const barInner = document.getElementById("dbModalSaveStatusBarInner");
+
+    if (!wrap || !text || !barInner) return;
+
+    // stop précédent
+    if (__modalStatusTimerId) {
+      clearTimeout(__modalStatusTimerId);
+      __modalStatusTimerId = null;
+    }
+
+    wrap.style.display = "block";
+    text.textContent = msg || "";
+
+    // couleurs simples (sans toucher à ton CSS global)
+    const color =
+      type === "error" ? "#f97373" :
+      type === "warn"  ? "#fbbf24" :
+                        "#34d399";
+
+    text.style.color = color;
+    barInner.style.background = color;
+
+    // reset anim
+    barInner.style.animation = "none";
+    barInner.offsetHeight; // force reflow
+    barInner.style.animation = `modal-status-countdown ${ms / 1000}s linear forwards`;
+
+    __modalStatusTimerId = setTimeout(() => {
+      wrap.style.display = "none";
+      __modalStatusTimerId = null;
+    }, ms);
+  }
+
 
   async function saveDbModal() {
     if (!dbEditingRow || !dbModalForm) return;
 
+    const sp = getStatusPanel();
     const obj = {};
     const inputs = dbModalForm.querySelectorAll("input, select, textarea");
     inputs.forEach((el) => {
       if (!el.name) return;
       if (el.disabled) return;
+
+    // ✅ si création ticket depuis modal Tickets, forcer userId même si champ disabled
+    if (dbCurrentResource === "tickets" && dbEditingRow?.mode === "create" && __stayInEditAfterSave) {
+      const ctx = window.__ticketsModalCtx || {};
+      if (ctx.userId) obj.userId = ctx.userId;
+    }
+
 
       const v = el.value;
       if (el.name === "admin") {
@@ -1316,33 +2183,265 @@
       obj[el.name] = v === "" ? null : v;
     });
 
+    // // ✅ si création ticket depuis modal Tickets, forcer userId dans le payload
+    // if (dbCurrentResource === "tickets" && dbEditingRow?.mode === "create") {
+    //   const ctx = window.__ticketsModalCtx || {};
+    //   if (ctx.userId && !obj.userId) obj.userId = ctx.userId;
+    // }
+
+    // ✅ Validation: création ticket => userId obligatoire
+    if (dbCurrentResource === "tickets" && dbEditingRow?.mode === "create") {
+      const uid = String(obj.userId || obj.userid || obj.user_id || "").trim();
+
+      // normalise en userId (si jamais)
+      if (!obj.userId && uid) obj.userId = uid;
+
+      if (!uid) {
+        showToast("❌ userId obligatoire pour créer un ticket", "error");
+        setDbModalSaveStatus("❌ userId obligatoire", "error", 5000);
+        return;
+      }
+
+      // optionnel: vérif UUID format simple
+      const uuidRe = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+      if (!uuidRe.test(uid)) {
+        showToast("❌ userId invalide (UUID attendu)", "error");
+        setDbModalSaveStatus("❌ UUID invalide", "error", 5000);
+        return;
+      }
+    }
+
+
+
     const base = DB_ENDPOINTS[dbCurrentResource];
     let url = base;
     let method = "POST";
 
     if (dbEditingRow.mode === "edit") {
       const id = dbEditingRow.row.id || dbEditingRow.row._id;
-      url = `${base}/${id}`;
+      // url = `${base}/${id}`;
+      url = `${base}/${encodeURIComponent(String(id))}`;
       method = "PUT";
     }
 
-    const res = await apiFetch(url, {
-      method,
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(obj),
+    // UI: disable bouton save pendant la requête
+    if (dbModalSave) {
+      dbModalSave.disabled = true;
+      dbModalSave.style.opacity = "0.65";
+      dbModalSave.style.cursor = "not-allowed";
+    }
+
+    try {
+      const res = await apiFetch(url, {
+        method,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(obj),
+      });
+
+      const bodyText = await res.text().catch(() => "");
+      // ✅ essayer de récupérer l'objet renvoyé (souvent contient l'id)
+      let bodyJson = null;
+      try {
+        bodyJson = bodyText ? JSON.parse(bodyText) : null;
+      } catch {
+        bodyJson = null;
+      }
+
+      // ✅ id renvoyé par l'API lors d'un CREATE (POST)
+      const createdId = bodyJson?.id || bodyJson?._id || bodyJson?.uuid || null;
+
+
+      if (!res.ok) {
+        // const msg = data?.message || bodyText || `Erreur ${res.status}`;
+        const msg = bodyText || `Erreur ${res.status}`;
+        sp.show(`❌ ${msg}`, { variant: "err", ms: 9000, status: res.status, details: bodyText, title: "Sauvegarde" });
+        showToast(`Erreur ${res.status}`, "error");
+        console.error("SAVE error:", res.status, bodyText);
+        setDbModalSaveStatus("❌ Erreur modification", "error", 5000);
+        return; // ✅ IMPORTANT
+
+        // ✅ message sous le bouton (5s)
+        // sp.show("✅ Modif enregistrée", { variant: "ok", ms: 5000, status: res.status, title: "Sauvegarde" });
+        // setDbModalSaveStatus("❌ Erreur modification", "error", 5000);
+        // return;
+      }
+
+    // // ✅ succès
+    // showToast("Modif avec succès ✅", "success");
+
+    // // refresh table principale
+    // await loadDbData();
+
+    // // 🔥 CAS SPÉCIAL : on vient du modal Tickets
+    // const ctx = window.__ticketsModalCtx;
+
+    // if (dbCurrentResource === "tickets" && ctx?.email) {
+    //   try {
+    //     await refreshTicketsModalForEmail(ctx.email);
+    //   } catch (e) {
+    //     console.warn("refresh tickets modal failed", e);
+    //   }
+
+    //   // ferme le modal edit IMMÉDIATEMENT
+    //   closeDbModal();
+
+    //   // reset flag
+    //   __stayInEditAfterSave = false;
+
+    //   return;
+    // }
+
+    // // sinon comportement normal
+    // setDbModalSaveStatus("✅ Modif avec succès", "success", 5000);
+    // closeDbModal();
+
+
+    // // ✅ succès
+    // showToast("Modif avec succès ✅", "success");
+
+    // // id concerné (edit) ou renvoyé par l’API si tu le gères
+    // const editedId = dbEditingRow?.mode === "edit"
+    //   ? (dbEditingRow?.row?.id || dbEditingRow?.row?._id)
+    //   : null;
+
+    // notifyAction({
+    //   variant: "ok",
+    //   title: "Sauvegarde",
+    //   status: res.status,
+    //   message:
+    //     dbCurrentResource === "tickets"
+    //       ? `✅ Ticket #${editedId || "?"} modifié avec succès`
+    //       : dbCurrentResource === "users"
+    //       ? `✅ User #${editedId || "?"} modifié avec succès`
+    //       : `✅ Modification enregistrée`,
+    //   details: "", // ou bodyText si tu veux
+    //   ms: 7000,
+    // });
+
+    const isCreate = dbEditingRow?.mode === "create";
+
+    const editedId = !isCreate
+      ? (dbEditingRow?.row?.id || dbEditingRow?.row?._id)
+      : null;
+
+    const idToShow = createdId || editedId || "?";
+
+    // ✅ Toast cohérent
+    showToast(isCreate ? "Ajout avec succès ✅" : "Modif avec succès ✅", "success");
+
+    // ✅ Notification cohérente + UUID
+    notifyAction({
+      variant: "ok",
+      title: isCreate ? "Ajout" : "Sauvegarde",
+      status: res.status,
+      message:
+        dbCurrentResource === "tickets"
+          ? (isCreate
+              ? `✅ Ticket #${idToShow} ajouté avec succès`
+              : `✅ Ticket #${idToShow} modifié avec succès`)
+          : dbCurrentResource === "users"
+          ? (isCreate
+              ? `✅ User #${idToShow} ajouté avec succès`
+              : `✅ User #${idToShow} modifié avec succès`)
+          : (isCreate ? `✅ Ajout effectué (#${idToShow})` : `✅ Modification enregistrée (#${idToShow})`),
+      details: "",
+      ms: 7000,
     });
 
-    const body = await res.text().catch(() => "");
-    if (!res.ok) {
-      showToast(`Erreur ${res.status}`, "error");
-      console.error("SAVE error:", res.status, body);
+    // ✅ Status sous le bouton (si tu veux différencier)
+    setDbModalSaveStatus(isCreate ? "✅ Ajout avec succès" : "✅ Modif avec succès", "success", 5000);
+
+
+    // // 🔥 on vient du modal tickets ?
+    // const ctx = window.__ticketsModalCtx;
+
+    // if (dbCurrentResource === "tickets" && ctx?.email) {
+
+    //   // 1️⃣ recharge les tickets du user
+    //   try {
+    //     await refreshTicketsModalForEmail(ctx.email);
+    //   } catch (e) {
+    //     console.warn("refresh tickets modal failed", e);
+    //   }
+
+    //   // 2️⃣ fermer le modal edit
+    //   closeDbModal();
+
+    //   // 3️⃣ remettre le contexte sur USERS
+    //   const sel = document.getElementById("dbResourceSelect");
+    //   if (sel) sel.value = "users";
+    //   dbCurrentResource = "users";
+
+    //   // 4️⃣ reload table users
+    //   await loadDbData();
+
+    //   // reset contexte
+    //   window.__ticketsModalCtx = null;
+    //   __stayInEditAfterSave = false;
+
+    //   return;
+    // }
+    const ctx = window.__ticketsModalCtx;
+
+    // ✅ Seulement si on vient du modal Tickets (pas depuis DB tickets)
+    if (dbCurrentResource === "tickets" && __stayInEditAfterSave && ctx?.email) {
+
+      // 1) refresh la liste tickets dans le modal user
+      try {
+        await refreshTicketsModalForEmail(ctx.email);
+      } catch (e) {
+        console.warn("refresh tickets modal failed", e);
+      }
+
+      // 2) fermer le modal edit
+      closeDbModal();
+
+      // ✅ IMPORTANT : ici tu peux choisir quoi faire
+      // Si tu veux revenir sur USERS uniquement dans ce cas spécial :
+      const sel = document.getElementById("dbResourceSelect");
+      if (sel) sel.value = "users";
+      dbCurrentResource = "users";
+      await loadDbData();
+
+      // reset
+      // window.__ticketsModalCtx = null;
+      __stayInEditAfterSave = false;
       return;
     }
 
-    closeDbModal();
+
+    // sinon comportement normal
     await loadDbData();
-    showToast("Enregistré ✅", "success");
+    setDbModalSaveStatus("✅ Modif avec succès", "success", 5000);
+    closeDbModal();
+
+
+    } catch (e) {
+      console.error(e);
+      showToast("Erreur réseau", "error");
+      setDbModalSaveStatus("❌ Erreur réseau", "error", 5000);
+    } finally {
+      if (dbModalSave) {
+        dbModalSave.disabled = false;
+        dbModalSave.style.opacity = "1";
+        dbModalSave.style.cursor = "pointer";
+      }
+    }
   }
+
+
+  // // ✅ si on vient d'éditer un ticket depuis le modal Tickets, on refresh le modal Tickets
+  // try {
+  //   const ctx = window.__ticketsModalCtx;
+  //   if (dbCurrentResource === "tickets" && ctx?.email) {
+  //     refreshTicketsModalForEmail(ctx.email).catch((e) => {
+  //       console.warn("refresh tickets modal after save failed", e);
+  //     });
+  //   }
+  // } catch (e) {
+  //   console.warn("refresh tickets modal after save failed", e);
+  // }
+
 
   btnLoadData?.addEventListener("click", loadDbData);
   dbSearch?.addEventListener("input", applyDbFilter);
@@ -1357,7 +2456,8 @@
     }
   });
   dbNextPage?.addEventListener("click", () => {
-    const pageSize = parseInt(dbPageSize?.value || "20", 10);
+    // const pageSize = parseInt(dbPageSize?.value || "20", 10);
+    const pageSize = parseInt(dbPageSize?.value || "8", 10);
     const totalPages = Math.max(1, Math.ceil(dbFilteredData.length / pageSize));
     if (dbCurrentPage < totalPages - 1) {
       dbCurrentPage++;
@@ -1375,6 +2475,7 @@
   const ticketsOverlay = document.getElementById("ticketsOverlay");
   const ticketsClose = document.getElementById("ticketsClose");
   const ticketsCopy = document.getElementById("ticketsCopy");
+  const ticketsAdd = document.getElementById("ticketsAdd");
   let lastTicketsForCopy = [];
   let lastTicketsUserEmail = "";
   const ticketsBody = document.getElementById("ticketsBody");
@@ -1423,10 +2524,45 @@
     return wrap;
   }
 
-  function openTicketsModal(tickets, userEmail) {
+  // function openTicketsModal(tickets, userEmail) {
+  function openTicketsModal(tickets, userEmail, userId) {
+
     if (!ticketsOverlay || !ticketsBody || !ticketsTitle) return;
 
-    const list = Array.isArray(tickets) ? tickets : [];
+    // const list = Array.isArray(tickets) ? tickets : [];
+    const list = Array.isArray(tickets) ? tickets.slice() : [];
+
+    // ✅ tri : dernier tirage d'abord
+    // 1) drawDate desc (YYYY-MM-DD)
+    // 2) updatedAt desc
+    // 3) createdAt desc
+    list.sort((a, b) => {
+      const da = String(a.drawDate || "");
+      const db = String(b.drawDate || "");
+      if (da !== db) return db.localeCompare(da);
+
+      const ua = new Date(a.updatedAt || 0).getTime() || 0;
+      const ub = new Date(b.updatedAt || 0).getTime() || 0;
+      if (ua !== ub) return ub - ua;
+
+      const ca = new Date(a.createdAt || 0).getTime() || 0;
+      const cb = new Date(b.createdAt || 0).getTime() || 0;
+      return cb - ca;
+    });
+
+    // ✅ IMPORTANT : l’état "Copier" doit correspondre AU MODAL OUVERT
+    lastTicketsForCopy = list;
+    lastTicketsUserEmail = userEmail || "";
+
+    // (optionnel mais utile si tu refresh ensuite)
+    // window.__ticketsModalCtx = { email: lastTicketsUserEmail };
+    // contexte: on veut refresh le modal tickets après save
+    // window.__ticketsModalCtx = { email: userEmail };
+    window.__ticketsModalCtx = { email: userEmail, userId: userId || null };
+
+    // ✅ on veut rester dans le formulaire après save
+    // __stayInEditAfterSave = true;
+
     ticketsTitle.textContent = "Tickets";
     if (ticketsMeta) {
       ticketsMeta.textContent =
@@ -1453,8 +2589,8 @@
         const tdDate = document.createElement("td");
         tdDate.textContent = t.drawDate || "—";
 
-        const tdDay = document.createElement("td");
-        tdDay.textContent = t.drawDay || "—";
+        // const tdDay = document.createElement("td");
+        // tdDay.textContent = t.drawDay || "—";
 
         const tdCreated = document.createElement("td");
         tdCreated.textContent = fmtDateTime(t.createdAt);
@@ -1462,20 +2598,233 @@
         const tdUpdated = document.createElement("td");
         tdUpdated.textContent = fmtDateTime(t.updatedAt);
 
-        tr.append(tdNumbers, tdChance, tdDate, tdDay, tdCreated, tdUpdated);
-        ticketsBody.appendChild(tr);
-      });
-    }
+        // ✅ Actions (Modifier / Supprimer)
+        const tdActions = document.createElement("td");
+        const actions = document.createElement("div");
+        actions.className = "tickets-actions";
+
+        const btnEdit = document.createElement("button");
+        btnEdit.type = "button";
+        // btnEdit.className = "btn-mini";
+        btnEdit.className = "btn-mini btn-blue";
+        btnEdit.textContent = "Modifier";
+
+        btnEdit.addEventListener("click", async () => {
+          if (!t?.id) {
+            showToast("Ticket sans id (impossible à modifier)", "error");
+            return;
+          }
+
+          const sel = document.getElementById("dbResourceSelect");
+          if (sel) sel.value = "tickets";
+          dbCurrentResource = "tickets";
+
+          closeTicketsModal();
+
+          // window.__ticketsModalCtx = { email: userEmail };
+          window.__ticketsModalCtx = { email: userEmail, userId: userId || null };
+          __stayInEditAfterSave = true;
+
+          try {
+            // const res = await apiFetch(`/api/admin/tickets/${t.id}`);
+            const res = await apiFetch(`${DB_ENDPOINTS.tickets}/${encodeURIComponent(String(t.id))}`);
+            const full = await res.json();
+            // openDbModal("edit", full);
+            // const res = await apiFetch(`/api/admin/tickets/${t.id}`);
+            // const full = await res.json();
+
+            // const mapped = {
+            //   id: full?.id ?? t.id,
+            //   numbers: full?.numbers ?? t.numbers ?? null,
+            //   chanceNumber: full?.chanceNumber ?? t.chanceNumber ?? null,
+            //   drawDate: full?.drawDate ?? t.drawDate ?? null,
+            //   drawDay: full?.drawDay ?? t.drawDay ?? null,
+
+            //   // ⚠️ support entity->dto
+            //   userId: full?.userId ?? full?.userid ?? full?.user?.id ?? null,
+            // };
+            const ctx = window.__ticketsModalCtx || {};
+            const forcedUserId = userId || ctx.userId || null;
+
+            const mapped = {
+              id: full?.id ?? t.id,
+              numbers: full?.numbers ?? t.numbers ?? null,
+              chanceNumber: full?.chanceNumber ?? t.chanceNumber ?? null,
+              drawDate: full?.drawDate ?? t.drawDate ?? null,
+              // drawDay: full?.drawDay ?? t.drawDay ?? null,
+
+              userId:
+                full?.userId ??
+                full?.userid ??
+                full?.user_id ??
+                full?.user?.id ??
+                t?.userId ??
+                t?.userid ??
+                t?.user_id ??
+                forcedUserId,
+            };
+
+
+            openDbModal("edit", mapped);
+
+          } catch (e) {
+            console.error(e);
+            showToast("Impossible de charger le ticket complet", "error");
+          }
+        });
+
+
+        const btnDel = document.createElement("button");
+        btnDel.type = "button";
+        // btnDel.className = "btn-mini btn-danger";
+        btnDel.className  = "btn-mini btn-red";
+        btnDel.textContent = "Supprimer";
+
+        // btnDel.addEventListener("click", async () => {
+        //   if (!t?.id) {
+        //     showToast("Ticket sans id (impossible à supprimer)", "error");
+        //     return;
+        //   }
+
+        // const ok = confirm("Supprimer ce ticket?  Suppriler cette user?");
+        btnDel.addEventListener("click", async () => {
+          const id = t?.id || t?._id;
+          if (!id) {
+            showToast("Ticket sans id (impossible à supprimer)", "error");
+            return;
+          }
+
+          const ok = await confirmDialog({
+            title: "Supprimer le ticket",
+            message: `Supprimer ce ticket (#${id}) ?`,
+            okText: "Supprimer",
+            cancelText: "Annuler",
+            danger: true,
+          });
+          if (!ok) return;
+
+          const url = `${DB_ENDPOINTS.tickets}/${encodeURIComponent(String(id))}`;
+
+          try {
+            const res = await apiFetch(url, { method: "DELETE" });
+            const body = await res.text().catch(() => "");
+
+            if (!res.ok) {
+              console.error("DELETE ticket error:", res.status, body);
+              showToast(`Erreur suppression (${res.status})`, "error");
+              return;
+            }
+
+            showToast("Ticket supprimé ✅", "success");
+
+            notifyAction({
+              variant: "ok",
+              title: "Suppression",
+              status: res.status,
+              message: `🗑️ Ticket #${id} supprimé`,
+              ms: 7000,
+            });
+
+
+            // refresh du modal tickets (si tu as la fonction)
+            if (userEmail && typeof refreshTicketsModalForEmail === "function") {
+              await refreshTicketsModalForEmail(userEmail);
+            } else {
+              // fallback: recharge la table principale si tu veux
+              // await loadDbData();
+            }
+          } catch (e) {
+            console.error(e);
+            showToast("Erreur réseau", "error");
+          }
+        });
+
+
+
+      //   if (!ok) return;
+
+      //   try {
+      //     const res = await apiFetch(`/api/admin/tickets/${t.id}`, { method: "DELETE" });
+      //     if (!res.ok) {
+      //       const body = await res.text().catch(() => "");
+      //       console.error("DELETE ticket error:", res.status, body);
+      //       showToast(`Erreur suppression (${res.status})`, "error");
+      //       return;
+      //     }
+
+      //     showToast("Ticket supprimé ✅", "success");
+
+      //     // refresh du modal tickets (tu as déjà cette fonction dans ton code)
+      //     if (userEmail) {
+      //       await refreshTicketsModalForEmail(userEmail);
+      //     }
+      //   } catch (e) {
+      //     console.error(e);
+      //     showToast("Erreur réseau", "error");
+      //   }
+      // });
+
+      actions.append(btnEdit, btnDel);
+      tdActions.appendChild(actions);
+
+      // ✅ ajoute tdActions à la fin
+      // tr.append(tdNumbers, tdChance, tdDate, tdDay, tdCreated, tdUpdated, tdActions);
+      tr.append(tdNumbers, tdChance, tdDate, tdCreated, tdUpdated, tdActions);
+
+
+      // tr.append(tdNumbers, tdChance, tdDate, tdDay, tdCreated, tdUpdated);
+      ticketsBody.appendChild(tr);
+    });
+  }
 
     ticketsOverlay.style.display = "flex";
     ticketsOverlay.setAttribute("aria-hidden", "false");
+}
+
+  async function refreshTicketsModalForEmail(email) {
+    const ctx = window.__ticketsModalCtx || {};
+    let userId = ctx.userId || null;
+
+    // fallback : retrouver l'id via l'index users si besoin
+    if (!userId && email) {
+      await ensureUsersIndex().catch(() => {});
+      for (const [id, u] of __userById.entries()) {
+        if (String(u.email || "").toLowerCase() === String(email).toLowerCase()) {
+          userId = id;
+          break;
+        }
+      }
+    }
+
+    if (!userId) {
+      console.warn("[Tickets Modal] userId introuvable pour refresh");
+      return;
+    }
+
+    const url = `${DB_ENDPOINTS.users}/${encodeURIComponent(String(userId))}`;
+    const res = await apiFetch(url, { method: "GET" });
+    const data = await res.json().catch(() => null);
+
+    if (!res.ok || !data) {
+      console.warn("[Tickets Modal] refresh failed", res.status, data);
+      return;
+    }
+
+    const tickets = Array.isArray(data.tickets) ? data.tickets : [];
+    openTicketsModal(tickets, email || data.email || "", userId);
   }
+
 
   function closeTicketsModal() {
     if (!ticketsOverlay) return;
     ticketsOverlay.style.display = "none";
     ticketsOverlay.setAttribute("aria-hidden", "true");
     if (ticketsBody) ticketsBody.innerHTML = "";
+
+    // ✅ évite toute “fuite” de contexte
+    lastTicketsForCopy = [];
+    lastTicketsUserEmail = "";
+    // window.__ticketsModalCtx = null;
   }
 
   ticketsClose?.addEventListener("click", closeTicketsModal);
@@ -1496,7 +2845,7 @@
       const nums = t.numbers ? String(t.numbers) : "—";
       const chance = t.chanceNumber ?? "—";
       const date = t.drawDate || "—";
-      const day = t.drawDay || "—";
+      // const day = t.drawDay || "—";
       const created = fmtDateTime(t.createdAt);
       const updated = fmtDateTime(t.updatedAt);
 
@@ -1507,6 +2856,42 @@
 
     return lines.join("\n");
   }
+
+  ticketsAdd?.addEventListener("click", () => {
+    const ctx = window.__ticketsModalCtx || {};
+    const userId = ctx.userId || null;
+    const email = ctx.email || lastTicketsUserEmail || "";
+
+    if (!userId) {
+      showToast("UserId introuvable (impossible d’ajouter un ticket)", "error");
+      return;
+    }
+
+    // on passe en mode tickets + on ouvre le CRUD create
+    const sel = document.getElementById("dbResourceSelect");
+    if (sel) sel.value = "tickets";
+    dbCurrentResource = "tickets";
+
+    // IMPORTANT: on veut revenir au modal Tickets après save
+    __stayInEditAfterSave = true;
+
+    // on ferme le modal tickets et on ouvre la création du ticket
+    closeTicketsModal();
+
+    // row "fake" juste pour que openDbModal ait des clés
+    openDbModal("create", {
+      numbers: "",
+      chanceNumber: "",
+      drawDate: "",
+      // drawDay: "",
+      userId: userId,
+    });
+
+    // optionnel: titre plus clair
+    const title = document.getElementById("dbModalTitle");
+    if (title) title.textContent = `Nouveau ticket • ${email}`;
+  });
+
 
   async function copyToClipboard(text) {
     try {

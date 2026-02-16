@@ -240,6 +240,7 @@ public class SecurityConfig {
                                 // "/assets/**",
                                 // "/favicon-admin.ico"
                         ).hasRole("ADMIN")
+                        .requestMatchers("/api/admin/**").hasRole("ADMIN")
 
                         // .requestMatchers("/api/health").permitAll()
                         // Auth API accessible sans authentification
@@ -268,7 +269,7 @@ public class SecurityConfig {
                         // .requestMatchers("/api/users/**", "/api/users").authenticated()  // Protégé par JWT
                         // .requestMatchers("/api/users/**").hasRole("ADMIN")
 
-                        /* ========== 💾 ADMIN CRUD MINI-HEIDISQL ========== */
+                        /* ==========  ADMIN CRUD MINI-HEIDISQL ========== */
                         .requestMatchers(HttpMethod.GET,    "/api/admin/users/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.POST,   "/api/admin/users/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.PUT,    "/api/admin/users/**").hasRole("ADMIN")
@@ -310,12 +311,14 @@ public class SecurityConfig {
         //     "http://localhost:*",
         //     "http://127.0.0.1:*",
             // "http://192.168.*.*:*",
-        configuration.setAllowedOrigins(List.of(
-             "http://localhost:*",
+        // configuration.setAllowedOrigins(List.of(
+        configuration.setAllowedOriginPatterns(List.of(
+            "http://localhost:*",
             "http://127.0.0.1:*",
             "http://localhost:8082",
             "http://127.0.0.1:5500", //live server
             "https://stephanedinahet.fr",
+            "https://loto-tracker.fr",
             "http://192.168.*.*:*",
             // "http://localhost:8082", // add sd
 	        "http://localhost:5500", // add sd

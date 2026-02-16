@@ -20,7 +20,13 @@ public interface TicketRepository extends JpaRepository<Ticket, String> {
      * @param email The **email** of the user whose tickets are being retrieved.
      * @return A **list of tickets** belonging to the specified user.
      */
-    @Query("SELECT t FROM Ticket t WHERE t.user.email = :email")
+    // @Query("SELECT t FROM Ticket t WHERE t.user.email = :email")
+    @Query("""
+        SELECT t
+        FROM Ticket t
+        WHERE t.user.email = :email
+        ORDER BY t.drawDate DESC, t.createdAt DESC
+    """)
     List<Ticket> findByUserEmail(@Param("email") String email);
 
     /**
@@ -29,8 +35,22 @@ public interface TicketRepository extends JpaRepository<Ticket, String> {
      * @param userId The **ID of the user** whose tickets are being retrieved.
      * @return A **list of tickets** belonging to the specified user.
      */
-    @Query("SELECT t FROM Ticket t WHERE t.user.id = :userId")
+    // @Query("SELECT t FROM Ticket t WHERE t.user.id = :userId")
+    @Query("""
+        SELECT t
+        FROM Ticket t
+        WHERE t.user.id = :userId
+        ORDER BY t.drawDate DESC, t.createdAt DESC
+    """)
     List<Ticket> findByUserId(@Param("userId") String userId);
+
+    // Optionnel (admin / liste globale)
+    @Query("""
+        SELECT t
+        FROM Ticket t
+        ORDER BY t.drawDate DESC, t.createdAt DESC
+    """)
+    List<Ticket> findAllSorted();
 }
 
 /**
