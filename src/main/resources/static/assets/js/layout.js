@@ -1236,7 +1236,7 @@ function setAdminInBurger(isAdmin) {
   }
 
   document.addEventListener("DOMContentLoaded", injectLayout);
-})();
+// })();
 
 
 
