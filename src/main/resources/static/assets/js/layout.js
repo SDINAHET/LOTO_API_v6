@@ -6,89 +6,27 @@
    Requis dans les pages qui contiennent :
    <div id="appHeader"></div>
    <div id="appFooter"></div>
-// */
-// (function () {
-//   const HOST = window.location.hostname;
+*/
 
-//   // ✅ En local : on vise le même host que le front (localhost OU 127.0.0.1)
-//   const API_BASE_PRIMARY =
-//     (HOST === "localhost" || HOST === "127.0.0.1")
-//       ? `http://${HOST}:8082`
-//       : "https://stephanedinahet.fr";
+(function () {
+  /* =========================================================
+     API BASE (local/prod)
+     - Local: http://HOST:8082
+     - Prod : même origin (Apache reverse proxy)
+  ========================================================= */
+  const HOST = window.location.hostname;
 
+  const IS_LOCAL =
+    HOST === "localhost" ||
+    HOST === "127.0.0.1" ||
+    HOST.startsWith("192.168.") ||
+    HOST.startsWith("10.") ||
+    HOST.endsWith(".local");
 
-  // const HOST = window.location.hostname;
+  window.API_BASE = IS_LOCAL ? `http://${HOST}:8082` : window.location.origin;
+  console.log("API_BASE =", window.API_BASE);
 
-  // const PROD_DOMAINS = ["stephanedinahet.fr", "loto-tracker.fr"];
-
-  // const IS_PROD = PROD_DOMAINS.some((domain) =>
-  //   HOST === domain ||
-  //   HOST === `www.${domain}` ||
-  //   HOST.endsWith(`.${domain}`)
-  // );
-
-  // // ✅ PROD : même origin (apache reverse proxy)
-  // // ✅ LOCAL : API sur le même host, port 8082
-  // const API_BASE = IS_PROD
-  //   ? window.location.origin
-  //   : `${window.location.protocol}//${HOST}:8082`;
-
-  // window.API_BASE = API_BASE;
-  // console.log("API_BASE:", API_BASE);
-
-  // function getActiveBase() {
-  //   return window.__API_BASE_ACTIVE__ || window.API_BASE;
-  // }
-  (function () {
-    const HOST = window.location.hostname;
-
-    const PROD_DOMAINS = ["stephanedinahet.fr", "loto-tracker.fr"];
-
-    const IS_PROD = PROD_DOMAINS.some(d =>
-      HOST === d ||
-      HOST === `www.${d}` ||
-      HOST.endsWith(`.${d}`)
-    );
-
-    // ✅ Local => API sur 8082 du même host (localhost/127.0.0.1)
-    // ✅ Prod => même origin (fonctionne pour stephanedinahet.fr ET loto-tracker.fr)
-    const API_BASE_PRIMARY = (HOST === "localhost" || HOST === "127.0.0.1")
-      ? `http://${HOST}:8082`
-      : (IS_PROD ? window.location.origin : "https://stephanedinahet.fr"); // fallback sécurité
-
-    window.API_BASE = API_BASE_PRIMARY;
-    window.getApiBase = () => window.API_BASE;
-
-    console.log("API_BASE =", window.API_BASE);
-// })();
-
-
-
-// (function () {
-//   const HOST = window.location.hostname;
-
-//   const PROD_DOMAINS = [
-//     "stephanedinahet.fr",
-//     "loto-tracker.fr"
-//   ];
-
-//   const IS_PROD = PROD_DOMAINS.some(domain =>
-//     HOST === domain ||
-//     HOST === `www.${domain}` ||
-//     HOST.endsWith(`.${domain}`)
-//   );
-
-//   const API_BASE = IS_PROD
-//     ? window.location.origin
-//     : `${window.location.protocol}//${HOST}:8082`;
-
-//   // On rend API_BASE global
-//   window.API_BASE = API_BASE;
-
-//   console.log("API_BASE:", API_BASE);
-
-
-  const API_BASE_FALLBACK = null; // ✅ désactiver en local
+  const API_BASE_FALLBACK = null; // optionnel, laisse null
 
   const USERINFO_PATH = "/api/protected/userinfo";
   const LOGOUT_PATH = "/api/auth/logout";
@@ -96,7 +34,7 @@
   const REFRESH_PATH = "/api/auth/refresh";
 
   function getActiveBase() {
-    return window.__API_BASE_ACTIVE__ || API_BASE_PRIMARY;
+    return window.__API_BASE_ACTIVE__ || window.API_BASE || window.location.origin;
   }
 
   /* =========================================================
@@ -120,17 +58,11 @@
     }
 
     try {
-      // const res = await (window.__ORIGINAL_FETCH__ || fetch)(`${baseUrl}${CSRF_PATH}`, {
-      //   method: "GET",
-      //   credentials: "include",
-      //   cache: "no-store"
-      // });
-
       const res = await (window.__ORIGINAL_FETCH__ || fetch)(`${baseUrl}${CSRF_PATH}`, {
         method: "POST",
         credentials: "include",
         cache: "no-store",
-        headers: { "Accept": "application/json" }
+        headers: { Accept: "application/json" }
       });
 
       if (res.ok) {
@@ -413,7 +345,6 @@
     );
   }
 
-
   /* =========================================================
      Refresh helper (utilise originalFetch pour éviter boucle)
   ========================================================= */
@@ -504,21 +435,16 @@
 
   /* =========================================================
      fetchWithRefresh helper (compat legacy pages)
-     - garde le même comportement que fetch patché (CSRF + refresh 401)
-     - accepte URL relatives (/api/...) ou absolues
   ========================================================= */
   window.fetchWithRefresh = async function fetchWithRefresh(input, init = {}) {
     const base = getActiveBase();
 
-    // Garantit credentials/cache comme le patch fetch()
     init = init || {};
     init.credentials = init.credentials || "include";
     init.cache = init.cache || "no-store";
 
-    // Ajoute CSRF si méthode unsafe
     init = await withCsrfHeaders(init, base);
 
-    // Si on reçoit une URL relative /api/..., on la transforme en URL absolue
     let finalInput = input;
     if (typeof input === "string" && input.startsWith("/api/")) {
       finalInput = `${base}${input}`;
@@ -526,11 +452,8 @@
       finalInput = new Request(`${base}${input.url}`, input);
     }
 
-    // IMPORTANT :
-    // On appelle le fetch patché (window.fetch) -> il fera refresh sur 401 + retry
     return fetch(finalInput, init);
   };
-
 
   /* =========================================================
      Burger (menu) - delegation globale
@@ -625,7 +548,6 @@
             <span>Admin</span>
           </a>
 
-
           <div class="chip user-chip" id="userChip" style="display:none;">
             <span>Bienvenue, <b id="userEmail">—</b></span>
             <button class="btn-danger-soft" id="logoutBtn" type="button" title="Déconnexion">
@@ -678,35 +600,24 @@
 
   function isTrackingExcludedPage() {
     const path = (location.pathname || "").toLowerCase();
-
-    // Liste des pages à EXCLURE du tracking
-    const excludedPages = [
-      "admin-login.html",
-      "admin.html",
-      "login.html",
-      "register.html"
-    ];
-
-    return excludedPages.some(page => path.endsWith(page));
+    const excludedPages = ["admin-login.html", "admin.html", "login.html", "register.html"];
+    return excludedPages.some((page) => path.endsWith(page));
   }
 
   function loadGoatCounter() {
-    // ❌ Ne pas tracker certaines pages
     if (isTrackingExcludedPage()) {
       window.goatcounter = { no_onload: true };
       return;
     }
 
-    // ❌ Ne pas tracker hors production
+    // ✅ Tracking uniquement sur stephanedinahet.fr (comme ton code d'origine)
     if (!location.hostname.endsWith("stephanedinahet.fr")) {
       window.goatcounter = { no_onload: true };
       return;
     }
 
-    // Évite les doublons
     if (document.querySelector('script[data-goatcounter]')) return;
 
-    // (Optionnel) forcer un chemin canonique
     window.goatcounter = window.goatcounter || {};
     window.goatcounter.path = location.pathname;
 
@@ -717,41 +628,36 @@
     document.body.appendChild(s);
   }
 
-
-
-
   /* =========================================================
-   Admin link (dans le menu burger)
-========================================================= */
-function renderAdminMenuItem() {
-  return `
-    <a href="/admin-login.html" class="btn-ghost admin-menu-item" id="adminBurgerLink">
-      <svg class="btn-ico" viewBox="0 0 24 24" aria-hidden="true">
-        <path d="M12 2l8 4v6c0 5-3 9-8 10C7 21 4 17 4 12V6l8-4z"></path>
-      </svg>
-      <span>Admin Dashboard</span>
-    </a>
-  `;
-}
+     Admin link (burger menu)
+  ========================================================= */
+  function renderAdminMenuItem() {
+    return `
+      <a href="/admin-login.html" class="btn-ghost admin-menu-item" id="adminBurgerLink">
+        <svg class="btn-ico" viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M12 2l8 4v6c0 5-3 9-8 10C7 21 4 17 4 12V6l8-4z"></path>
+        </svg>
+        <span>Admin Dashboard</span>
+      </a>
+    `;
+  }
 
-function setAdminInBurger(isAdmin) {
-  const slot = document.getElementById("adminMenuSlot");
-  if (!slot) return;
-  slot.innerHTML = isAdmin ? renderAdminMenuItem() : "";
-}
-
+  function setAdminInBurger(isAdmin) {
+    const slot = document.getElementById("adminMenuSlot");
+    if (!slot) return;
+    slot.innerHTML = isAdmin ? renderAdminMenuItem() : "";
+  }
 
   /* =========================================================
      Auth UI (source de vérité = /userinfo)
   ========================================================= */
   async function fetchUserInfo(baseUrl) {
-    // ✅ plus besoin de fetchWithRefresh : fetch() est patché -> refresh auto
-    const res = await fetch(`${baseUrl}${USERINFO_PATH}`, { method: "GET" });
+    const base = baseUrl || getActiveBase();
+    const res = await fetch(`${base}${USERINFO_PATH}`, { method: "GET" });
     if (!res.ok) throw new Error(`userinfo ${res.status}`);
     return await res.json();
   }
 
-  // function setAuthUI({ logged, label }) {
   function setAuthUI({ logged, label, isAdmin }) {
     const adminLink = document.getElementById("adminLink");
     const authBtn = document.getElementById("authActionBtn");
@@ -771,18 +677,13 @@ function setAdminInBurger(isAdmin) {
       userChip.style.display = "inline-flex";
       userEmail.textContent = label || "Utilisateur";
 
-      // 🔥 AJOUT ICI
       if (window.location.pathname.endsWith("/login.html")) {
         window.location.replace("index.html");
         return;
       }
 
-      // ✅ injecte l’item Admin dans le burger menu
       setAdminInBurger(!!isAdmin);
-
-      // (optionnel) tu peux aussi masquer le bouton admin du header :
       if (adminLink) adminLink.style.display = "none";
-      // if (adminLink) adminLink.style.display = isAdmin ? "inline-flex" : "none";
       return;
     }
 
@@ -808,41 +709,33 @@ function setAdminInBurger(isAdmin) {
   }
 
   async function checkUserAuthUI() {
+    const base = getActiveBase();
     try {
-      // const data = await fetchUserInfo(API_BASE_PRIMARY);
-      // const shown = data.username || data.email || "Utilisateur";
-      // setAuthUI({ logged: true, label: shown });
-      const data = await fetchUserInfo(API_BASE_PRIMARY);
+      const data = await fetchUserInfo(base);
       const shown = data.username || data.email || "Utilisateur";
 
       const isAdmin =
         data?.role === "ADMIN" ||
         data?.role === "ROLE_ADMIN" ||
-        (Array.isArray(data?.roles) && data.roles.includes("ADMIN")) ||
-        (Array.isArray(data?.roles) && data.roles.includes("ROLE_ADMIN"));
+        (Array.isArray(data?.roles) && (data.roles.includes("ADMIN") || data.roles.includes("ROLE_ADMIN")));
 
       setAuthUI({ logged: true, label: shown, isAdmin });
-
-      window.__API_BASE_ACTIVE__ = API_BASE_PRIMARY;
+      window.__API_BASE_ACTIVE__ = base;
       return;
     } catch {
       if (API_BASE_FALLBACK) {
         try {
           const data2 = await fetchUserInfo(API_BASE_FALLBACK);
           const shown2 = data2.username || data2.email || "Utilisateur";
-          setAuthUI({ logged: true, label: shown2 });
+          setAuthUI({ logged: true, label: shown2, isAdmin: false });
           window.__API_BASE_ACTIVE__ = API_BASE_FALLBACK;
           return;
         } catch {
-          // setAuthUI({ logged: false });
-          setAuthUI({ logged: false, isAdmin: false });
-          window.__API_BASE_ACTIVE__ = API_BASE_PRIMARY;
-          return;
+          // ignore fallback
         }
       }
-      // setAuthUI({ logged: false });
       setAuthUI({ logged: false, isAdmin: false });
-      window.__API_BASE_ACTIVE__ = API_BASE_PRIMARY;
+      window.__API_BASE_ACTIVE__ = base;
     }
   }
 
@@ -855,7 +748,7 @@ function setAdminInBurger(isAdmin) {
       credentials: "include",
       cache: "no-store"
     });
-    return (res.status === 200 || res.status === 401);
+    return res.status === 200 || res.status === 401;
   }
 
   async function checkApiAlive() {
@@ -897,7 +790,7 @@ function setAdminInBurger(isAdmin) {
       getActiveBase() ||
       ((location.hostname === "localhost" || location.hostname === "127.0.0.1")
         ? `http://${location.hostname}:8082`
-        : "https://stephanedinahet.fr");
+        : window.location.origin);
 
     const el = document.getElementById("visitCount");
     if (!el) return;
@@ -986,7 +879,7 @@ function setAdminInBurger(isAdmin) {
       getActiveBase() ||
       ((location.hostname === "localhost" || location.hostname === "127.0.0.1")
         ? `http://${location.hostname}:8082`
-        : "https://stephanedinahet.fr");
+        : window.location.origin);
 
     const url = `${base}/api/analytics/event`;
 
@@ -1116,14 +1009,13 @@ function setAdminInBurger(isAdmin) {
     if (headerMount) headerMount.innerHTML = renderHeader();
     if (footerMount) footerMount.innerHTML = renderFooter();
 
-    // ✅ GOATCOUNTER : tracking global, avec exclusions
     loadGoatCounter();
 
-    // ✅ Patch fetch/axios très tôt
+    // Patch fetch/axios très tôt
     setupFetchFastPatch();
     setupAxiosFastPatch();
 
-    // ✅ CSRF : prépare le token au chargement
+    // CSRF : prépare le token au chargement
     ensureCsrfToken(getActiveBase());
 
     // Heure
@@ -1150,70 +1042,8 @@ function setAdminInBurger(isAdmin) {
       window.addEventListener("resize", syncFooterHeight);
     });
 
-
-    // function renderAdminMenuItem() {
-    //   return `
-    //     <a href="/admin-login.html" class="btn-ghost admin-menu-item" id="adminBurgerLink">
-    //       <svg class="btn-ico" viewBox="0 0 24 24" aria-hidden="true">
-    //         <path d="M12 2l8 4v6c0 5-3 9-8 10C7 21 4 17 4 12V6l8-4z"></path>
-    //       </svg>
-    //       <span>Admin Dashboard</span>
-    //     </a>
-    //   `;
-    // }
-
-    // function setAdminInBurger(isAdmin) {
-    //   const slot = document.getElementById("adminMenuSlot");
-    //   if (!slot) return;
-
-    //   if (isAdmin) {
-    //     slot.innerHTML = renderAdminMenuItem();
-    //   } else {
-    //     slot.innerHTML = "";
-    //   }
-    // }
-
-    function renderAdminMenuItem() {
-      return `
-        <a href="/admin-login.html" class="nav-item admin-menu-item" id="adminBurgerLink">
-          <i class="fa-solid fa-shield-halved"></i><span>Admin</span>
-        </a>
-      `;
-    }
-
-    function setAdminInBurger(isAdmin) {
-      const slot = document.getElementById("adminMenuSlot");
-      if (!slot) return;
-      slot.innerHTML = isAdmin ? renderAdminMenuItem() : "";
-    }
-
-    function setBurgerIdentity({ logged, label, isAdmin }) {
-      const box = document.getElementById("burgerUserBox");
-      const name = document.getElementById("burgerUserName");
-      const role = document.getElementById("burgerUserRole");
-
-      if (!box || !name || !role) return;
-
-      if (!logged) {
-        box.style.display = "none";
-        name.textContent = "—";
-        role.textContent = "Invité";
-        return;
-      }
-
-      box.style.display = "block";
-      name.textContent = label || "Utilisateur";
-      role.textContent = isAdmin ? "Administrateur" : "Utilisateur";
-    }
-
-
-
     document.dispatchEvent(new CustomEvent("layout:ready"));
   }
 
   document.addEventListener("DOMContentLoaded", injectLayout);
 })();
-
-
-
-
