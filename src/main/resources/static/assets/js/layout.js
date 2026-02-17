@@ -6,45 +6,89 @@
    Requis dans les pages qui contiennent :
    <div id="appHeader"></div>
    <div id="appFooter"></div>
-*/
-(function () {
-  const HOST = window.location.hostname;
+// */
+// (function () {
+//   const HOST = window.location.hostname;
 
-  // ✅ En local : on vise le même host que le front (localhost OU 127.0.0.1)
-  const API_BASE_PRIMARY =
-    (HOST === "localhost" || HOST === "127.0.0.1")
+//   // ✅ En local : on vise le même host que le front (localhost OU 127.0.0.1)
+//   const API_BASE_PRIMARY =
+//     (HOST === "localhost" || HOST === "127.0.0.1")
+//       ? `http://${HOST}:8082`
+//       : "https://stephanedinahet.fr";
+
+
+  // const HOST = window.location.hostname;
+
+  // const PROD_DOMAINS = ["stephanedinahet.fr", "loto-tracker.fr"];
+
+  // const IS_PROD = PROD_DOMAINS.some((domain) =>
+  //   HOST === domain ||
+  //   HOST === `www.${domain}` ||
+  //   HOST.endsWith(`.${domain}`)
+  // );
+
+  // // ✅ PROD : même origin (apache reverse proxy)
+  // // ✅ LOCAL : API sur le même host, port 8082
+  // const API_BASE = IS_PROD
+  //   ? window.location.origin
+  //   : `${window.location.protocol}//${HOST}:8082`;
+
+  // window.API_BASE = API_BASE;
+  // console.log("API_BASE:", API_BASE);
+
+  // function getActiveBase() {
+  //   return window.__API_BASE_ACTIVE__ || window.API_BASE;
+  // }
+  (function () {
+    const HOST = window.location.hostname;
+
+    const PROD_DOMAINS = ["stephanedinahet.fr", "loto-tracker.fr"];
+
+    const IS_PROD = PROD_DOMAINS.some(d =>
+      HOST === d ||
+      HOST === `www.${d}` ||
+      HOST.endsWith(`.${d}`)
+    );
+
+    // ✅ Local => API sur 8082 du même host (localhost/127.0.0.1)
+    // ✅ Prod => même origin (fonctionne pour stephanedinahet.fr ET loto-tracker.fr)
+    const API_BASE_PRIMARY = (HOST === "localhost" || HOST === "127.0.0.1")
       ? `http://${HOST}:8082`
-      : "https://stephanedinahet.fr";
-      // : "https://loto-tracker.fr";
+      : (IS_PROD ? window.location.origin : "https://stephanedinahet.fr"); // fallback sécurité
+
+    window.API_BASE = API_BASE_PRIMARY;
+    window.getApiBase = () => window.API_BASE;
+
+    console.log("API_BASE =", window.API_BASE);
+// })();
+
+
+
+// (function () {
+//   const HOST = window.location.hostname;
+
+//   const PROD_DOMAINS = [
+//     "stephanedinahet.fr",
+//     "loto-tracker.fr"
+//   ];
+
+//   const IS_PROD = PROD_DOMAINS.some(domain =>
+//     HOST === domain ||
+//     HOST === `www.${domain}` ||
+//     HOST.endsWith(`.${domain}`)
+//   );
+
+//   const API_BASE = IS_PROD
+//     ? window.location.origin
+//     : `${window.location.protocol}//${HOST}:8082`;
+
+//   // On rend API_BASE global
+//   window.API_BASE = API_BASE;
+
+//   console.log("API_BASE:", API_BASE);
+
 
   const API_BASE_FALLBACK = null; // ✅ désactiver en local
-
-  // =========================
-  // API BASE (local / prod multi-domain)
-  // - Local: http://<host>:8082
-  // - Prod: same origin (Apache reverse proxy)
-  // =========================
-  // (function initApiBase() {
-  //   // évite collisions si le script est chargé 2 fois
-  //   if (window.API_BASE) return;
-
-  //   const host = window.location.hostname;
-  //   const prodDomains = ["stephanedinahet.fr", "loto-tracker.fr"];
-
-  //   const isLocal = (host === "localhost" || host === "127.0.0.1");
-  //   const isProd = prodDomains.some(d =>
-  //     host === d || host === `www.${d}` || host.endsWith(`.${d}`)
-  //   );
-
-  //   window.API_BASE = isLocal
-  //     ? `http://${host}:8082`
-  //     : (isProd ? window.location.origin : "https://stephanedinahet.fr"); // fallback
-
-  //   window.getApiBase = () => window.API_BASE;
-
-  //   console.log("API_BASE =", window.API_BASE);
-  // // })();
-
 
   const USERINFO_PATH = "/api/protected/userinfo";
   const LOGOUT_PATH = "/api/auth/logout";

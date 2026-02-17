@@ -1,9 +1,34 @@
   (function () {
-    const API_BASE =
-      (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1")
-        ? "http://localhost:8082"
-        : "https://stephanedinahet.fr";
-        // : "https://loto-tracker.fr";
+  //   const API_BASE =
+  //     (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1")
+  //       ? "http://localhost:8082"
+  //       : "https://stephanedinahet.fr";
+
+  const HOST = window.location.hostname;
+
+  // Liste des domaines de production
+  const PROD_DOMAINS = [
+    "stephanedinahet.fr",
+    "loto-tracker.fr"
+  ];
+
+  // Vérifie si le host correspond à un domaine ou sous-domaine
+  const IS_PROD = PROD_DOMAINS.some(domain =>
+    HOST === domain ||
+    HOST === `www.${domain}` ||
+    HOST.endsWith(`.${domain}`)
+  );
+
+  // En prod → reverse proxy HTTPS
+  // En local → port 8082
+  const API_BASE = IS_PROD
+    ? window.location.origin
+    : `${window.location.protocol}//${HOST}:8082`;
+
+  console.log("HOST:", HOST);
+  console.log("IS_PROD:", IS_PROD);
+  console.log("API_BASE:", API_BASE);
+
 
     function renderSidebar() {
       const path = (window.location.pathname || "").toLowerCase();

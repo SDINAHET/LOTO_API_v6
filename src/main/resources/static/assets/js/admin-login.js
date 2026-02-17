@@ -1,13 +1,41 @@
 // 🔧 BASE URL dynamique : même origin que la page
 // const API_BASE = window.location.origin;
 
-const API_BASE =
-  (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1")
-    // ? "http://localhost:8082"
-    // : window.location.origin;
-    ? "http://localhost:8082"
-    : "https://stephanedinahet.fr";
-    // : "https://loto-tracker.fr";
+// const API_BASE =
+//   (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1")
+//     // ? "http://localhost:8082"
+//     // : window.location.origin;
+//     ? "http://localhost:8082"
+//     : "https://stephanedinahet.fr";
+
+// ----------------------------
+// API_BASE (robuste)
+// ----------------------------
+const HOST = window.location.hostname;
+
+// Liste des domaines de production
+const PROD_DOMAINS = [
+  "stephanedinahet.fr",
+  "loto-tracker.fr"
+];
+
+// Prod si domaine principal OU www OU sous-domaine
+const IS_PROD = PROD_DOMAINS.some(domain =>
+  HOST === domain ||
+  HOST === `www.${domain}` ||
+  HOST.endsWith(`.${domain}`)
+);
+
+// En prod: API sur le même host via reverse-proxy
+// En local/réseau: API sur même host mais port 8082
+const API_BASE = IS_PROD
+  ? window.location.origin
+  : `${window.location.protocol}//${HOST}:8082`;
+
+console.log("HOST:", HOST);
+console.log("IS_PROD:", IS_PROD);
+console.log("API_BASE:", API_BASE);
+
 
 const form = document.getElementById("adminLoginForm");
 const errorMsg = document.getElementById("errorMsg");

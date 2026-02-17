@@ -19,15 +19,11 @@
     HOST === "stephanedinahet.fr" ||
     HOST === "www.stephanedinahet.fr" ||
     HOST.endsWith(".stephanedinahet.fr");
-    // HOST === "loto-tracker.fr" ||
-    // HOST === "www.loto-tracker.fr" ||
-    // HOST.endsWith(".loto-tracker.fr");
 
   // ✅ En prod: API via reverse-proxy sur le domaine principal
   // ✅ En local/réseau: API sur même host mais port 8082
   const API_BASE = IS_PROD
     ? "https://stephanedinahet.fr"
-    // ? "https://loto-tracker.fr"
     : `${window.location.protocol}//${HOST}:8082`;
 
   const USERINFO_PATH = "/api/protected/userinfo";

@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Ajouter un ticket — Loto Tracker</title>
+  <style>html,body{background:#0a101c;}</style>
+
+
+  <link rel="icon" type="image/png" href="assets/img/loto_tracker.png" />
+  <!-- <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script> -->
+
+  <link rel="stylesheet" href="/assets/vendors/bootstrap/bootstrap.min.css">
+  <link rel="stylesheet" href="/assets/vendors/fontawesome/css/all.min.css">
+  <script src="/assets/vendors/axios/axios.min.js"></script>
+
+
+  <link rel="stylesheet" href="assets/css/styles.css">
+  <link rel="stylesheet" href="assets/css/post_ticket.css">
+  <style>
+
+  </style>
+</head>
+
+<body>
+  <div id="appHeader"></div>
+
+  <div class="app-shell">
+    <aside id="sidebar" class="sidebar">
+      <div class="sidebar-inner">
+
+        <!-- ✅ Profil + rôle dans le menu burger -->
+        <div class="burger-user" id="burgerUserBox" style="display:none;">
+          <div class="burger-user-row">
+            <i class="fa-solid fa-user-shield"></i>
+            <div class="burger-user-text">
+              <div class="burger-user-name" id="burgerUserName">—</div>
+              <div class="burger-user-role" id="burgerUserRole">Utilisateur</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ✅ Slot pour lien admin dans le menu (si admin) -->
+        <div id="adminMenuSlot"></div>
+
+        <div class="sidebar-title">Dashboard</div>
+        <a class="side-link" href="index.html"><i class="fa-solid fa-chart-line"></i> Résultats</a>
+        <a class="side-link active" href="tickets.html"><i class="fa-solid fa-ticket"></i> Tickets</a>
+        <a class="side-link" href="statistiques.html"><i class="fa-solid fa-chart-column"></i> Statistiques</a>
+        <a class="side-link" href="profil.html"><i class="fa-solid fa-user-gear"></i> Mon profil</a>
+        <hr style="border-color: rgba(255,255,255,.10); margin: 12px 0;">
+
+        <div class="sidebar-title">Jouer</div>
+        <a class="side-link" href="loto.html"><i class="fa-solid fa-clover"></i> Loto</a>
+        <a class="side-link" href="euromillions.html"><i class="fa-solid fa-star"></i> Euromillions</a>
+      </div>
+    </aside>
+
+    <main>
+      <section class="glass-panel">
+        <div class="d-flex align-items-start justify-content-between flex-wrap gap-2">
+          <div>
+            <h1 class="panel-title">Ajouter un ticket</h1>
+            <p class="muted mb-0">Sélectionne 5 numéros + 1 chance, puis enregistre.</p>
+          </div>
+          <a class="btn btn-soft px-3" href="tickets.html">
+            <i class="fa-solid fa-arrow-left me-2"></i>Retour
+          </a>
+        </div>
+
+        <div class="alert alert-success d-none mt-3" id="okBox">
+          <i class="fa-solid fa-circle-check me-2"></i>
+          <span id="okText">OK</span>
+        </div>
+        <div class="alert alert-danger d-none mt-3" id="errBox">
+          <i class="fa-solid fa-triangle-exclamation me-2"></i>
+          <span id="errText">Erreur</span>
+        </div>
+
+        <div class="sub-card mt-3">
+          <form id="ticketForm">
+            <div class="row g-3 align-items-end">
+              <div class="col-md-6">
+                <label for="drawDate" class="form-label fw-bold">Date du tirage</label>
+                <input type="date" class="form-control" id="drawDate" required>
+                <div class="muted mt-2" style="font-weight:800; font-size:.92rem;">
+                  Tirages Loto : lundi, mercredi, samedi
+                </div>
+              </div>
+              <div class="col-md-6 text-md-end">
+                <button type="submit" class="btn btn-primary px-4" id="submitBtn">
+                  <i class="fa-solid fa-plus me-2"></i>Enregistrer
+                </button>
+              </div>
+            </div>
+
+            <hr style="border-color: rgba(255,255,255,.10); margin: 18px 0;">
+
+            <div class="mb-2 fw-bold">Choisissez 5 numéros</div>
+            <div id="numberSelection" class="pick-grid"></div>
+
+            <hr style="border-color: rgba(255,255,255,.10); margin: 18px 0;">
+
+            <div class="mb-2 fw-bold">Choisissez 1 numéro chance</div>
+            <div id="chanceSelection" class="pick-grid"></div>
+
+            <div class="muted mt-3" id="selectionHint" style="font-weight:850;">
+              Sélection : <span id="pickedCount">0</span>/5 — Chance : <span id="pickedChance">—</span>
+            </div>
+          </form>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <div id="overlay"></div>
+  <div id="appFooter"></div>
+
+  <script src="assets/js/layout.js"></script>
+  <!-- <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script> -->
+  <script src="/assets/vendors/bootstrap/bootstrap.bundle.min.js"></script>
+
+  <script src="assets/js/post_ticket.js"></script>
+
+  <script src="assets/js/cookies.js"></script>
+  <script src="assets/js/ai-loader.js"></script>
+
+  <!-- <script>
+    // Désactiver GoatCounter hors production
+    if (
+      !location.hostname.endsWith("stephanedinahet.fr")
+    ) {
+      window.goatcounter = { no_onload: true };
+    }
+  </script>
+  <script data-goatcounter="https://lototracker.goatcounter.com/count"
+        async src="//gc.zgo.at/count.js"></script> -->
+</body>
+</html>

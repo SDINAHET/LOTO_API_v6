@@ -1,16 +1,52 @@
-  (() => {
-    // ✅ API_BASE : si la page est en file:// => localhost. Sinon, même host que la page (pratique en réseau).
+  // (() => {
+  //   // ✅ API_BASE : si la page est en file:// => localhost. Sinon, même host que la page (pratique en réseau).
+  //   const guessBase = () => {
+  //     try {
+  //       if (location.protocol === "file:") return "http://127.0.0.1:8091";
+  //       return location.origin.replace(/:\d+$/, "") + ":8091";
+  //     } catch {
+  //       return "http://127.0.0.1:8091";
+  //     }
+  //   };
+  //   const API_BASE = localStorage.getItem("LT_API_BASE") || guessBase();
+  //   const AI_SERVICE_URL = API_BASE + "/ai/chat";
+  //   const HEALTH_URL = API_BASE + "/health";
+
+
+    (() => {
+    const HOST = location.hostname;
+
+    const PROD_DOMAINS = ["stephanedinahet.fr", "loto-tracker.fr"];
+
+    const IS_PROD = PROD_DOMAINS.some(d =>
+      HOST === d || HOST === `www.${d}` || HOST.endsWith(`.${d}`)
+    );
+
     const guessBase = () => {
       try {
+        // file:// -> backend local
         if (location.protocol === "file:") return "http://127.0.0.1:8091";
-        return location.origin.replace(/:\d+$/, "") + ":8091";
+
+        // prod -> reverse proxy sur le même domaine (pas de port)
+        if (IS_PROD) return location.origin;
+
+        // local / LAN -> même host + port 8091
+        return `${location.protocol}//${HOST}:8091`;
       } catch {
         return "http://127.0.0.1:8091";
       }
     };
+
     const API_BASE = localStorage.getItem("LT_API_BASE") || guessBase();
-    const AI_SERVICE_URL = API_BASE + "/ai/chat";
-    const HEALTH_URL = API_BASE + "/health";
+
+    const AI_SERVICE_URL = `${API_BASE}/ai/chat`;
+    const HEALTH_URL = `${API_BASE}/health`;
+
+    console.log("HOST:", HOST);
+    console.log("IS_PROD:", IS_PROD);
+    console.log("API_BASE:", API_BASE);
+  // })();
+
 
     const launcher = document.getElementById("lt-chat-launcher");
     const panel = document.getElementById("lt-chat-panel");

@@ -2589,8 +2589,8 @@ function ensureDeletedToggleUI() {
         const tdDate = document.createElement("td");
         tdDate.textContent = t.drawDate || "—";
 
-        const tdDay = document.createElement("td");
-        tdDay.textContent = t.drawDay || "—";
+        // const tdDay = document.createElement("td");
+        // tdDay.textContent = t.drawDay || "—";
 
         const tdCreated = document.createElement("td");
         tdCreated.textContent = fmtDateTime(t.createdAt);
@@ -2651,7 +2651,7 @@ function ensureDeletedToggleUI() {
               numbers: full?.numbers ?? t.numbers ?? null,
               chanceNumber: full?.chanceNumber ?? t.chanceNumber ?? null,
               drawDate: full?.drawDate ?? t.drawDate ?? null,
-              drawDay: full?.drawDay ?? t.drawDay ?? null,
+              // drawDay: full?.drawDay ?? t.drawDay ?? null,
 
               userId:
                 full?.userId ??
@@ -2845,7 +2845,7 @@ function ensureDeletedToggleUI() {
       const nums = t.numbers ? String(t.numbers) : "—";
       const chance = t.chanceNumber ?? "—";
       const date = t.drawDate || "—";
-      const day = t.drawDay || "—";
+      // const day = t.drawDay || "—";
       const created = fmtDateTime(t.createdAt);
       const updated = fmtDateTime(t.updatedAt);
 
@@ -2883,7 +2883,7 @@ function ensureDeletedToggleUI() {
       numbers: "",
       chanceNumber: "",
       drawDate: "",
-      drawDay: "",
+      // drawDay: "",
       userId: userId,
     });
 

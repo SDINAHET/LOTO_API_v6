@@ -47,10 +47,10 @@
     ? `https://${HOST}`
     : `${window.location.protocol}//${HOST}:8082`;
 
-
   console.log("HOST:", HOST);
   console.log("IS_PROD:", IS_PROD);
   console.log("API_BASE:", API_BASE);
+
 
   const USERINFO_PATH = "/api/protected/userinfo";
   const LOGOUT_PATH = "/api/auth/logout";

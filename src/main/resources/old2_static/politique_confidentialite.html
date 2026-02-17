@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Politique de Confidentialité – Loto Tracker</title>
+  <style>html,body{background:#0a101c;}</style>
+
+
+  <link rel="icon" type="image/png" href="assets/img/loto_tracker.png">
+
+  <!-- Bootstrap + Font Awesome -->
+  <!-- <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"> -->
+  <!-- Bootstrap + Font Awesome (local) -->
+  <link rel="stylesheet" href="/assets/vendors/bootstrap/bootstrap.min.css">
+  <link rel="stylesheet" href="/assets/vendors/fontawesome/css/all.min.css">
+
+  <link rel="stylesheet" href="assets/css/styles.css">
+    <link rel="stylesheet" href="assets/css/politique_confidentialite.css">
+  <!-- ✅ Layout global (header/footer injectés) -->
+  <script src="assets/js/layout.js"></script>
+
+</head>
+
+<body class="has-fixed-footer">
+
+  <!-- Header injecté -->
+  <div id="appHeader"></div>
+  <div id="overlay" class="overlay"></div>
+  <div class="shell">
+    <div id="appSidebar"></div>
+
+  <main>
+    <section class="panel">
+
+      <h1><i class="fa-solid fa-user-shield"></i> Politique de Confidentialité</h1>
+      <div class="meta">
+        Version RNCP6 (niveau Licence/Bachelor) – conformité <b>RGPD (UE 2016/679)</b><br>
+        Dernière mise à jour : <b>2026</b>
+      </div>
+
+      <div class="actions">
+        <button class="btn-ghost" onclick="history.length>1?history.back():location.href='index.html'">
+          <i class="fa-solid fa-arrow-left"></i> Retour
+        </button>
+        <a href="index.html" class="btn-primary">
+          <i class="fa-solid fa-house"></i> Accueil
+        </a>
+        <a href="mentions_legales.html" class="btn-ghost">
+          <i class="fa-solid fa-file-signature"></i> Mention Légales
+        </a>
+        <a href="conditions_utilisation.html" class="btn-ghost">
+          <i class="fa-solid fa-file-signature"></i> Conditions d’utilisation
+        </a>
+      </div>
+
+      <div class="notice">
+        <i class="fa-solid fa-circle-exclamation"></i>
+        Cette politique décrit les traitements de données réalisés par le site <b>Loto Tracker</b>.
+        Elle est structurée pour répondre aux exigences attendues dans un dossier RNCP6 :
+        gouvernance des données, bases légales, sécurité, droits des personnes, traçabilité.
+      </div>
+
+      <h2><i class="fa-solid fa-building-shield"></i> 1. Responsable de traitement</h2>
+      <p>
+        Le responsable de traitement est l’éditeur du Site (projet Loto Tracker / SDINAHET).
+        Pour toute question : <b>stephane.dinahet@gmail.com</b>.
+      </p>
+
+      <!-- <div class="info">
+        <i class="fa-solid fa-circle-info"></i>
+        Si tu veux un rendu “production”, remplace l’email par ton contact réel et ajoute les éléments d’identification
+        dans <b>mentions_legales.html</b> (éditeur, hébergeur, coordonnées).
+      </div> -->
+
+      <h2><i class="fa-solid fa-list-check"></i> 2. Données personnelles traitées</h2>
+      <p>Selon les fonctionnalités utilisées, le Site peut traiter :</p>
+      <ul>
+        <li><b>Données d’identification</b> : adresse email (et éventuellement nom/prénom si ton formulaire l’ajoute).</li>
+        <li><b>Données de compte</b> : identifiants techniques (UUID), rôles, état de session.</li>
+        <li><b>Données utilisateur</b> : tickets saisis, historique de tickets.</li>
+        <li><b>Données techniques</b> : adresse IP, user-agent, journaux (logs) de sécurité et d’accès.</li>
+        <li><b>Données de navigation</b> : pages consultées / événements techniques (dans la limite de la configuration).</li>
+      </ul>
+
+      <h2><i class="fa-solid fa-bullseye"></i> 3. Finalités des traitements</h2>
+      <ul>
+        <li>Fournir le service (affichage résultats, historique, statistiques).</li>
+        <li>Créer et gérer les comptes utilisateurs (inscription, login, session, logout).</li>
+        <li>Permettre la gestion des tickets utilisateur (CRUD).</li>
+        <li>Assurer la sécurité (détection fraude, prévention abus, journalisation).</li>
+        <li>Améliorer la qualité et la performance du service (diagnostic, monitoring).</li>
+        <li>Respecter les obligations légales (le cas échéant).</li>
+      </ul>
+
+      <h2><i class="fa-solid fa-scale-balanced"></i> 4. Bases légales (RGPD)</h2>
+      <p>
+        Les traitements reposent, selon le cas, sur :
+      </p>
+      <ul>
+        <li><b>Exécution du contrat</b> (art. 6.1.b) : création/gestion de compte, accès aux services authentifiés.</li>
+        <li><b>Intérêt légitime</b> (art. 6.1.f) : sécurité, prévention des abus, journalisation, performance.</li>
+        <li><b>Obligation légale</b> (art. 6.1.c) : si une conservation est requise par la loi (rare ici).</li>
+        <li><b>Consentement</b> (art. 6.1.a) : uniquement si des traceurs non essentiels sont activés.</li>
+      </ul>
+
+      <h2><i class="fa-solid fa-hourglass-half"></i> 5. Durées de conservation</h2>
+      <p>
+        Les durées suivantes sont recommandées (bon niveau RNCP6) :
+      </p>
+
+      <div class="table-like">
+        <div class="rowx">
+          <div class="cell key">Comptes utilisateurs</div>
+          <div class="cell">Durée du compte + suppression à la demande (sauf obligations légales).</div>
+        </div>
+        <div class="rowx">
+          <div class="cell key">Tickets utilisateur</div>
+          <div class="cell">Jusqu’à suppression par l’utilisateur ou fermeture du compte.</div>
+        </div>
+        <div class="rowx">
+          <div class="cell key">Logs sécurité / accès</div>
+          <div class="cell">Durée limitée (ex : 30 à 90 jours), prolongée en cas d’incident.</div>
+        </div>
+        <div class="rowx">
+          <div class="cell key">Cookies de session</div>
+          <div class="cell">Temps de session / expiration définie par la configuration serveur.</div>
+        </div>
+      </div>
+
+      <h2><i class="fa-solid fa-share-nodes"></i> 6. Destinataires et sous-traitants</h2>
+      <p>
+        Les données ne sont ni vendues ni louées. Elles peuvent être accessibles :
+      </p>
+      <ul>
+        <li>à l’éditeur du Site (administration et maintenance),</li>
+        <li>aux prestataires techniques strictement nécessaires (hébergeur, base de données, logs/monitoring),
+            agissant comme <b>sous-traitants</b> au sens du RGPD.</li>
+      </ul>
+      <p>
+        En cas d’obligation légale, certaines données peuvent être communiquées aux autorités compétentes.
+      </p>
+
+      <h2><i class="fa-solid fa-globe"></i> 7. Transferts hors Union Européenne</h2>
+      <p>
+        Par défaut, le Site vise un hébergement et des traitements au sein de l’Union Européenne.
+        Si un transfert hors UE devait exister (CDN, outils externes), il serait encadré par des garanties appropriées
+        (clauses contractuelles types, décision d’adéquation, etc.).
+      </p>
+
+      <h2><i class="fa-solid fa-shield-halved"></i> 8. Sécurité (mesures techniques & organisationnelles)</h2>
+      <p>
+        Le Site met en œuvre des mesures de sécurité adaptées au risque, notamment :
+      </p>
+      <ul>
+        <li>Contrôles d’accès (routes protégées, rôles).</li>
+        <li>Sessions sécurisées (cookies <b>HttpOnly</b>, politique SameSite, expiration).</li>
+        <li>Chiffrement TLS/HTTPS (si déployé sur domaine avec certificat).</li>
+        <li>Journalisation (logs) pour la détection d’abus et la traçabilité.</li>
+        <li>Principe de minimisation : collecte limitée au strict nécessaire.</li>
+      </ul>
+
+      <div class="danger">
+        <i class="fa-solid fa-triangle-exclamation"></i>
+        Important : malgré ces mesures, aucun système n’est invulnérable.
+        En cas d’incident avéré, une procédure de gestion d’incident et de notification peut être mise en œuvre
+        conformément aux articles 33 et 34 du RGPD.
+      </div>
+
+      <h2><i class="fa-solid fa-cookie-bite"></i> 9. Cookies et traceurs</h2>
+      <p>
+        Le Site peut utiliser :
+      </p>
+      <ul>
+        <li><b>Cookies strictement nécessaires</b> (ex : cookie de session) : indispensables au fonctionnement.</li>
+        <li><b>Cookies optionnels</b> (statistiques / mesure d’audience) : uniquement si activés et soumis au consentement.</li>
+      </ul>
+      <p>
+        Vous pouvez gérer les cookies via les paramètres de votre navigateur.
+        Pour les cookies non essentiels, un bandeau de consentement est recommandé (niveau RNCP6).
+      </p>
+
+      <h2><i class="fa-solid fa-id-card"></i> 10. Vos droits (RGPD)</h2>
+      <p>
+        Conformément au RGPD, vous disposez des droits suivants :
+      </p>
+      <ul>
+        <li>Droit d’accès</li>
+        <li>Droit de rectification</li>
+        <li>Droit à l’effacement (« droit à l’oubli »)</li>
+        <li>Droit à la limitation du traitement</li>
+        <li>Droit d’opposition (notamment si traitement fondé sur l’intérêt légitime)</li>
+        <li>Droit à la portabilité (lorsque applicable)</li>
+      </ul>
+      <p>
+        Pour exercer vos droits : <b>stephane.dinahet@gmail.com</b>.<br>
+        Une réponse est apportée dans les délais légaux (en principe 1 mois).
+      </p>
+
+      <h2><i class="fa-solid fa-rotate"></i> 11. Mise à jour de la politique</h2>
+      <p>
+        Cette politique peut être modifiée pour refléter les évolutions légales, techniques ou fonctionnelles.
+        La version applicable est celle publiée sur le Site.
+      </p>
+
+      <div class="actions mt-3">
+        <button class="btn-primary" type="button" onclick="window.scrollTo({top:0, behavior:'smooth'})">
+          <i class="fa-solid fa-arrow-up"></i> Retour en haut
+        </button>
+      </div>
+
+    </section>
+  </main>
+  <div id="appSidebar"></div>
+
+  <!-- Footer injecté -->
+  <div id="appFooter"></div>
+
+  <!-- <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script> -->
+  <script src="/assets/vendors/bootstrap/bootstrap.bundle.min.js"></script>
+
+  <script src="assets/js/cookies.js"></script>
+  <!-- IA (si tu l'utilises) -->
+  <script src="assets/js/ai-loader.js"></script>
+
+<script src="assets/js/politique_confidentialite.js"></script>
+
+  <!-- <script>
+    // Désactiver GoatCounter hors production
+    if (
+      !location.hostname.endsWith("stephanedinahet.fr")
+    ) {
+      window.goatcounter = { no_onload: true };
+    }
+  </script>
+
+<script data-goatcounter="https://lototracker.goatcounter.com/count"
+        async src="//gc.zgo.at/count.js"></script> -->
+
+
+</body>
+</html>

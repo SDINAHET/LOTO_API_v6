@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Loto Tracker - Connexion</title>
+  <style>html,body{background:#0a101c;}</style>
+
+
+  <link rel="icon" type="image/png" href="assets/images/loto_tracker.png" />
+
+  <!-- (Optionnel) Font Awesome pour le header comme index -->
+  <!-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css"> -->
+  <link rel="stylesheet" href="/assets/vendors/fontawesome/css/all.min.css">
+
+  <link rel="stylesheet" href="assets/css/styles.css">
+  <link rel="stylesheet" href="assets/css/login.css">
+
+  <style>
+
+  </style>
+</head>
+
+<body>
+  <!-- Injecté par layout.js -->
+  <div id="appHeader"></div>
+
+  <div class="page">
+    <div class="container">
+      <h2>Loto Tracker - Connexion</h2>
+
+      <form id="loginForm" novalidate>
+        <!-- EMAIL -->
+        <div class="input-group">
+          <label for="email">Email</label>
+          <div class="field" id="emailField">
+            <input type="email" id="email" required placeholder="email">
+            <div class="right-icons" aria-hidden="true">
+              <svg id="emailOkIcon" viewBox="0 0 24 24" class="status-icon ok hidden">
+                <circle cx="12" cy="12" r="10"></circle>
+                <path d="M8 12.5l2.5 2.5L16 9"></path>
+              </svg>
+
+              <svg id="emailBadIcon" viewBox="0 0 24 24" class="status-icon bad hidden">
+                <circle cx="12" cy="12" r="10"></circle>
+                <path d="M9 9l6 6"></path>
+                <path d="M15 9l-6 6"></path>
+              </svg>
+            </div>
+          </div>
+          <div class="hint" id="emailHint">Email invalide (ex: nom@domaine.fr)</div>
+        </div>
+
+        <!-- PASSWORD -->
+        <div class="input-group">
+          <label for="password">Mot de passe</label>
+          <div class="field" id="passwordField">
+            <input type="password" id="password" required placeholder="••••••••">
+            <div class="right-icons">
+              <button type="button" class="icon-btn" id="togglePassword" title="Afficher / Masquer" aria-label="Afficher / Masquer">
+                <svg id="eyeOpen" class="eye-icon hidden" viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"/>
+                  <path d="M12 9a3 3 0 100 6 3 3 0 000-6z"/>
+                </svg>
+                <svg id="eyeClosed" class="eye-icon" viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"/>
+                  <path d="M12 9a3 3 0 100 6 3 3 0 000-6z"/>
+                  <path d="M4 4l16 16"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="forgot-password">
+          <a href="#">Mot de passe oublié ?</a>
+        </div>
+
+        <button type="submit" class="btn" id="submitBtn">Se connecter</button>
+        <div class="msg" id="loginMsg"></div>
+      </form>
+
+      <div class="register-link">
+        <p>Pas encore inscrit ? <a href="register.html" id="registerLink">Créer un compte</a></p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Injecté par layout.js -->
+  <div id="appFooter"></div>
+
+  <!-- Transition balls -->
+  <div class="balls" id="ballsLayer" aria-hidden="true"></div>
+
+  <!-- Injection header/footer -->
+  <script src="assets/js/layout.js"></script>
+
+  <script src="assets/js/cookies.js"></script>
+
+
+  <script src="assets/js/login.js"></script>
+
+  <!-- <script>
+    // Désactiver GoatCounter hors production
+    if (
+      !location.hostname.endsWith("stephanedinahet.fr")
+    ) {
+      window.goatcounter = { no_onload: true };
+    }
+  </script>
+  <script data-goatcounter="https://lototracker.goatcounter.com/count"
+        async src="//gc.zgo.at/count.js"></script> -->
+</body>
+</html>
