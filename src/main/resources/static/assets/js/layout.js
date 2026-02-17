@@ -898,7 +898,9 @@ function setAdminInBurger(isAdmin) {
       getActiveBase() ||
       ((location.hostname === "localhost" || location.hostname === "127.0.0.1")
         ? `http://${location.hostname}:8082`
-        : "https://stephanedinahet.fr");
+        // : "https://stephanedinahet.fr");
+        : window.location.origin);
+
 
     const el = document.getElementById("visitCount");
     if (!el) return;
@@ -987,7 +989,9 @@ function setAdminInBurger(isAdmin) {
       getActiveBase() ||
       ((location.hostname === "localhost" || location.hostname === "127.0.0.1")
         ? `http://${location.hostname}:8082`
-        : "https://stephanedinahet.fr");
+        // : "https://stephanedinahet.fr");
+        : window.location.origin);
+
 
     const url = `${base}/api/analytics/event`;
 

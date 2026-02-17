@@ -101,9 +101,9 @@
         return moment.tz(dateStr, "Europe/Paris").format("YYYY-MM-DD");
       }
 
-      function formatDate(dateStr){
-        return moment.tz(dateStr, "Europe/Paris").format("DD MMMM YYYY");
-      }
+      // function formatDate(dateStr){
+      //   return moment.tz(dateStr, "Europe/Paris").format("DD MMMM YYYY");
+      // }
 
       function formatGain(gain){
         if (gain === null || gain === undefined) return "-";
