@@ -10,29 +10,21 @@
   "use strict";
 
   // ----------------------------
-  // API_BASE (robuste: prod multi-domaines)
+  // API_BASE (robuste)
   // ----------------------------
   const HOST = window.location.hostname;
 
-  const isLocalHost = (h) => {
-    if (!h) return true;
-    const hh = h.toLowerCase();
-    return (
-      hh === "localhost" ||
-      hh === "127.0.0.1" ||
-      hh === "::1" ||
-      hh.endsWith(".local") ||
-      hh.startsWith("192.168.") ||
-      hh.startsWith("10.") ||
-      /^172\.(1[6-9]|2\d|3[0-1])\./.test(hh) // 172.16.0.0 -> 172.31.255.255
-    );
-  };
+  // Prod si domaine principal OU sous-domaine
+  const IS_PROD =
+    HOST === "stephanedinahet.fr" ||
+    HOST === "www.stephanedinahet.fr" ||
+    HOST.endsWith(".stephanedinahet.fr");
 
-  const IS_LOCAL = isLocalHost(HOST);
-
-  // ✅ Local/réseau: API sur :8082
-  // ✅ Prod: même origin (Apache reverse proxy) => marche pour stephanedinahet.fr ET loto-tracker.fr (+ www)
-  const API_BASE = IS_LOCAL ? `${window.location.protocol}//${HOST}:8082` : window.location.origin;
+  // ✅ En prod: API via reverse-proxy sur le domaine principal
+  // ✅ En local/réseau: API sur même host mais port 8082
+  const API_BASE = IS_PROD
+    ? "https://stephanedinahet.fr"
+    : `${window.location.protocol}//${HOST}:8082`;
 
   const USERINFO_PATH = "/api/protected/userinfo";
   const LOGOUT_PATH = "/api/auth/logout";
@@ -186,6 +178,7 @@
     return m ? decodeURIComponent(m[2]) : null;
   }
 
+  // Spring CookieCsrfTokenRepository => cookie "XSRF-TOKEN" (NON HttpOnly)
   function getCsrfToken() {
     return getCookie("XSRF-TOKEN");
   }
@@ -202,18 +195,23 @@
     const url = path.startsWith("http") ? path : `${API_BASE}${path}`;
     const method = String(options.method || "GET").toUpperCase();
 
+    // base headers
     const baseHeaders = new Headers();
-    baseHeaders.set("X-Requested-With", "XMLHttpRequest");
-    if (!baseHeaders.has("Accept")) baseHeaders.set("Accept", "application/json");
+    baseHeaders.set("X-Requested-With", "XMLHttpRequest"); // utile Spring / proxies
 
+    // merge headers utilisateur
     const userHeaders = new Headers(options.headers || {});
     userHeaders.forEach((v, k) => baseHeaders.set(k, v));
 
+    // Accept par défaut si pas défini par l'appelant
+    if (!baseHeaders.has("Accept")) baseHeaders.set("Accept", "application/json");
+
+    // CSRF sur méthodes mutantes
     if (isMutating(method)) {
       const token = getCsrfToken();
       if (token) {
-        baseHeaders.set("X-XSRF-TOKEN", token);
-        baseHeaders.set("X-CSRF-TOKEN", token);
+        baseHeaders.set("X-XSRF-TOKEN", token); // standard XSRF cookie
+        baseHeaders.set("X-CSRF-TOKEN", token); // fallback selon configs
       }
     }
 
@@ -226,6 +224,7 @@
       mode: "cors",
     });
 
+    // log utile si 401/403 sur PUT/POST
     if (res.status === 401 || res.status === 403) {
       console.warn("[apiFetch] AUTH ERROR", {
         status: res.status,
@@ -240,11 +239,13 @@
     return res;
   }
 
+  // Expose global (admin-dashboard.js l’utilise)
   window.API_BASE = API_BASE;
   window.apiFetch = apiFetch;
 
   // ----------------------------
-  // Pré-chauffage CSRF (pose cookie XSRF-TOKEN)
+  // Pré-chauffage CSRF
+  // (Important pour que Spring pose le cookie XSRF-TOKEN)
   // ----------------------------
   async function prewarmCsrf() {
     try {
@@ -321,21 +322,22 @@
   window.debugAuth = async function debugAuth() {
     console.log("=== DEBUG AUTH ===");
     console.log("HOST:", HOST);
-    console.log("IS_LOCAL:", IS_LOCAL);
     console.log("API_BASE:", API_BASE);
     console.log("document.cookie (visible JS):", document.cookie || "(vide)");
     console.log("XSRF-TOKEN visible JS:", !!getCsrfToken());
 
+    // ping
     try {
       const ping = await apiFetch("/api/admin/ping", {
         method: "GET",
         headers: { Accept: "text/plain" },
       });
-      console.log("GET /api/admin/ping:", ping.status, await ping.text());
+      console.log("GET /admin/ping:", ping.status, await ping.text());
     } catch (e) {
       console.log("PING error:", e);
     }
 
+    // userinfo
     try {
       const u = await apiFetch("/api/protected/userinfo", {
         method: "GET",
@@ -346,6 +348,7 @@
       console.log("userinfo error:", e);
     }
 
+    // admin users
     try {
       const r = await apiFetch("/api/admin/users", {
         method: "GET",
@@ -359,13 +362,12 @@
     console.log("=== END DEBUG AUTH ===");
   };
 
+  // Test PUT (remplace id + payload si besoin)
   window.debugPutUser = async function debugPutUser(id, payload) {
     console.log("=== DEBUG PUT USER ===");
     console.log("XSRF-TOKEN visible JS:", !!getCsrfToken(), "value:", getCsrfToken());
 
-    const body =
-      payload ||
-      { firstName: "Test", lastName: "Admin", email: "test@exemple.com", role: "ROLE_USER", admin: false };
+    const body = payload || { firstName: "Test", lastName: "Admin", email: "test@exemple.com", role: "ROLE_USER", admin: false };
 
     try {
       const res = await apiFetch(`/api/admin/users/${encodeURIComponent(id)}`, {
@@ -395,6 +397,7 @@
 
   bindBurger();
 
+  // ✅ Important: pré-chauffe CSRF AVANT bindAuthUI + avant tes PUT/POST/DELETE
   prewarmCsrf().finally(() => {
     bindAuthUI();
   });

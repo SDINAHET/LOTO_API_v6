@@ -1,32 +1,8 @@
 (function () {
-  // const API_BASE =
-  //   (location.hostname === "localhost" || location.hostname === "127.0.0.1")
-  //     ? "http://localhost:8082"
-  //     : "https://stephanedinahet.fr";
-
-  const HOST = window.location.hostname;
-
-  const PROD_DOMAINS = [
-    "stephanedinahet.fr",
-    "loto-tracker.fr"
-  ];
-
-  const IS_PROD = PROD_DOMAINS.some(domain =>
-    HOST === domain ||
-    HOST === `www.${domain}` ||
-    HOST.endsWith(`.${domain}`)
-  );
-
-  const API_BASE = IS_PROD
-    ? window.location.origin
-    : `${window.location.protocol}//${HOST}:8082`;
-
-  // On rend API_BASE global
-  window.API_BASE = API_BASE;
-
-  console.log("API_BASE:", API_BASE);
-
-
+  const API_BASE =
+    (location.hostname === "localhost" || location.hostname === "127.0.0.1")
+      ? "http://localhost:8082"
+      : "https://stephanedinahet.fr";
 
   const ME_URL = `${API_BASE}/api/auth/me`;
   const API_TICKETS = `${API_BASE}/api/tickets`;

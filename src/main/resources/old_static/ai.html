@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Loto Tracker — Assistant public</title>
+  <style>html,body{background:#0a101c;}</style>
+
+
+  <link rel="stylesheet" href="assets/css/ai.css" />
+  <link rel="icon" href="assets/img/favicon-lt.ico" />
+</head>
+
+<body>
+  <div id="lt-chat-root">
+    <button id="lt-chat-launcher" aria-label="Ouvrir/Fermer le chat">
+      <span class="lt-launcher-core" aria-hidden="true">☁️</span>
+
+      <span class="lt-orbit" aria-hidden="true">
+        <span class="lt-orb lt-orb-blue"></span>
+        <span class="lt-orb lt-orb-red"></span>
+      </span>
+
+      <span id="lt-chat-invite" class="lt-invite" role="status" aria-live="polite">
+        Hello 👋 viens poser ta question sur les tirages…
+      </span>
+    </button>
+
+  <div id="lt-chat-panel" class="lt-hidden" role="dialog" aria-modal="true" aria-label="Assistant Loto">
+    <div class="lt-header">
+      <div class="lt-brand">
+        <div class="lt-logo">☁️</div>
+        <div style="min-width:0">
+          <b>Loto Tracker</b><br/>
+          <span class="lt-sub">Assistant public</span>
+        </div>
+      </div>
+
+      <div class="lt-hbtns">
+        <button id="lt-chat-max" class="lt-iconbtn" title="Grand écran (80%)">⤢</button>
+        <button id="lt-chat-close" class="lt-iconbtn" aria-label="Fermer" title="Fermer">✕</button>
+      </div>
+    </div>
+
+    <div class="lt-hero">
+      <h3>Hi 👋</h3>
+      <p>Règles, tirages, ticket + gain, stats, combinaisons de jeux, ...</p>
+    </div>
+
+    <div class="lt-tabs">
+      <button class="lt-tab-btn lt-active" data-tab="home">Home</button>
+      <button class="lt-tab-btn" data-tab="messages">Messages</button>
+    </div>
+
+    <div id="lt-home" class="lt-tab lt-show">
+      <button class="lt-action" data-preset="📜 Comment on joue au Loto ?">📜 Règles</button>
+      <button class="lt-action" data-preset="📊 Donne les stats de fréquence des numéros (MongoDB)">📊 Stats (MongoDB)</button>
+      <button class="lt-action" data-preset="🎲 Propose 5 combinaisons probables (MongoDB)">🎲 Proposer 5 combinaisons</button>
+
+      <div class="lt-status" style="margin-top:12px">
+        <b>Dernier tirage</b>
+        <div id="lt-latest-draw" class="lt-mini" style="margin-top:8px">Chargement…</div>
+      </div>
+
+      <div id="lt-home-presets" style="margin-top:10px"></div>
+
+      <div class="lt-status" id="lt-status">
+        🔎 Statut ai-service : <b>non vérifié</b><br/>
+        Lance <code>uvicorn ai:app --host 0.0.0.0 --port 8091</code>
+      </div>
+    </div>
+
+    <div id="lt-messages-tab" class="lt-tab">
+      <div id="lt-messages" class="lt-messages"></div>
+
+      <div class="lt-inputbar">
+        <input id="lt-input" placeholder="Pose ta question..." autocomplete="off"/>
+        <button id="lt-send">Envoyer</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- <button style="position:fixed;left:18px;bottom:18px;z-index:99999" onclick="confetti({particleCount:150,spread:90})">
+    TEST 🎆
+  </button> -->
+
+<!-- <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script> -->
+<script defer src="/assets/vendors/canvas-confetti/confetti.browser.min.js"></script>
+
+<script src="assets/js/ai.js"></script>
+<!-- <script src="assets/js/ai-loader.js"></script> -->
+
+  <!-- <script>
+    // Désactiver GoatCounter hors production
+    if (
+      !location.hostname.endsWith("stephanedinahet.fr")
+    ) {
+      window.goatcounter = { no_onload: true };
+    }
+  </script>
+  <script data-goatcounter="https://lototracker.goatcounter.com/count"
+        async src="//gc.zgo.at/count.js"></script> -->
+</body>
+</html>

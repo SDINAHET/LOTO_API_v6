@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Statistiques — Loto Tracker</title>
+  <style>html,body{background:#0a101c;}</style>
+
+
+  <link rel="icon" type="image/png" href="assets/img/loto_tracker.png" />
+  <!-- <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css"> -->
+  <link rel="stylesheet" href="/assets/vendors/bootstrap/bootstrap.min.css">
+  <link rel="stylesheet" href="/assets/vendors/fontawesome/css/all.min.css">
+
+
+  <!-- <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script> -->
+  <script src="/assets/vendors/axios/axios.min.js"></script>
+  <script src="/assets/vendors/chartjs/chart.min.js"></script>
+
+
+  <link rel="stylesheet" href="assets/css/statistiques.css">
+
+
+</head>
+
+<body>
+  <!-- Header injecté -->
+  <div id="appHeader"></div>
+
+  <div class="app-shell">
+    <!-- Sidebar (ID requis pour burger layout.js) -->
+    <aside id="sidebar" class="sidebar">
+      <div class="sidebar-inner">
+        <!-- ✅ Profil + rôle dans le menu burger -->
+        <div class="burger-user" id="burgerUserBox" style="display:none;">
+          <div class="burger-user-row">
+            <i class="fa-solid fa-user-shield"></i>
+            <div class="burger-user-text">
+              <div class="burger-user-name" id="burgerUserName">—</div>
+              <div class="burger-user-role" id="burgerUserRole">Utilisateur</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ✅ Slot pour lien admin dans le menu (si admin) -->
+        <div id="adminMenuSlot"></div>
+
+        <div class="sidebar-title">Dashboard</div>
+        <a class="side-link" href="index.html"><i class="fa-solid fa-chart-line"></i> Résultats</a>
+        <a class="side-link" href="tickets.html"><i class="fa-solid fa-ticket"></i> Tickets</a>
+        <a class="side-link active" href="statistiques.html"><i class="fa-solid fa-chart-column"></i> Statistiques</a>
+        <a class="side-link" href="profil.html"><i class="fa-solid fa-user-gear"></i> Mon profil</a>
+        <hr style="border-color: rgba(255,255,255,.10); margin: 12px 0;">
+
+        <div class="sidebar-title">Jouer</div>
+        <a class="side-link" href="index.html"><i class="fa-solid fa-clover"></i> Loto</a>
+        <a class="side-link" href="euromillions.html"><i class="fa-solid fa-star"></i> Euromillions</a>
+      </div>
+    </aside>
+
+    <!-- Contenu -->
+    <main>
+      <section class="glass-panel">
+        <h1 class="panel-title">Statistiques</h1>
+        <p class="muted mb-4">Historique de tes tickets + graphique dépenses/gains.</p>
+
+        <!-- Alerts propres (pas de alert()) -->
+        <div class="alert alert-danger d-none" id="errBox">
+          <i class="fa-solid fa-triangle-exclamation me-2"></i>
+          <span id="errText">Erreur.</span>
+        </div>
+
+        <div class="alert alert-success d-none" id="okBox">
+          <i class="fa-solid fa-circle-check me-2"></i>
+          <span id="okText">OK.</span>
+        </div>
+
+        <div class="row g-3 align-items-stretch">
+        <!-- <div class="stats-grid"> -->
+        <!-- Tableau -->
+        <!-- <div class="stats-left">   Historique -->
+        <div class="col-12 col-lg-6">
+            <div class="table-tools">
+            <div class="tool-left">
+                <h5 class="mb-0" style="font-weight:950;">Historique des tickets</h5>
+                <span class="mini-loader d-none" id="tableLoader">
+                <span class="spinner-border spinner-border-sm"></span> Chargement…
+                </span>
+            </div>
+
+            <div class="tool-right">
+                <input id="searchInput" class="input-dark" type="search" placeholder="Rechercher une date…">
+                <select id="pageSize" class="form-select select-dark">
+                <option value="10">10 / page</option>
+                <option value="15">15 / page</option>
+                <option value="25">25 / page</option>
+                </select>
+            </div>
+            </div>
+
+            <div class="table-wrap">
+            <div class="table-responsive" style="max-height: 520px;">
+                <table class="table table-borderless table-premium align-middle">
+                <thead>
+                    <tr>
+                    <th style="width:45%">Date</th>
+                    <th style="width:30%">Statut</th>
+                    <th style="width:25%" class="text-end">Gains</th>
+                    </tr>
+                </thead>
+                <tbody id="ticketsTable"></tbody>
+                </table>
+            </div>
+            </div>
+
+            <div class="pager">
+            <div class="muted" style="font-weight:900;">
+                <span id="pagerInfo">—</span>
+            </div>
+
+            <div class="d-flex gap-2">
+                <button class="btn-pager" id="prevBtn" type="button">← Précédent</button>
+                <button class="btn-pager" id="nextBtn" type="button">Suivant →</button>
+            </div>
+            </div>
+        </div>
+
+        <!-- Graphique + totaux -->
+        <div class="col-12 col-lg-6">
+        <!-- <div class="stats-right">  Graphique -->
+            <div class="chart-tools">
+            <div class="tool-left">
+                <h5 class="mb-0" style="font-weight:950;">Graphique</h5>
+                <span class="mini-loader d-none" id="chartLoader">
+                <span class="spinner-border spinner-border-sm"></span> Calcul…
+                </span>
+            </div>
+
+            <label class="toggle">
+                <input type="checkbox" id="logScale">
+                <span class="dot"></span>
+                Échelle log
+            </label>
+            </div>
+
+            <div class="table-glass p-3">
+            <canvas id="statsChart" style="max-height: 330px;"></canvas>
+            </div>
+
+            <div class="row g-3 mt-1">
+            <div class="col-12 col-md-6">
+                <div class="stat-tile">
+                <div class="stat-label">Total dépensé</div>
+                <div class="stat-value text-danger"><span id="totalDepense">0.00</span> €</div>
+                </div>
+            </div>
+            <div class="col-12 col-md-6">
+                <div class="stat-tile">
+                <div class="stat-label">Total gagné</div>
+                <div class="stat-value text-success"><span id="totalGagne">0.00</span> €</div>
+                </div>
+            </div>
+            </div>
+        </div>
+        </div>
+
+
+      </section>
+    </main>
+  </div>
+
+  <!-- overlay requis pour fermer le menu mobile -->
+  <div id="overlay"></div>
+
+  <!-- Footer injecté -->
+  <div id="appFooter"></div>
+
+  <!-- Layout global -->
+  <script src="assets/js/layout.js"></script>
+
+<script src="assets/js/statistiques.js"></script>
+
+
+  <!-- <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script> -->
+  <script defer src="/assets/vendors/bootstrap/bootstrap.bundle.min.js"></script>
+
+  <script src="assets/js/cookies.js"></script>
+  <!-- IA (si tu l'utilises) -->
+  <script src="assets/js/ai-loader.js"></script>
+
+  <!-- <script>
+    // Désactiver GoatCounter hors production
+    if (
+      !location.hostname.endsWith("stephanedinahet.fr")
+    ) {
+      window.goatcounter = { no_onload: true };
+    }
+  </script>
+
+  <script data-goatcounter="https://lototracker.goatcounter.com/count"
+        async src="//gc.zgo.at/count.js"></script> -->
+
+</body>
+</html>
