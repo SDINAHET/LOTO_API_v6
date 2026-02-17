@@ -14,10 +14,37 @@
   const API_BASE_PRIMARY =
     (HOST === "localhost" || HOST === "127.0.0.1")
       ? `http://${HOST}:8082`
-      // : "https://stephanedinahet.fr";
-      : "https://loto-tracker.fr";
+      : "https://stephanedinahet.fr";
+      // : "https://loto-tracker.fr";
 
   const API_BASE_FALLBACK = null; // ✅ désactiver en local
+
+  // =========================
+  // API BASE (local / prod multi-domain)
+  // - Local: http://<host>:8082
+  // - Prod: same origin (Apache reverse proxy)
+  // =========================
+  // (function initApiBase() {
+  //   // évite collisions si le script est chargé 2 fois
+  //   if (window.API_BASE) return;
+
+  //   const host = window.location.hostname;
+  //   const prodDomains = ["stephanedinahet.fr", "loto-tracker.fr"];
+
+  //   const isLocal = (host === "localhost" || host === "127.0.0.1");
+  //   const isProd = prodDomains.some(d =>
+  //     host === d || host === `www.${d}` || host.endsWith(`.${d}`)
+  //   );
+
+  //   window.API_BASE = isLocal
+  //     ? `http://${host}:8082`
+  //     : (isProd ? window.location.origin : "https://stephanedinahet.fr"); // fallback
+
+  //   window.getApiBase = () => window.API_BASE;
+
+  //   console.log("API_BASE =", window.API_BASE);
+  // // })();
+
 
   const USERINFO_PATH = "/api/protected/userinfo";
   const LOGOUT_PATH = "/api/auth/logout";

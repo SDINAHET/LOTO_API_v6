@@ -21,8 +21,8 @@
       const API_BASE = (window.getActiveBase && window.getActiveBase()) || (
         (location.hostname === "localhost" || location.hostname === "127.0.0.1")
           ? `http://${location.hostname}:8082`
-          // : "https://stephanedinahet.fr"
-          : "https://loto-tracker.fr"
+          : "https://stephanedinahet.fr"
+          // : "https://loto-tracker.fr"
       );
 
 
