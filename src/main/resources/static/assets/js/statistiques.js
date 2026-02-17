@@ -2,7 +2,8 @@
   const API_BASE =
     (location.hostname === "localhost" || location.hostname === "127.0.0.1")
       ? "http://localhost:8082"
-      : "https://stephanedinahet.fr";
+      // : "https://stephanedinahet.fr";
+      : "https://loto-tracker.fr";
 
   const ME_URL = `${API_BASE}/api/auth/me`;
   const API_TICKETS = `${API_BASE}/api/tickets`;

@@ -4,7 +4,8 @@
       window.__API_BASE_ACTIVE__ ||
       ((location.hostname === "localhost" || location.hostname === "127.0.0.1")
         ? `http://${location.hostname}:8082`
-        : "https://stephanedinahet.fr");
+        // : "https://stephanedinahet.fr");
+        : "https://loto-tracker.fr");
 
     //const API_BASE =
     //  (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1")

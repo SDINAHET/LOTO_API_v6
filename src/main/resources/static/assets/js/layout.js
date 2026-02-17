@@ -14,7 +14,8 @@
   const API_BASE_PRIMARY =
     (HOST === "localhost" || HOST === "127.0.0.1")
       ? `http://${HOST}:8082`
-      : "https://stephanedinahet.fr";
+      // : "https://stephanedinahet.fr";
+      : "https://loto-tracker.fr";
 
   const API_BASE_FALLBACK = null; // ✅ désactiver en local
 

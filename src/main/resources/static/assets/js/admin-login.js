@@ -6,7 +6,8 @@ const API_BASE =
     // ? "http://localhost:8082"
     // : window.location.origin;
     ? "http://localhost:8082"
-    : "https://stephanedinahet.fr";
+    // : "https://stephanedinahet.fr";
+    : "https://loto-tracker.fr";
 
 const form = document.getElementById("adminLoginForm");
 const errorMsg = document.getElementById("errorMsg");
