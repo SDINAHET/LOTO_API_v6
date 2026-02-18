@@ -224,7 +224,8 @@
         color: var(--text);
         min-width: 0;
       }
-      .brand-logo{ width: 44px; height: 44px; object-fit: contain; }
+      /*.brand-logo{ width: 44px; height: 44px; object-fit: contain; }*/
+      .brand-logo{ width: 90px; height: 90px; object-fit: contain; }
       .brand-title{
         font-weight: 900;
         letter-spacing:.2px;
@@ -232,6 +233,14 @@
         white-space: nowrap;
       }
       .brand-sub{ font-size: .9rem; color: var(--muted); margin-top: 2px; }
+
+      /* Mobile */
+      @media (max-width: 600px){
+        .brand-logo{
+          width: 65px;
+          height: 65px;
+        }
+      }
 
       .topbar-actions{
         display:flex;
@@ -298,14 +307,22 @@
         border-radius: 0 !important;
         display: inline-flex;
         align-items: center;
-        gap: 12px;
+        gap: 8px;
       }
       .user-chip span{
         color: var(--text);
-        font-weight: 800;
+        /*font-weight: 800;*/
+        font-weight: 500;
         opacity: .95;
       }
-      .user-chip b{ font-weight: 900; }
+      /*.user-chip b{ font-weight: 900; }*/
+      .user-chip b{ font-weight: 300; }
+
+      /* Réduire la police du "Bienvenue, ..." */
+        .user-chip span{
+          font-size: .9rem;   /* essaie .85rem si tu veux plus petit */
+        }
+
 
       .topbar #logoutBtn.btn-danger-soft{
         display:inline-flex;
@@ -339,6 +356,7 @@
         .topbar #logoutBtn{
           padding: 8px 10px;
           height: 36px;
+          /*font-size: .85rem;*/
           font-size: .85rem;
         }
       }
