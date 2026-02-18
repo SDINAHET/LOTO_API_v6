@@ -717,7 +717,8 @@
     }
 
     // ❌ Ne pas tracker hors production
-    if (!location.hostname.endsWith("stephanedinahet.fr")) {
+    // if (!location.hostname.endsWith("stephanedinahet.fr")) {
+    if (!location.hostname.endsWith("loto-tracker.fr")) {
       window.goatcounter = { no_onload: true };
       return;
     }
