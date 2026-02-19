@@ -1,5 +1,5 @@
 # =====================================================
-# robots.txt – loto-tracker.fr
+# robots.txt – stephanedinahet.fr
 # Owner: Stéphane Dinahet
 # Purpose: SEO + protection pages sensibles
 # =====================================================
@@ -34,4 +34,4 @@ User-agent: Applebot-Extended
 Disallow: /
 
 # Sitemap
-Sitemap: https://loto-tracker.fr/sitemap.xml
+Sitemap: https://stephanedinahet.fr/sitemap.xml

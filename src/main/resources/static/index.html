@@ -3,7 +3,26 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Loto Tracker — Résultats</title>
+  <!-- <title>Loto Tracker — Résultats</title> -->
+  <title>Résultats du Loto Français en Direct | Historique FDJ & Vérification Ticket | Loto Tracker</title>
+  <meta name="description" content="Consultez les résultats du Loto Français en direct, recherchez un tirage par date, accédez à l’historique depuis 2019 et vérifiez vos tickets automatiquement. Interface rapide et sécurisée." />
+  <link rel="canonical" href="https://loto-tracker.fr/">
+  <meta property="og:title" content="Résultats du Loto Français en Direct | Loto Tracker">
+  <meta property="og:description" content="Résultats en direct, recherche par date, historique FDJ depuis 2019 et vérification automatique de tickets.">
+  <meta property="og:url" content="https://loto-tracker.fr/">
+  <meta property="og:type" content="website">
+  <meta property="og:image" content="https://loto-tracker.fr/assets/img/loto_tracker.png">
+
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Résultats du Loto Français en Direct | Loto Tracker">
+  <meta name="twitter:description" content="Résultats, historique FDJ, recherche par date et vérification de tickets.">
+  <meta name="twitter:image" content="https://loto-tracker.fr/assets/img/loto_tracker.png">
+  <meta name="robots" content="index, follow, max-image-preview:large">
+  <meta name="theme-color" content="#0a101c">
+  <link rel="preload" href="/assets/vendors/bootstrap/bootstrap.min.css" as="style">
+  <link rel="preload" href="/assets/css/styles.css" as="style">
+
+
   <style>html,body{background:#0a101c;}</style>
 
 
@@ -29,19 +48,36 @@
   <script src="/assets/vendors/axios/axios.min.js"></script>
   <script src="/assets/vendors/moment/moment.min.js"></script>
   <script src="/assets/vendors/moment/moment-timezone-with-data.min.js"></script>
-  <script src="/assets/vendors/leaflet/leaflet.js"></script>
+  <!-- <script src="/assets/vendors/leaflet/leaflet.js"></script> -->
 
   <!-- Chart.js -->
   <!-- <script src="https://cdn.jsdelivr.net/npm/chart.js"></script> -->
   <script src="/assets/vendors/chartjs/chart.min.js"></script>
 
   <!-- ✅ Layout (header/footer) -->
-  <script src="assets/js/layout.js"></script>
-  <link rel="stylesheet" href="assets/css/index.css">
+  <script src="/assets/js/layout.js"></script>
+  <link rel="stylesheet" href="/assets/css/index.css">
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "name": "Loto Tracker",
+    "url": "https://loto-tracker.fr/",
+    "inLanguage": "fr-FR",
+    "description": "Résultats du Loto Français, recherche de tirages, historique FDJ depuis 2019 et statistiques."
+  }
+  </script>
 
 
-
+</head>
 <body>
+  <noscript>
+    <p style="color:#fff;padding:12px;">
+      Loto Tracker nécessite JavaScript pour afficher les résultats.
+    </p>
+  </noscript>
+
   <!-- ✅ Header injecté par layout.js -->
   <div id="appHeader"></div>
 
@@ -61,7 +97,11 @@
       <section class="panel">
         <div class="panel-head">
           <div>
-            <h1>Résultats du Loto</h1>
+            <!-- <h1>Résultats du Loto</h1> -->
+            <h1>Résultats du Loto Français en direct</h1>
+            <p class="muted">
+              Consultez les résultats officiels du Loto, recherchez un tirage par date et accédez à l’historique depuis 2019.
+            </p>
             <div class="muted" id="nextDrawInfo">Prochain tirage : —</div>
             <!-- <div class="muted">Visites : <b id="visitCount">—</b></div> -->
           </div>
@@ -274,10 +314,12 @@
 
 
 
-  <script src="assets/js/index.js"></script>
+  <script src="/assets/js/index.js"></script>
 
   <!-- IA (si tu l'utilises) -->
-  <script src="assets/js/ai-loader.js"></script>
+  <script src="/assets/js/ai-loader.js"></script>
+
+
 
   <!-- <script>
     // Désactiver GoatCounter hors production
