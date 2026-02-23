@@ -1,38 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<urlset
-  xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 
-  <!-- Page d'accueil -->
-  <url>
-    <loc>https://loto-tracker.fr/</loc>
-    <priority>1.0</priority>
-    <changefreq>daily</changefreq>
-  </url>
+  <sitemap>
+    <loc>https://loto-tracker.fr/sitemap-pages.xml</loc>
+    <lastmod>2026-02-19</lastmod>
+  </sitemap>
 
-  <!-- Pages principales -->
-  <url>
-    <loc>https://loto-tracker.fr/mentions_legales.html</loc>
-    <priority>0.4</priority>
-    <changefreq>yearly</changefreq>
-  </url>
+  <sitemap>
+    <loc>https://loto-tracker.fr/sitemap-tirages.xml</loc>
+    <lastmod>2026-02-19</lastmod>
+  </sitemap>
 
-  <url>
-    <loc>https://loto-tracker.fr/conditions_utilisation.html</loc>
-    <priority>0.4</priority>
-    <changefreq>yearly</changefreq>
-  </url>
+  <sitemap>
+    <loc>https://loto-tracker.fr/sitemap-static.xml</loc>
+    <lastmod>2026-02-19</lastmod>
+  </sitemap>
 
-  <url>
-    <loc>https://loto-tracker.fr/politique_confidentialite.html</loc>
-    <priority>0.4</priority>
-    <changefreq>yearly</changefreq>
-  </url>
-
-  <!-- Pages fonctionnelles importantes -->
-  <url>
-    <loc>https://loto-tracker.fr/index.html</loc>
-    <priority>0.8</priority>
-    <changefreq>daily</changefreq>
-  </url>
-
-</urlset>
+</sitemapindex>

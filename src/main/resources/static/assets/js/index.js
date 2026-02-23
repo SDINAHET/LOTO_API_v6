@@ -1,3 +1,30 @@
+// ================================
+// Canonical dynamique for SEO
+// ================================
+(function setCanonical() {
+  let path = location.pathname;
+
+  // index.html => /
+  if (path.endsWith("/index.html")) path = "/";
+
+  // Supprime slash final sauf si /
+  if (path.length > 1 && path.endsWith("/")) path = path.slice(0, -1);
+
+  const href = "https://loto-tracker.fr" + path;
+
+  let link = document.querySelector('link[rel="canonical"]');
+  if (!link) {
+    link = document.createElement("link");
+    link.rel = "canonical";
+    document.head.appendChild(link);
+  }
+
+  link.href = href;
+})();
+
+
+
+
 // <!-- ✅ Sidebar + Auth-only + Burger -->
     (function () {
       const API_BASE =
@@ -497,13 +524,14 @@
     /* =========================
       Last20
     ========================== */
-    async function loadLast20(){
-      try{
+    async function loadLast20() {
+      try {
         const res = await axios.get(`${API_BASE}/api/historique/last20`);
         const data = res.data || [];
         const container = document.getElementById("last20");
         container.innerHTML = "";
 
+        // 1) Render cards
         data.forEach(draw => {
           const dayName = getDayName(draw.dateDeTirage);
           const card = document.createElement("article");
@@ -524,11 +552,20 @@
           `;
           container.appendChild(card);
         });
-      }catch(err){
+
+        // 2) ✅ SEO snippet + JSON-LD dynamique (une seule fois)
+        if (data.length > 0) {
+          const d = data[0]; // le plus récent
+          updateSeoLastDraw(d);
+          updateLastDrawJsonLd(d);
+        }
+      } catch (err) {
         console.error(err);
       }
     }
+
     loadLast20();
+
 
     /* =========================
       DÉTAIL TIRAGE (MODAL COMPLET)
@@ -628,6 +665,53 @@
         new bootstrap.Modal(document.getElementById("detailModal")).show();
       }
     }
+
+
+
+    /* =========================
+      aéliore affichage dernier tirage dans google et SEO
+    ========================== */
+  function updateSeoLastDraw(draw) {
+    const el = document.getElementById("seoLastDraw");
+    if (!el || !draw) return;
+
+    const date = draw.dateDeTirage;
+    const dayName = getDayName(date);
+    const nums = [draw.boule1, draw.boule2, draw.boule3, draw.boule4, draw.boule5].join(" ");
+    const chance = draw.numeroChance;
+
+    el.textContent = `Dernier tirage (${dayName} ${date}) : ${nums} | Chance : ${chance}.`;
+  }
+
+  function updateLastDrawJsonLd(draw) {
+    const scriptId = "ld-last-draw";
+    let script = document.getElementById(scriptId);
+
+    if (!script) {
+      script = document.createElement("script");
+      script.type = "application/ld+json";
+      script.id = scriptId;
+      document.head.appendChild(script);
+    }
+
+    // draw.dateDeTirage = "DD/MM/YYYY" => convert ISO
+    const iso = moment(draw.dateDeTirage, "DD/MM/YYYY", true).isValid()
+      ? moment(draw.dateDeTirage, "DD/MM/YYYY").format("YYYY-MM-DD")
+      : undefined;
+
+    const payload = {
+      "@context": "https://schema.org",
+      "@type": "Event",
+      "name": `Résultat du Loto - ${draw.dateDeTirage}`,
+      "startDate": iso || draw.dateDeTirage,
+      "eventStatus": "https://schema.org/EventCompleted",
+      "description": `Numéros : ${draw.boule1}, ${draw.boule2}, ${draw.boule3}, ${draw.boule4}, ${draw.boule5} | Chance : ${draw.numeroChance}`,
+      "url": "https://loto-tracker.fr/resultats"
+    };
+
+    script.textContent = JSON.stringify(payload);
+  }
+
 
     /* =========================
       Prediction modal (Chart.js)

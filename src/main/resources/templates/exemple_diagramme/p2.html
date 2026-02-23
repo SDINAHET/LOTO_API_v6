@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nombre d'événements validés</title>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+
+<style>
+body {
+  background-color: #f4f4f4;
+  font-family: Arial, sans-serif;
+  padding: 40px;
+}
+
+.chart-container {
+  background: white;
+  padding: 30px;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+</style>
+</head>
+
+<body>
+
+<div class="chart-container">
+  <h2 style="margin-bottom: 30px;">Nombre d'événements validés</h2>
+  <canvas id="chart"></canvas>
+</div>
+
+<script>
+
+const labels = ["août 2025", "sept. 2025", "oct. 2025", "nov. 2025", "déc. 2025", "janv. 2026"];
+const dataValues = [3958, 15406, 17741, 16954, 11575, 12047];
+
+const valueLabelPlugin = {
+  id: 'valueLabel',
+  afterDatasetsDraw(chart) {
+    const {ctx} = chart;
+    const meta = chart.getDatasetMeta(0);
+
+    ctx.save();
+    ctx.textAlign = "center";
+    ctx.textBaseline = "bottom";
+    ctx.font = "14px Arial";
+    ctx.fillStyle = "#333";
+
+    meta.data.forEach((bar, index) => {
+      const value = dataValues[index];
+      ctx.fillText(value.toLocaleString("fr-FR"), bar.x, bar.y - 5);
+    });
+
+    ctx.restore();
+  }
+};
+
+new Chart(document.getElementById('chart'), {
+  type: 'bar',
+  data: {
+    labels: labels,
+    datasets: [{
+      data: dataValues,
+      backgroundColor: '#7CB342',
+      borderRadius: 6,
+      barPercentage: 0.7,
+      categoryPercentage: 0.8
+    }]
+  },
+  options: {
+    responsive: true,
+    plugins: {
+      legend: { display: false }
+    },
+    scales: {
+      x: {
+        title: {
+          display: true,
+          text: 'mois'
+        },
+        grid: { display: false }
+      },
+      y: {
+        beginAtZero: true,
+        title: {
+          display: true,
+          text: "Nombre d'événements validés"
+        },
+        ticks: {
+          callback: function(value) {
+            return value >= 1000 ? value/1000 + 'k' : value;
+          }
+        }
+      }
+    }
+  },
+  plugins: [valueLabelPlugin]
+});
+
+</script>
+
+</body>
+</html>

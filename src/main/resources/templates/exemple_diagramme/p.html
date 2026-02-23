@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Bar chart Chart.js</title>
+
+  <!-- Chart.js via CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+</head>
+<body style="margin:0; padding:24px; font-family: system-ui, -apple-system, Segoe UI, Roboto;">
+  <h2>Nombre d'événements validés</h2>
+  <div style="max-width: 900px;">
+    <canvas id="eventsChart"></canvas>
+  </div>
+
+  <script>
+    // Données (reprennent ce qu'on voit sur ton graphe)
+    const labels = ["août 2025", "sept. 2025", "oct. 2025", "nov. 2025", "déc. 2025", "janv. 2026"];
+    const values = [3958, 15406, 17741, 16954, 11575, 12047];
+
+    // Petit plugin pour afficher la valeur au-dessus de chaque barre
+    const valueLabelsPlugin = {
+      id: "valueLabels",
+      afterDatasetsDraw(chart, args, pluginOptions) {
+        const { ctx } = chart;
+        const dataset = chart.data.datasets[0];
+        const meta = chart.getDatasetMeta(0);
+
+        ctx.save();
+        ctx.textAlign = "center";
+        ctx.textBaseline = "bottom";
+        ctx.font = "12px system-ui, -apple-system, Segoe UI, Roboto";
+
+        meta.data.forEach((bar, i) => {
+          const val = dataset.data[i];
+          ctx.fillText(val.toLocaleString("fr-FR"), bar.x, bar.y - 6);
+        });
+
+        ctx.restore();
+      }
+    };
+
+    new Chart(document.getElementById("eventsChart"), {
+      type: "bar",
+      data: {
+        labels,
+        datasets: [{
+          label: "Nombre d'événements validés",
+          data: values,
+          backgroundColor: "#7CB342",   // vert proche du screenshot
+          borderRadius: 4
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          legend: { display: false }
+        },
+        scales: {
+          x: {
+            title: { display: true, text: "mois" },
+            grid: { display: false }
+          },
+          y: {
+            beginAtZero: true,
+            title: { display: true, text: "Nombre d'événements validés" },
+            ticks: {
+              // Affichage 0, 3000, 6000... => 3k, 6k (optionnel)
+              callback: (v) => (v >= 1000 ? (v/1000) + "k" : v)
+            }
+          }
+        }
+      },
+      plugins: [valueLabelsPlugin]
+    });
+  </script>
+</body>
+</html>

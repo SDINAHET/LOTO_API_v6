@@ -100,6 +100,13 @@
     return window.__API_BASE_ACTIVE__ || API_BASE_PRIMARY;
   }
 
+  if (window.__LAYOUT_ALREADY_LOADED__) {
+    console.warn("[layout] déjà chargé, on stoppe la 2e init");
+    return;
+  }
+  window.__LAYOUT_ALREADY_LOADED__ = true;
+
+
   /* =========================================================
      Cookies helpers
   ========================================================= */
@@ -473,6 +480,38 @@
     return false;
   }
 
+  // async function apiFetch(input, init = {}) {
+  //   const base = getActiveBase();
+  //   const originalFetch = window.__ORIGINAL_FETCH__ || fetch;
+
+  //   init.credentials = init.credentials || "include";
+  //   init.cache = init.cache || "no-store";
+
+  //   init = await withCsrfHeaders(init, base);
+
+  //   const res1 = await originalFetch(input, init);
+  //   if (res1.status !== 401) return res1;
+
+  //   if (isRefreshing) {
+  //     const ok = await waitForRefresh();
+  //     if (!ok) return res1;
+  //     const init2 = await withCsrfHeaders({ ...init }, base);
+  //     return originalFetch(input, init2);
+  //   }
+
+  //   isRefreshing = true;
+  //   try {
+  //     const ok = await refreshAccessToken(base);
+  //     resolveRefresh(ok);
+  //     if (!ok) return res1;
+
+  //     const init2 = await withCsrfHeaders({ ...init }, base);
+  //     return originalFetch(input, init2);
+  //   } finally {
+  //     isRefreshing = false;
+  //   }
+  // }
+
   async function apiFetch(input, init = {}) {
     const base = getActiveBase();
     const originalFetch = window.__ORIGINAL_FETCH__ || fetch;
@@ -484,6 +523,20 @@
 
     const res1 = await originalFetch(input, init);
     if (res1.status !== 401) return res1;
+
+    // ✅ IMPORTANT : ne pas tenter de refresh pour /userinfo
+    // (Lighthouse arrive en invité => 401 normal)
+    try {
+      const urlStr = typeof input === "string" ? input : (input?.url || "");
+      const path = urlStr.startsWith("http") ? new URL(urlStr).pathname : urlStr;
+
+      // Gère les URLs absolues et relatives
+      if (path === USERINFO_PATH || path.endsWith(USERINFO_PATH)) {
+        return res1; // 401 => invité, pas de refresh
+      }
+    } catch {
+      // ignore
+    }
 
     if (isRefreshing) {
       const ok = await waitForRefresh();
@@ -504,6 +557,7 @@
       isRefreshing = false;
     }
   }
+
 
   function setupFetchFastPatch() {
     if (window.__FETCH_PATCHED__) return;
@@ -668,7 +722,15 @@
         <a href="conditions_utilisation.html">Conditions</a>
         <a href="politique_confidentialite.html">Confidentialité</a>
         <a href="#" id="openCookiePrefs">🍪 Cookies</a>
-        <span>© 2026 SDINAHET</span>
+        <a>
+          © 2026
+        </a>
+        <a href="https://github.com/SDINAHET/LOTO_API_v6/tree/fix2_migration"
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label="GitHub - LOTO_API_v6">
+          <i class="fa-brands fa-github"></i> SDINAHET
+        </a>
 
         <span class="api-status" title="État de l'API">
           <span id="apiDot" class="api-dot api-offline"></span>
@@ -764,12 +826,27 @@ function setAdminInBurger(isAdmin) {
   /* =========================================================
      Auth UI (source de vérité = /userinfo)
   ========================================================= */
+  // async function fetchUserInfo(baseUrl) {
+  //   // ✅ plus besoin de fetchWithRefresh : fetch() est patché -> refresh auto
+  //   const res = await fetch(`${baseUrl}${USERINFO_PATH}`, { method: "GET" });
+  //   if (!res.ok) throw new Error(`userinfo ${res.status}`);
+  //   return await res.json();
+  // }
   async function fetchUserInfo(baseUrl) {
-    // ✅ plus besoin de fetchWithRefresh : fetch() est patché -> refresh auto
     const res = await fetch(`${baseUrl}${USERINFO_PATH}`, { method: "GET" });
-    if (!res.ok) throw new Error(`userinfo ${res.status}`);
+
+    if (res.status === 401) {
+      // invité → on ne log pas d’erreur
+      return null;
+    }
+
+    if (!res.ok) {
+      throw new Error(`userinfo ${res.status}`);
+    }
+
     return await res.json();
   }
+
 
   // function setAuthUI({ logged, label }) {
   function setAuthUI({ logged, label, isAdmin }) {
@@ -827,12 +904,56 @@ function setAdminInBurger(isAdmin) {
     if (registerBtn) registerBtn.style.display = "none";
   }
 
+  // async function checkUserAuthUI() {
+  //   try {
+  //     // const data = await fetchUserInfo(API_BASE_PRIMARY);
+  //     // const shown = data.username || data.email || "Utilisateur";
+  //     // setAuthUI({ logged: true, label: shown });
+  //     const data = await fetchUserInfo(API_BASE_PRIMARY);
+  //     const shown = data.username || data.email || "Utilisateur";
+
+  //     const isAdmin =
+  //       data?.role === "ADMIN" ||
+  //       data?.role === "ROLE_ADMIN" ||
+  //       (Array.isArray(data?.roles) && data.roles.includes("ADMIN")) ||
+  //       (Array.isArray(data?.roles) && data.roles.includes("ROLE_ADMIN"));
+
+  //     setAuthUI({ logged: true, label: shown, isAdmin });
+
+  //     window.__API_BASE_ACTIVE__ = API_BASE_PRIMARY;
+  //     return;
+  //   } catch {
+  //     if (API_BASE_FALLBACK) {
+  //       try {
+  //         const data2 = await fetchUserInfo(API_BASE_FALLBACK);
+  //         const shown2 = data2.username || data2.email || "Utilisateur";
+  //         setAuthUI({ logged: true, label: shown2 });
+  //         window.__API_BASE_ACTIVE__ = API_BASE_FALLBACK;
+  //         return;
+  //       } catch {
+  //         // setAuthUI({ logged: false });
+  //         setAuthUI({ logged: false, isAdmin: false });
+  //         window.__API_BASE_ACTIVE__ = API_BASE_PRIMARY;
+  //         return;
+  //       }
+  //     }
+  //     // setAuthUI({ logged: false });
+  //     setAuthUI({ logged: false, isAdmin: false });
+  //     window.__API_BASE_ACTIVE__ = API_BASE_PRIMARY;
+  //   }
+  // }
+
   async function checkUserAuthUI() {
     try {
-      // const data = await fetchUserInfo(API_BASE_PRIMARY);
-      // const shown = data.username || data.email || "Utilisateur";
-      // setAuthUI({ logged: true, label: shown });
       const data = await fetchUserInfo(API_BASE_PRIMARY);
+
+      // ✅ Cas normal : utilisateur non connecté (ex: 401 => fetchUserInfo() retourne null)
+      if (!data) {
+        setAuthUI({ logged: false, isAdmin: false });
+        window.__API_BASE_ACTIVE__ = API_BASE_PRIMARY;
+        return;
+      }
+
       const shown = data.username || data.email || "Utilisateur";
 
       const isAdmin =
@@ -842,29 +963,43 @@ function setAdminInBurger(isAdmin) {
         (Array.isArray(data?.roles) && data.roles.includes("ROLE_ADMIN"));
 
       setAuthUI({ logged: true, label: shown, isAdmin });
-
       window.__API_BASE_ACTIVE__ = API_BASE_PRIMARY;
       return;
     } catch {
       if (API_BASE_FALLBACK) {
         try {
           const data2 = await fetchUserInfo(API_BASE_FALLBACK);
+
+          // ✅ Cas normal : invité aussi sur le fallback
+          if (!data2) {
+            setAuthUI({ logged: false, isAdmin: false });
+            window.__API_BASE_ACTIVE__ = API_BASE_PRIMARY;
+            return;
+          }
+
           const shown2 = data2.username || data2.email || "Utilisateur";
-          setAuthUI({ logged: true, label: shown2 });
+
+          const isAdmin2 =
+            data2?.role === "ADMIN" ||
+            data2?.role === "ROLE_ADMIN" ||
+            (Array.isArray(data2?.roles) && data2.roles.includes("ADMIN")) ||
+            (Array.isArray(data2?.roles) && data2.roles.includes("ROLE_ADMIN"));
+
+          setAuthUI({ logged: true, label: shown2, isAdmin: isAdmin2 });
           window.__API_BASE_ACTIVE__ = API_BASE_FALLBACK;
           return;
         } catch {
-          // setAuthUI({ logged: false });
           setAuthUI({ logged: false, isAdmin: false });
           window.__API_BASE_ACTIVE__ = API_BASE_PRIMARY;
           return;
         }
       }
-      // setAuthUI({ logged: false });
+
       setAuthUI({ logged: false, isAdmin: false });
       window.__API_BASE_ACTIVE__ = API_BASE_PRIMARY;
     }
   }
+
 
   /* =========================================================
      Ping API (alive/down) => 200 OU 401 = API vivante

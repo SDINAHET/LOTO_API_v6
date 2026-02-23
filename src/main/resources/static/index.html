@@ -102,13 +102,15 @@
             <p class="muted">
               Consultez les résultats officiels du Loto, recherchez un tirage par date et accédez à l’historique depuis 2019.
             </p>
-            <div class="muted" id="nextDrawInfo">Prochain tirage : —</div>
+            <!-- <div class="muted" id="nextDrawInfo">Prochain tirage : —</div> -->
+            <div class="muted" id="nextDrawInfo" data-nosnippet>Prochain tirage : —</div>
             <!-- <div class="muted">Visites : <b id="visitCount">—</b></div> -->
           </div>
         </div>
 
         <div class="countdown-wrap">
-          <div id="countdown" class="countdown">--j --h --m --s</div>
+          <!-- <div id="countdown" class="countdown">--j --h --m --s</div> -->
+          <div id="countdown" class="countdown" data-nosnippet>--j --h --m --s</div>
           <div class="next-draws" id="nextDraws"></div>
 
           <button class="btn-primary-app" onclick="showPrediction()">
