@@ -31,6 +31,20 @@ public interface Historique20DetailRepository extends MongoRepository<Historique
      * @return A **List** of `Historique20Detail` objects within the specified range.
      */
     List<Historique20Detail> findByDateDeTirageBetween(Date startDate, Date endDate);
+
+    // 🔥 AJOUTER CES DEUX MÉTHODES :
+
+    /**
+     * Finds the previous draw before the given date.
+     */
+    Optional<Historique20Detail>
+    findTopByDateDeTirageBeforeOrderByDateDeTirageDesc(Date date);
+
+    /**
+     * Finds the next draw after the given date.
+     */
+    Optional<Historique20Detail>
+    findTopByDateDeTirageAfterOrderByDateDeTirageAsc(Date date);
 }
 
 /**

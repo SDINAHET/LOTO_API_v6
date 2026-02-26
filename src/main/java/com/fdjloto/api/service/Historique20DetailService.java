@@ -25,7 +25,9 @@ public class Historique20DetailService {
     public Optional<Historique20Detail> getTirageByDate(String date) {
         try {
             LocalDate localDate = LocalDate.parse(date, formatter);
-            Date parsedDate = Date.from(localDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
+            // ✅ Zone fixée à Paris (important en production)
+            ZoneId paris = ZoneId.of("Europe/Paris");
+            Date parsedDate = Date.from(localDate.atStartOfDay(paris).toInstant());
             return repository.findByDateDeTirage(parsedDate);
         } catch (Exception e) {
             e.printStackTrace();
@@ -44,6 +46,7 @@ public class Historique20DetailService {
             // 🔥 Soustrait 1 jour à la date de début pour inclure J-1
             LocalDate startLocalDateJMoinsUn = startLocalDate.minusDays(1);
 
+            ZoneId paris = ZoneId.of("Europe/Paris");
             // 🔥 Convertit en Date pour MongoDB
             Date start = Date.from(startLocalDateJMoinsUn.atStartOfDay(ZoneId.systemDefault()).toInstant());
             Date end = Date.from(endLocalDate.plusDays(1).atStartOfDay(ZoneId.systemDefault()).toInstant());
@@ -58,6 +61,23 @@ public class Historique20DetailService {
             e.printStackTrace();
             return List.of(); // Retourne une liste vide en cas d'erreur
         }
+    }
+
+    // ✅ AJOUT : utilisé par sitemap-tirages.xml
+    public List<Historique20Detail> getAllTirages() {
+        return repository.findAll();
+    }
+
+    public Optional<Historique20Detail> getTiragePrecedent(LocalDate date) {
+        return repository.findTopByDateDeTirageBeforeOrderByDateDeTirageDesc(
+            Date.from(date.atStartOfDay(ZoneId.of("Europe/Paris")).toInstant())
+        );
+    }
+
+    public Optional<Historique20Detail> getTirageSuivant(LocalDate date) {
+        return repository.findTopByDateDeTirageAfterOrderByDateDeTirageAsc(
+            Date.from(date.atStartOfDay(ZoneId.of("Europe/Paris")).toInstant())
+        );
     }
 
 

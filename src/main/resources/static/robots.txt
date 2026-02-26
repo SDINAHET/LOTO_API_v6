@@ -1,23 +1,54 @@
 # =====================================================
 # robots.txt – loto-tracker.fr
 # Owner: Stéphane Dinahet
-# Purpose: SEO + protection pages sensibles
+# Purpose: SEO + protection pages sensibles + crawl propre
 # =====================================================
 
+# -----------------------------------------------------
+# Règles générales (SEO)
+# -----------------------------------------------------
 User-agent: *
 Allow: /
 
-# Pages techniques / sensibles
-Disallow: /status/
+# ✅ Pages SEO à garder accessibles
+Allow: /dernier-tirage
+Allow: /tirage/
+
+# ✅ Sitemaps accessibles
+Allow: /sitemap.xml
+Allow: /sitemap-static.xml
+Allow: /sitemap-tirages.xml
+
+# ✅ Assets statiques (si Google rend/charge tes pages)
+Allow: /assets/
+Allow: /css/
+Allow: /js/
+Allow: /images/
+
+# -----------------------------------------------------
+# Pages sensibles / techniques à ne pas crawler
+# -----------------------------------------------------
 Disallow: /admin/
 Disallow: /admin-login.html
 Disallow: /__maintenance__/
+Disallow: /status/
 Disallow: /errors/
+Disallow: /error
+Disallow: /actuator/
 
-# API (optionnel : autoriser ou non)
-# Disallow: /api/
+# Si tu as des endpoints internes (optionnel)
+Disallow: /api/private/
 
-# Bloquer les bots IA
+# -----------------------------------------------------
+# (Optionnel) Réduire le crawl des paramètres d’URL
+# si un jour tu ajoutes des querystrings non utiles SEO
+# -----------------------------------------------------
+Disallow: /*?*
+
+# -----------------------------------------------------
+# Blocage bots IA (option stratégique)
+# N’impacte pas l’indexation Google "classique"
+# -----------------------------------------------------
 User-agent: GPTBot
 Disallow: /
 
@@ -33,5 +64,7 @@ Disallow: /
 User-agent: Applebot-Extended
 Disallow: /
 
-# Sitemap
+# -----------------------------------------------------
+# Sitemap principal (à déclarer dans Search Console)
+# -----------------------------------------------------
 Sitemap: https://loto-tracker.fr/sitemap.xml

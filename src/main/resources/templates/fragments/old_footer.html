@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<body>
+
+<footer th:fragment="footer">
+    <div class="footer-container">
+
+        <div class="footer-left">
+            <strong>Loto Tracker</strong>
+            <p>
+                Résultats du Loto Français.
+                Site indépendant non affilié à la FDJ.
+            </p>
+        </div>
+
+        <div class="footer-links">
+            <a th:href="@{/mentions-legales}">Mentions légales</a>
+            <a th:href="@{/politique-confidentialite}">Confidentialité</a>
+            <a th:href="@{/contact}">Contact</a>
+        </div>
+
+        <div class="footer-bottom">
+            <p>
+                © <span th:text="${#dates.format(#dates.createNow(),'yyyy')}"></span>
+                Loto Tracker — Tous droits réservés
+            </p>
+        </div>
+
+    </div>
+</footer>
+
+</body>
+</html>

@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- TITLE UNIQUE PAR DATE -->
+  <title th:text="'Résultat Loto du ' + ${dateFr} + ' | Loto Tracker'">
+    Résultat Loto | Loto Tracker
+  </title>
+
+  <!-- META DESCRIPTION UNIQUE -->
+  <meta name="description"
+        th:content="'Résultat du Loto du ' + ${dateFr} +
+        ' : numéros gagnants, numéro Chance, jackpot et rapports complets.'">
+
+  <!-- CANONICAL DYNAMIQUE -->
+  <link rel="canonical"
+        th:href="'https://loto-tracker.fr/tirage/' + ${dateIso}">
+
+  <meta name="robots" content="index, follow">
+
+  <!-- Open Graph -->
+  <meta property="og:title"
+        th:content="'Résultat Loto du ' + ${dateFr}">
+  <meta property="og:description"
+        th:content="'Numéros gagnants et jackpot du ' + ${dateFr}">
+  <meta property="og:url"
+        th:content="'https://loto-tracker.fr/tirage/' + ${dateIso}">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="Loto Tracker">
+
+  <!-- JSON-LD SEO -->
+  <script type="application/ld+json" th:inline="javascript">
+  {
+    "@context": "https://schema.org",
+    "@type": "Event",
+    "name": "Résultat Loto Français du [[${dateFr}]]",
+    "eventStatus": "https://schema.org/EventCompleted",
+    "startDate": "[[${startDateIso}]]",
+    "location": { "@type": "Place", "name": "France" },
+    "description": "Résultat officiel du Loto du [[${dateFr}]]",
+    "offers": {
+      "@type": "Offer",
+      "priceCurrency": "EUR",
+      "price": [[${details != null ? details.rapportDuRang1 : 0}]]
+    }
+  }
+  </script>
+
+  <link rel="stylesheet" th:href="@{/assets/css/dernier-tirage.css}">
+</head>
+
+<body>
+
+<div class="container">
+  <div class="card">
+
+    <h1 th:text="'Résultat Loto du ' + ${dateFr}">
+      Résultat Loto
+    </h1>
+
+	<a href="/dernier-tirage" class="btn-close">
+		Dernier tirage
+	</a>
+
+
+
+    <p class="subtitle"
+       th:text="'Tirage du ' + ${dateFr}">
+    </p>
+
+    <!-- RESULTATS -->
+    <h2 class="section-title">Numéros gagnants</h2>
+
+    <div class="balls">
+      <div class="ball" th:text="${details.boule1}">--</div>
+      <div class="ball" th:text="${details.boule2}">--</div>
+      <div class="ball" th:text="${details.boule3}">--</div>
+      <div class="ball" th:text="${details.boule4}">--</div>
+      <div class="ball" th:text="${details.boule5}">--</div>
+      <div class="ball chance" th:text="${details.numeroChance}">--</div>
+    </div>
+
+    <!-- JACKPOT -->
+    <p class="jackpot">
+      <strong>Jackpot annoncé :</strong>
+      <span th:text="${#numbers.formatDecimal(details.rapportDuRang1, 1, 'WHITESPACE', 2, 'COMMA')} + ' €'">
+      </span>
+    </p>
+
+    <!-- TABLEAU -->
+    <h3>Rapports du tirage principal</h3>
+
+    <table class="details-table">
+      <thead>
+        <tr>
+          <th>Rang</th>
+          <th>Gagnants</th>
+          <th>Gain (€)</th>
+        </tr>
+      </thead>
+		<tbody>
+		<tr>
+			<td>1</td>
+			<td th:text="${details.nombreDeGagnantAuRang1}">--</td>
+			<td th:text="${#numbers.formatDecimal(details.rapportDuRang1, 1, 'WHITESPACE', 2, 'COMMA')} + ' €'">--</td>
+		</tr>
+		<tr>
+			<td>2</td>
+			<td th:text="${details.nombreDeGagnantAuRang2}">--</td>
+			<td th:text="${#numbers.formatDecimal(details.rapportDuRang2, 1, 'WHITESPACE', 2, 'COMMA')} + ' €'">--</td>
+		</tr>
+		<tr>
+			<td>3</td>
+			<td th:text="${details.nombreDeGagnantAuRang3}">--</td>
+			<td th:text="${#numbers.formatDecimal(details.rapportDuRang3, 1, 'WHITESPACE', 2, 'COMMA')} + ' €'">--</td>
+		</tr>
+		<tr>
+			<td>4</td>
+			<td th:text="${details.nombreDeGagnantAuRang4}">--</td>
+			<td th:text="${#numbers.formatDecimal(details.rapportDuRang4, 1, 'WHITESPACE', 2, 'COMMA')} + ' €'">--</td>
+		</tr>
+		<tr>
+			<td>5</td>
+			<td th:text="${details.nombreDeGagnantAuRang5}">--</td>
+			<td th:text="${#numbers.formatDecimal(details.rapportDuRang5, 1, 'WHITESPACE', 2, 'COMMA')} + ' €'">--</td>
+		</tr>
+		<tr>
+			<td>6</td>
+			<td th:text="${details.nombreDeGagnantAuRang6}">--</td>
+			<td th:text="${#numbers.formatDecimal(details.rapportDuRang6, 1, 'WHITESPACE', 2, 'COMMA')} + ' €'">--</td>
+		</tr>
+		<tr>
+			<td>7</td>
+			<td th:text="${details.nombreDeGagnantAuRang7}">--</td>
+			<td th:text="${#numbers.formatDecimal(details.rapportDuRang7, 1, 'WHITESPACE', 2, 'COMMA')} + ' €'">--</td>
+		</tr>
+		<tr>
+			<td>8</td>
+			<td th:text="${details.nombreDeGagnantAuRang8}">--</td>
+			<td th:text="${#numbers.formatDecimal(details.rapportDuRang8, 1, 'WHITESPACE', 2, 'COMMA')} + ' €'">--</td>
+		</tr>
+		<tr>
+			<td>9</td>
+			<td th:text="${details.nombreDeGagnantAuRang9}">--</td>
+			<td th:text="${#numbers.formatDecimal(details.rapportDuRang9, 1, 'WHITESPACE', 2, 'COMMA')} + ' €'">--</td>
+		</tr>
+		</tbody>
+    </table>
+
+
+
+    <!-- CODES -->
+    <div th:if="${details.codesGagnants != null}">
+      <h3>Codes gagnants</h3>
+
+      <div class="codes-grid"
+           th:with="codes=${#strings.arraySplit(details.codesGagnants, ',')}">
+
+        <span class="code-chip"
+              th:each="c : ${codes}"
+              th:text="${#strings.trim(c)}">
+        </span>
+
+      </div>
+    </div>
+
+  </div>
+  <div class="navigation">
+	<a th:if="${prevIso != null}"
+		th:href="@{'/tirage/' + ${prevIso}}">
+		← Tirage précédent
+	</a>
+
+	<a th:if="${nextIso != null}"
+		th:href="@{'/tirage/' + ${nextIso}}">
+		Tirage suivant →
+	</a>
+	</div>
+</div>
+
+
+<script th:src="@{/assets/js/layout.js}" defer></script>
+
+</body>
+</html>

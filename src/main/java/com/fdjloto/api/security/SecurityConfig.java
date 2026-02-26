@@ -10,7 +10,7 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.config.core.GrantedAuthorityDefaults;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.core.userdetails.UserDetailsService;
+// import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
@@ -197,6 +197,10 @@ public class SecurityConfig {
                         //     "/admin-180.png",
                         //     "/admin.png"
                         // ).permitAll()
+                        .requestMatchers(HttpMethod.GET, "/dernier-tirage", "/dernier-tirage/").permitAll()
+                        .requestMatchers("/tirage/**").permitAll()
+                        .requestMatchers("/css/**", "/js/**", "/images/**").permitAll()
+                        .requestMatchers("/sitemap.xml", "/robots.txt").permitAll()
 
 
                         // ✅ CORS preflight
@@ -210,7 +214,8 @@ public class SecurityConfig {
                         // .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         // 🔓 Pages d’erreur accessibles à tout le monde
-                        .requestMatchers("/errors/**", "/401", "/403", "/404", "/500").permitAll()
+                        // .requestMatchers("/errors/**", "/401", "/403", "/404", "/500").permitAll()
+                        .requestMatchers("/errors/**", "/error", "/error/**", "/401", "/403", "/404", "/500").permitAll()
                         .requestMatchers("/admin-login.html").permitAll()
 
                         // 🔓 le HTML du dashboard peut être public, les vraies données restent derrière /api/admin/**

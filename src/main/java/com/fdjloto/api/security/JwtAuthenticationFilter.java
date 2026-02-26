@@ -12,6 +12,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
+import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -39,6 +40,32 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         this.jwtUtils = jwtUtils;
         this.userDetailsService = userDetailsService;
     }
+
+        @Override
+        protected boolean shouldNotFilter(HttpServletRequest request) {
+            String path = request.getServletPath();
+
+            // Normalisation : supprime le slash final si présent (ex: /dernier-tirage/)
+            if (path.endsWith("/") && path.length() > 1) {
+                path = path.substring(0, path.length() - 1);
+            }
+
+            // 1) Ressources statiques
+            boolean isStatic = PathRequest.toStaticResources()
+                    .atCommonLocations()
+                    .matches(request)
+                    || path.startsWith("/assets")
+                    || path.startsWith("/css")
+                    || path.startsWith("/js")
+                    || path.startsWith("/images")
+                    || path.equals("/sitemap.xml")
+                    || path.equals("/robots.txt");
+
+            // 2) Endpoints publics
+            boolean isPublic = path.equals("/dernier-tirage") || path.startsWith("/tirage");
+
+            return isStatic || isPublic;
+        }
 
     /**
      * **Main filter method** - Intercepts requests, extracts the JWT, validates it,

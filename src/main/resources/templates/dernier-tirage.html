@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title th:text="${seoTitle}">Dernier Résultat du Loto Français | Loto Tracker</title>
+
+  <meta name="description"
+        th:content="${seoDescription}"
+        content="Dernier résultat officiel du Loto Français." />
+
+  <link rel="canonical" href="https://loto-tracker.fr/dernier-tirage">
+  <meta name="robots" content="index, follow">
+
+  <!-- Open Graph -->
+  <meta property="og:title" th:content="${seoTitle}">
+  <meta property="og:description" th:content="${seoDescription}">
+  <meta property="og:url" content="https://loto-tracker.fr/dernier-tirage">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="Loto Tracker">
+  <meta property="og:locale" content="fr_FR">
+
+  <!-- Twitter -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" th:content="${seoTitle}">
+  <meta name="twitter:description" th:content="${seoDescription}">
+  <!-- optionnel si tu as un compte -->
+  <!-- <meta name="twitter:site" content="@LotoTracker"> -->
+
+  <!-- JSON-LD Schema.org -->
+  <script type="application/ld+json" th:inline="javascript">
+  {
+    "@context": "https://schema.org",
+    "@type": "Event",
+    "name": "Résultat Loto Français du [[${dateFr}]]",
+    "eventStatus": "https://schema.org/EventCompleted",
+    "startDate": "[[${startDateIso}]]",
+    "location": { "@type": "Place", "name": "France" },
+    "description": "[[${seoDescription}]]",
+    "offers": {
+      "@type": "Offer",
+      "priceCurrency": "EUR",
+      "price": [[${details != null ? details.rapportDuRang1 : 0}]]
+    }
+  }
+  </script>
+
+  <link rel="stylesheet" th:href="@{/assets/css/dernier-tirage.css}">
+</head>
+
+<body>
+
+<div class="container">
+  <div class="card">
+
+    <h1>Dernier tirage du Loto Français</h1>
+    <button type="button" class="btn-close" onclick="window.history.back()" aria-label="Fermer la page">
+      Fermer
+    </button>
+
+    <p class="subtitle" th:text="'Tirage du ' + ${dateFr}">
+      Tirage du --
+    </p>
+
+    <!-- Petit texte SEO (Google friendly) -->
+    <p class="seo-text">
+      Découvrez le dernier résultat officiel du Loto Français du
+      <strong th:text="${dateFr}">--</strong>,
+      avec les numéros gagnants, le numéro Chance, le jackpot annoncé et le détail complet des rapports.
+    </p>
+
+    <!-- ===================== -->
+    <!-- RESULTAT -->
+    <!-- ===================== -->
+    <h2 class="section-title">Résultat</h2>
+
+    <div class="balls" aria-label="Numéros gagnants du dernier tirage">
+      <div class="ball" th:text="${tirage.boule1}" aria-label="Boule 1">--</div>
+      <div class="ball" th:text="${tirage.boule2}" aria-label="Boule 2">--</div>
+      <div class="ball" th:text="${tirage.boule3}" aria-label="Boule 3">--</div>
+      <div class="ball" th:text="${tirage.boule4}" aria-label="Boule 4">--</div>
+      <div class="ball" th:text="${tirage.boule5}" aria-label="Boule 5">--</div>
+      <div class="ball chance" th:text="${tirage.numeroChance}" aria-label="Numéro Chance">--</div>
+    </div>
+
+    <!-- ===================== -->
+    <!-- DETAILS -->
+    <!-- ===================== -->
+    <h2 class="section-title">Détail du tirage</h2>
+
+    <div th:if="${details != null}">
+
+      <p class="jackpot">
+        <strong>Jackpot annoncé :</strong>
+        <span th:text="${details != null ? #numbers.formatDecimal(details.rapportDuRang1, 1, 'WHITESPACE', 2, 'COMMA') + ' €' : '--'}">
+        </span>
+      </p>
+
+      <!-- Tableau rapports -->
+      <h3>Rapports du tirage principal</h3>
+
+      <table class="details-table">
+        <thead>
+          <tr>
+            <th scope="col">Rang</th>
+            <th scope="col">Gagnants</th>
+            <th scope="col">Gain (€)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>1</td>
+            <td th:text="${details.nombreDeGagnantAuRang1}">--</td>
+            <td th:text="${#numbers.formatDecimal(details.rapportDuRang1, 1, 'WHITESPACE', 2, 'COMMA')} + ' €'">--</td>
+          </tr>
+          <tr>
+            <td>2</td>
+            <td th:text="${details.nombreDeGagnantAuRang2}">--</td>
+            <td th:text="${#numbers.formatDecimal(details.rapportDuRang2, 1, 'WHITESPACE', 2, 'COMMA')} + ' €'">--</td>
+          </tr>
+          <tr>
+            <td>3</td>
+            <td th:text="${details.nombreDeGagnantAuRang3}">--</td>
+            <td th:text="${#numbers.formatDecimal(details.rapportDuRang3, 1, 'WHITESPACE', 2, 'COMMA')} + ' €'">--</td>
+          </tr>
+          <tr>
+            <td>4</td>
+            <td th:text="${details.nombreDeGagnantAuRang4}">--</td>
+            <td th:text="${#numbers.formatDecimal(details.rapportDuRang4, 1, 'WHITESPACE', 2, 'COMMA')} + ' €'">--</td>
+          </tr>
+          <tr>
+            <td>5</td>
+            <td th:text="${details.nombreDeGagnantAuRang5}">--</td>
+            <td th:text="${#numbers.formatDecimal(details.rapportDuRang5, 1, 'WHITESPACE', 2, 'COMMA')} + ' €'">--</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <!-- Joker+ -->
+      <h3>Joker+</h3>
+      <p>
+        Numéro Joker+ :
+        <strong th:text="${details.numeroJokerplus}">--</strong>
+      </p>
+
+      <!-- Codes gagnants -->
+
+      <div th:if="${details.codesGagnants != null}">
+        <h3>Codes gagnants</h3>
+
+        <div class="codes-grid"
+            th:with="codes=${#strings.arraySplit(details.codesGagnants, ',')}">
+
+          <span class="code-chip"
+                th:each="c : ${codes}"
+                th:text="${#strings.trim(c)}">
+            CODE
+          </span>
+
+        </div>
+      </div>
+
+
+    </div>
+
+    <div th:if="${details == null}">
+      <p>Détails indisponibles pour ce tirage.</p>
+    </div>
+
+    <div class="footer-link">
+      Retrouvez l’historique complet sur
+      <a href="https://loto-tracker.fr/">Loto Tracker</a>.
+    </div>
+
+  </div>
+</div>
+{% comment %} <script th:src="@{/assets/js/layout.js}" defer></script> {% endcomment %}
+</body>
+</html>

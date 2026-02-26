@@ -717,42 +717,86 @@
 
   function renderFooter() {
     return `
-      <footer class="footer">
-        <a href="mentions_legales.html">Mentions légales</a>
-        <a href="conditions_utilisation.html">Conditions</a>
-        <a href="politique_confidentialite.html">Confidentialité</a>
-        <a href="#" id="openCookiePrefs">🍪 Cookies</a>
-        <a>
-          © 2026
+      <footer class="footer" role="contentinfo" aria-label="Pied de page du site">
+
+        <a href="mentions_legales.html"
+          aria-label="Consulter les mentions légales">
+          Mentions légales
         </a>
+
+        <a href="conditions_utilisation.html"
+          aria-label="Consulter les conditions d'utilisation">
+          Conditions
+        </a>
+
+        <a href="politique_confidentialite.html"
+          aria-label="Consulter la politique de confidentialité">
+          Confidentialité
+        </a>
+
+        <a href="#"
+          id="openCookiePrefs"
+          role="button"
+          aria-label="Ouvrir les préférences des cookies">
+          <i class="fa-solid fa-cookie-bite" aria-hidden="true"></i>
+          <span>Cookies</span>
+        </a>
+
+        <span aria-label="Copyright 2026 Stéphane Dinahet">
+          © 2026
+        </span>
+
         <a href="https://github.com/SDINAHET/LOTO_API_v6/tree/fix2_migration"
           target="_blank"
           rel="noopener noreferrer"
-          aria-label="GitHub - LOTO_API_v6">
-          <i class="fa-brands fa-github"></i> SDINAHET
+          aria-label="Voir le projet LOTO API v6 sur GitHub (nouvel onglet)">
+          <i class="fa-brands fa-github" aria-hidden="true"></i>
+          <span>SDINAHET</span>
         </a>
 
-        <span class="api-status" title="État de l'API">
-          <span id="apiDot" class="api-dot api-offline"></span>
-          API
-        </span>
-        <span><span id="visitCount">—</span> visites</span>
-
-        ${isLegalPage() ? `
-        <a href="https://lototracker.goatcounter.com/"
-           target="_blank"
-           rel="noopener noreferrer"
-           class="footer-stat-site">
-           <i class="fa-solid fa-chart-simple"></i> Stat du site
-        </a>
-
-        <a href="https://status.stephanedinahet.fr/status/loto"
+        <a href="assets/pdf/CV_Stephane_Dinahet.pdf"
           target="_blank"
           rel="noopener noreferrer"
-          class="footer-status-site">
-          <i class="fa-solid fa-signal"></i> Status site
+          aria-label="Télécharger le CV de Stéphane Dinahet au format PDF (nouvel onglet)">
+          <i class="fa-solid fa-file-pdf" aria-hidden="true"></i>
+          <span>CV</span>
         </a>
-      ` : ""}
+
+        <span class="api-status"
+              role="status"
+              aria-live="polite"
+              aria-label="État actuel de l'API">
+              <span id="apiDot"
+                    class="api-dot api-offline"
+                    aria-hidden="true"></span>
+              <span>API</span>
+        </span>
+
+        <span aria-live="polite"
+              aria-label="Nombre total de visites du site">
+              <span id="visitCount">—</span> visites
+        </span>
+
+        ${isLegalPage() ? `
+          <a href="https://lototracker.goatcounter.com/"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="footer-stat-site"
+            aria-label="Voir les statistiques du site (nouvel onglet)">
+            <i class="fa-solid fa-chart-simple" aria-hidden="true"></i>
+            <span>Stat du site</span>
+          </a>
+
+          <a href="https://status.stephanedinahet.fr/status/loto"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="footer-status-site"
+            aria-label="Voir le statut du site en temps réel (nouvel onglet)">
+            <i class="fa-solid fa-signal" aria-hidden="true"></i>
+            <span>Status site</span>
+          </a>
+        ` : ""}
+
       </footer>
     `;
   }

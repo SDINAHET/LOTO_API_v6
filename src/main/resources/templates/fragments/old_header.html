@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<body>
+
+<header th:fragment="header">
+    <div class="header-container">
+
+        <!-- LOGO -->
+        <div class="logo">
+            <a th:href="@{/}">
+                <span>Loto Tracker</span>
+            </a>
+        </div>
+
+        <!-- NAVIGATION -->
+        <nav class="main-nav">
+            <a th:href="@{/}">Accueil</a>
+            <a th:href="@{/dernier-tirage}">Dernier tirage</a>
+            <a th:href="@{/historique}">Historique</a>
+            <a th:href="@{/predictions}">Prédictions</a>
+        </nav>
+
+        <!-- BOUTON MOBILE -->
+        <button class="menu-toggle" aria-label="Menu">
+            ☰
+        </button>
+
+    </div>
+</header>
+
+</body>
+</html>

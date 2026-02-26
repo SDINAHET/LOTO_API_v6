@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title th:text="${seoTitle}">Dernier Résultat du Loto Français | Loto Tracker</title>
+
+  <meta name="description"
+        th:content="${seoDescription}"
+        content="Dernier résultat du Loto Français." />
+
+  <link rel="canonical" href="https://loto-tracker.fr/dernier-tirage">
+  <link rel="stylesheet" th:href="@{/assets/css/dernier-tirage.css}">
+  <meta name="robots" content="index, follow">
+
+  <!-- Open Graph -->
+  <meta property="og:title" th:content="${seoTitle}">
+  <meta property="og:description" th:content="${seoDescription}">
+  <meta property="og:url" content="https://loto-tracker.fr/dernier-tirage">
+  <meta property="og:type" content="article">
+
+  <!-- JSON-LD -->
+  <script type="application/ld+json" th:inline="javascript">
+  {
+    "@context": "https://schema.org",
+    "@type": "Event",
+    "name": "Résultat Loto Français",
+    "eventStatus": "https://schema.org/EventCompleted",
+    "startDate": [[${startDateIso}]],
+    "description": [[${seoDescription}]],
+    "location": { "@type": "Place", "name": "France" }
+  }
+  </script>
+</head>
+
+<body>
+
+<div class="container">
+  <div class="card">
+
+    <h1>Dernier tirage du Loto Français</h1>
+    <p class="subtitle" th:text="'Tirage du ' + ${dateFr}">
+      Tirage du --
+    </p>
+
+    <div class="section-title">Résultat</div>
+
+    <div class="balls">
+      <div class="ball" th:text="${tirage.boule1}">--</div>
+      <div class="ball" th:text="${tirage.boule2}">--</div>
+      <div class="ball" th:text="${tirage.boule3}">--</div>
+      <div class="ball" th:text="${tirage.boule4}">--</div>
+      <div class="ball" th:text="${tirage.boule5}">--</div>
+      <div class="ball chance" th:text="${tirage.numeroChance}">--</div>
+    </div>
+
+    <div class="section-title">Détails du tirage</div>
+
+    <div th:if="${details != null}">
+      <p>
+        Montant du jackpot :
+        <strong th:text="${details.jackpot}">--</strong>
+      </p>
+      <p>
+        Nombre de gagnants :
+        <strong th:text="${details.nombreGagnants}">--</strong>
+      </p>
+    </div>
+
+    <div th:if="${details == null}">
+      <p>Détails indisponibles pour ce tirage.</p>
+    </div>
+
+    <div class="footer-link">
+      Retrouvez l’historique complet sur
+      <a href="https://loto-tracker.fr/">Loto Tracker</a>.
+    </div>
+
+  </div>
+</div>
+
+</body>
+</html>

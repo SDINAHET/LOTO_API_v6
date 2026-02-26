@@ -373,13 +373,23 @@ public class AdminDebugController {
             return ResponseEntity.ok(Map.of("cookies", List.of()));
         }
 
-        var result = java.util.Arrays.stream(cookies)
-                .map(c -> Map.<String, Object>of(
-                        "name", c.getName(),
-                        "httpOnly", c.isHttpOnly(),
-                        "secure", c.getSecure(),
-                        "path", c.getPath()
-                ))
+        // var result = java.util.Arrays.stream(cookies)
+        //         .map(c -> Map.<String, Object>of(
+        //                 "name", c.getName(),
+        //                 "httpOnly", c.isHttpOnly(),
+        //                 "secure", c.getSecure(),
+        //                 "path", c.getPath()
+        //         ))
+        //         .toList();
+        var result = Arrays.stream(cookies)
+                .map(c -> {
+                        Map<String, Object> m = new java.util.LinkedHashMap<>();
+                        m.put("name", c.getName());
+                        m.put("httpOnly", c.isHttpOnly());
+                        m.put("secure", c.getSecure());
+                        m.put("path", c.getPath()); // null autorisé
+                        return m;
+                })
                 .toList();
 
         return ResponseEntity.ok(Map.of(

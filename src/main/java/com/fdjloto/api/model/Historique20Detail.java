@@ -4,6 +4,13 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.v3.oas.annotations.media.Schema;
+// import org.springframework.data.mongodb.core.index.IndexDirection;
+import org.springframework.data.mongodb.core.index.Indexed;
+// import org.springframework.data.mongodb.core.mapping.Document;
+
+// @Indexed(direction = IndexDirection.ASCENDING)
+// @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd/MM/yyyy", timezone = "Europe/Paris")
+// private Date dateDeTirage;
 
 import java.util.Date;
 
@@ -21,9 +28,15 @@ public class Historique20Detail {
 	@Schema(description = "Day of the draw", example = "Lundi")
     private String jourDeTirage;
 
-	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd/MM/yyyy", timezone = "Europe/Paris")
+	// @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd/MM/yyyy", timezone = "Europe/Paris")
+    // @Schema(description = "The draw date formatted as 'dd/MM/yyyy'", example = "15/03/2025")
+	// private Date dateDeTirage; // ✅ Maintenant stocké en Date
+
+    // ✅ Index unique (empêche les doublons)
+    @Indexed(unique = true)
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd/MM/yyyy", timezone = "Europe/Paris")
     @Schema(description = "The draw date formatted as 'dd/MM/yyyy'", example = "15/03/2025")
-	private Date dateDeTirage; // ✅ Maintenant stocké en Date
+    private Date dateDeTirage;
 
 	@Schema(description = "The deadline date for claiming winnings", example = "15/03/2026")
     private String dateDeForclusion;
