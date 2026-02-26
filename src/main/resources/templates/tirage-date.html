@@ -32,24 +32,20 @@
 
   <!-- JSON-LD SEO -->
   <script type="application/ld+json" th:inline="javascript">
-  /*<![CDATA[*/
-    const jsonLd = {
-      "@context": "https://schema.org",
-      "@type": "Event",
-      "name": "Résultat Loto Français du " + /*[[${dateFr}]]*/ "",
-      "eventStatus": "https://schema.org/EventCompleted",
-      "startDate": /*[[${startDateIso}]]*/ "",
-      "location": { "@type": "Place", "name": "France" },
-      "description": "Résultat officiel du Loto du " + /*[[${dateFr}]]*/ "",
-      "offers": {
-        "@type": "Offer",
-        "priceCurrency": "EUR",
-        "price": /*[[${details != null ? details.rapportDuRang1 : 0}]]*/ 0
-      }
-    };
-
-    document.currentScript.text = JSON.stringify(jsonLd);
-  /*]]>*/
+  {
+    "@context": "https://schema.org",
+    "@type": "Event",
+    "name": [[${'Résultat Loto Français du ' + dateFr}]],
+    "eventStatus": "https://schema.org/EventCompleted",
+    "startDate": [[${startDateIso}]],
+    "location": { "@type": "Place", "name": "France" },
+    "description": [[${'Résultat officiel du Loto du ' + dateFr}]],
+    "offers": {
+      "@type": "Offer",
+      "priceCurrency": "EUR",
+      "price": [[${details != null ? details.rapportDuRang1 : 0}]]
+    }
+  }
   </script>
 
   <link rel="stylesheet" th:href="@{/assets/css/dernier-tirage.css}">
