@@ -746,7 +746,7 @@
           © 2026
         </span>
 
-        <a href="https://github.com/SDINAHET/LOTO_API_v6/tree/fix2_migration"
+        <a href="https://github.com/SDINAHET/LOTO_API_v6/tree/fix3_migration"
           target="_blank"
           rel="noopener noreferrer"
           aria-label="Voir le projet LOTO API v6 sur GitHub (nouvel onglet)">
