@@ -118,15 +118,9 @@
               <i class="fa-solid fa-user-gear"></i><span>Compte</span>
             </a>
 
-            <div class="nav-sep"></div>
 
-            <div class="nav-title">Jouer</div>
-            <a class="nav-item" href="index.html" data-map="show">
-              <i class="fa-solid fa-clover"></i><span>Loto</span>
-            </a>
-            <a class="nav-item${active("euromillions.html")}" href="euromillions.html" data-map="hide">
-              <i class="fa-solid fa-star"></i><span>Euromillions</span>
-            </a>
+
+
 
             <div id="sidebarMapBlock">
               <div class="nav-sep"></div>
@@ -138,6 +132,15 @@
           </aside>
         `;
       }
+
+            // <div class="nav-sep"></div
+            // <div class="nav-title">Jouer</div>
+              // <a class="nav-item" href="index.html" data-map="show">
+              //   <i class="fa-solid fa-clover"></i><span>Loto</span>
+              // </a>
+              // <a class="nav-item${active("euromillions.html")}" href="euromillions.html" data-map="hide">
+              //   <i class="fa-solid fa-star"></i><span>Euromillions</span>
+              // </a>
 
       function closeSidebarIfMobile() {
         const sidebar = document.getElementById("sidebar");
