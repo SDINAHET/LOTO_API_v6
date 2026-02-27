@@ -32,6 +32,278 @@
 //     }
 // }
 
+// package com.fdjloto.api.controller;
+
+// import com.fdjloto.api.model.Historique20Detail;
+// import com.fdjloto.api.service.Historique20DetailService;
+// import org.springframework.http.MediaType;
+// import org.springframework.stereotype.Controller;
+// import org.springframework.web.bind.annotation.GetMapping;
+// import org.springframework.web.bind.annotation.ResponseBody;
+
+// import java.time.DayOfWeek;
+// import java.time.LocalDate;
+// import java.time.ZoneId;
+// import java.util.List;
+
+// @Controller
+// public class SitemapController {
+
+//     private static final String BASE_URL = "https://loto-tracker.fr";
+//     private final Historique20DetailService detailService;
+
+//     public SitemapController(Historique20DetailService detailService) {
+//         this.detailService = detailService;
+//     }
+
+//     /**
+//      * ✅ Sitemap index (celui à déclarer dans Google Search Console)
+//      */
+//     @GetMapping(value = "/sitemap.xml", produces = MediaType.APPLICATION_XML_VALUE)
+//     @ResponseBody
+//     public String sitemapIndex() {
+//         return """
+//             <?xml version="1.0" encoding="UTF-8"?>
+//             <sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+//               <sitemap>
+//                 <loc>%s/sitemap-static.xml</loc>
+//               </sitemap>
+//               <sitemap>
+//                 <loc>%s/sitemap-tirages.xml</loc>
+//               </sitemap>
+//             </sitemapindex>
+//             """.formatted(BASE_URL, BASE_URL);
+//     }
+
+//     /**
+//      * ✅ Pages fixes
+//      */
+//     @GetMapping(value = "/sitemap-static.xml", produces = MediaType.APPLICATION_XML_VALUE)
+//     @ResponseBody
+//     public String sitemapStatic() {
+//         return """
+//             <?xml version="1.0" encoding="UTF-8"?>
+//             <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+//               <url>
+//                 <loc>%s/</loc>
+//                 <changefreq>daily</changefreq>
+//                 <priority>1.0</priority>
+//               </url>
+//               <url>
+//                 <loc>%s/dernier-tirage</loc>
+//                 <changefreq>daily</changefreq>
+//                 <priority>0.9</priority>
+//               </url>
+//             </urlset>
+//             """.formatted(BASE_URL, BASE_URL);
+//     }
+
+//     /**
+//      * ✅ Pages SEO par date : /tirage/yyyy-MM-dd
+//      */
+// 	@GetMapping(value = "/sitemap-tirages.xml", produces = MediaType.APPLICATION_XML_VALUE)
+// 	@ResponseBody
+// 	public String sitemapTirages() {
+
+// 		List<Historique20Detail> tirages = detailService.getAllTirages();
+
+// 		StringBuilder sb = new StringBuilder(512);
+// 		sb.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
+// 		sb.append("<urlset xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\">");
+
+// 		ZoneId paris = ZoneId.of("Europe/Paris");
+// 		LocalDate today = LocalDate.now(paris);
+
+// 		for (Historique20Detail t : tirages) {
+
+// 			if (t.getDateDeTirage() == null) continue;
+
+// 			LocalDate ld = t.getDateDeTirage()
+// 					.toInstant()
+// 					.atZone(paris)
+// 					.toLocalDate();
+
+// 			DayOfWeek day = ld.getDayOfWeek();
+
+// 			// 🔥 Autoriser uniquement Lundi / Mercredi / Samedi
+// 			if (!(day == DayOfWeek.MONDAY
+// 					|| day == DayOfWeek.WEDNESDAY
+// 					|| day == DayOfWeek.SATURDAY)) {
+// 				continue;
+// 			}
+
+// 			String iso = ld.toString();
+
+// 			// 🔥 Priorité dynamique : plus récent = plus important
+// 			long daysOld = java.time.temporal.ChronoUnit.DAYS.between(ld, today);
+
+// 			String priority;
+// 			if (daysOld <= 7) {
+// 				priority = "0.9";
+// 			} else if (daysOld <= 30) {
+// 				priority = "0.8";
+// 			} else {
+// 				priority = "0.6";
+// 			}
+
+// 			sb.append("<url>");
+// 			sb.append("<loc>").append(BASE_URL).append("/tirage/").append(iso).append("</loc>");
+// 			sb.append("<lastmod>").append(iso).append("</lastmod>");
+// 			sb.append("<changefreq>yearly</changefreq>");
+// 			sb.append("<priority>").append(priority).append("</priority>");
+// 			sb.append("</url>");
+// 		}
+
+// 		sb.append("</urlset>");
+// 		return sb.toString();
+// 	}
+// }
+
+// package com.fdjloto.api.controller;
+
+// import com.fdjloto.api.model.Historique20Detail;
+// import com.fdjloto.api.service.Historique20DetailService;
+// import org.springframework.http.MediaType;
+// import org.springframework.stereotype.Controller;
+// import org.springframework.web.bind.annotation.GetMapping;
+// import org.springframework.web.bind.annotation.ResponseBody;
+
+// import java.time.DayOfWeek;
+// import java.time.LocalDate;
+// import java.time.ZoneId;
+// import java.time.temporal.ChronoUnit;
+// import java.util.Comparator;
+// import java.util.List;
+
+// @Controller
+// public class SitemapController {
+
+//     private static final String BASE_URL = "https://loto-tracker.fr";
+//     private final Historique20DetailService detailService;
+
+//     public SitemapController(Historique20DetailService detailService) {
+//         this.detailService = detailService;
+//     }
+
+//     /**
+//      * ✅ Sitemap index (celui à déclarer dans Google Search Console)
+//      */
+//     @GetMapping(value = "/sitemap.xml", produces = MediaType.APPLICATION_XML_VALUE)
+//     @ResponseBody
+//     public String sitemapIndex() {
+
+//         ZoneId paris = ZoneId.of("Europe/Paris");
+//         String lastmod = LocalDate.now(paris).toString();
+
+//         return """
+//             <?xml version="1.0" encoding="UTF-8"?>
+//             <sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+//               <sitemap>
+//                 <loc>%s/sitemap-static.xml</loc>
+//                 <lastmod>%s</lastmod>
+//               </sitemap>
+//               <sitemap>
+//                 <loc>%s/sitemap-tirages.xml</loc>
+//                 <lastmod>%s</lastmod>
+//               </sitemap>
+//             </sitemapindex>
+//             """.formatted(BASE_URL, lastmod, BASE_URL, lastmod);
+//     }
+
+//     /**
+//      * ✅ Pages fixes
+//      */
+//     @GetMapping(value = "/sitemap-static.xml", produces = MediaType.APPLICATION_XML_VALUE)
+//     @ResponseBody
+//     public String sitemapStatic() {
+
+//         ZoneId paris = ZoneId.of("Europe/Paris");
+//         String lastmod = LocalDate.now(paris).toString();
+
+//         return """
+//             <?xml version="1.0" encoding="UTF-8"?>
+//             <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+//               <url>
+//                 <loc>%s/</loc>
+//                 <lastmod>%s</lastmod>
+//                 <changefreq>daily</changefreq>
+//                 <priority>1.0</priority>
+//               </url>
+//               <url>
+//                 <loc>%s/dernier-tirage</loc>
+//                 <lastmod>%s</lastmod>
+//                 <changefreq>daily</changefreq>
+//                 <priority>0.9</priority>
+//               </url>
+//             </urlset>
+//             """.formatted(BASE_URL, lastmod, BASE_URL, lastmod);
+//     }
+
+//     /**
+//      * ✅ Pages SEO par date : /tirage/yyyy-MM-dd
+//      */
+//     @GetMapping(value = "/sitemap-tirages.xml", produces = MediaType.APPLICATION_XML_VALUE)
+//     @ResponseBody
+//     public String sitemapTirages() {
+
+//         List<Historique20Detail> tirages = detailService.getAllTirages();
+
+//         ZoneId paris = ZoneId.of("Europe/Paris");
+//         LocalDate today = LocalDate.now(paris);
+
+//         // ✅ Trier du plus récent au plus ancien (meilleur crawl)
+//         tirages.sort(Comparator.comparing(Historique20Detail::getDateDeTirage,
+//                 Comparator.nullsLast(Comparator.naturalOrder())).reversed());
+
+//         StringBuilder sb = new StringBuilder(16_384);
+//         sb.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
+//         sb.append("<urlset xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\">");
+
+//         for (Historique20Detail t : tirages) {
+
+//             if (t.getDateDeTirage() == null) continue;
+
+//             LocalDate ld = t.getDateDeTirage()
+//                     .toInstant()
+//                     .atZone(paris)
+//                     .toLocalDate();
+
+//             DayOfWeek day = ld.getDayOfWeek();
+
+//             // ✅ Autoriser uniquement Lundi / Mercredi / Samedi
+//             if (day != DayOfWeek.MONDAY && day != DayOfWeek.WEDNESDAY && day != DayOfWeek.SATURDAY) {
+//                 continue;
+//             }
+
+//             String iso = ld.toString();
+
+//             long daysOld = ChronoUnit.DAYS.between(ld, today);
+
+//             // ✅ Priorité dynamique : plus récent = plus important
+//             String priority;
+//             if (daysOld <= 7) {
+//                 priority = "0.9";
+//             } else if (daysOld <= 30) {
+//                 priority = "0.8";
+//             } else if (daysOld <= 365) {
+//                 priority = "0.7";
+//             } else {
+//                 priority = "0.6";
+//             }
+
+//             sb.append("<url>");
+//             sb.append("<loc>").append(BASE_URL).append("/tirage/").append(iso).append("</loc>");
+//             sb.append("<lastmod>").append(iso).append("</lastmod>");
+//             sb.append("<changefreq>never</changefreq>");
+//             sb.append("<priority>").append(priority).append("</priority>");
+//             sb.append("</url>");
+//         }
+
+//         sb.append("</urlset>");
+//         return sb.toString();
+//     }
+// }
+
 package com.fdjloto.api.controller;
 
 import com.fdjloto.api.model.Historique20Detail;
@@ -44,6 +316,8 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.ZoneId;
+import java.time.temporal.ChronoUnit;
+import java.util.Comparator;
 import java.util.List;
 
 @Controller
@@ -57,104 +331,145 @@ public class SitemapController {
     }
 
     /**
-     * ✅ Sitemap index (celui à déclarer dans Google Search Console)
+     * ✅ Sitemap index (à soumettre dans Google Search Console)
      */
     @GetMapping(value = "/sitemap.xml", produces = MediaType.APPLICATION_XML_VALUE)
     @ResponseBody
     public String sitemapIndex() {
+
+        ZoneId paris = ZoneId.of("Europe/Paris");
+        String lastmod = LocalDate.now(paris).toString();
+
         return """
             <?xml version="1.0" encoding="UTF-8"?>
             <sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
               <sitemap>
-                <loc>%s/sitemap-static.xml</loc>
+                <loc>%s/sitemap-pages.xml</loc>
+                <lastmod>%s</lastmod>
               </sitemap>
               <sitemap>
                 <loc>%s/sitemap-tirages.xml</loc>
+                <lastmod>%s</lastmod>
+              </sitemap>
+              <sitemap>
+                <loc>%s/sitemap-static.xml</loc>
+                <lastmod>%s</lastmod>
               </sitemap>
             </sitemapindex>
-            """.formatted(BASE_URL, BASE_URL);
+            """.formatted(BASE_URL, lastmod, BASE_URL, lastmod, BASE_URL, lastmod);
     }
 
     /**
-     * ✅ Pages fixes
+     * ✅ Pages principales (site navigation / SEO)
+     * Mets ici les pages importantes de ton site (hors pages "légales")
      */
-    @GetMapping(value = "/sitemap-static.xml", produces = MediaType.APPLICATION_XML_VALUE)
+    @GetMapping(value = "/sitemap-pages.xml", produces = MediaType.APPLICATION_XML_VALUE)
     @ResponseBody
-    public String sitemapStatic() {
+    public String sitemapPages() {
+
+        ZoneId paris = ZoneId.of("Europe/Paris");
+        String lastmod = LocalDate.now(paris).toString();
+
+        // ✅ Ajoute ici toutes les pages "business" importantes
+        // (exemples) : /historique, /stats, /verifier-ticket, etc.
         return """
             <?xml version="1.0" encoding="UTF-8"?>
             <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
               <url>
                 <loc>%s/</loc>
+                <lastmod>%s</lastmod>
                 <changefreq>daily</changefreq>
                 <priority>1.0</priority>
               </url>
               <url>
                 <loc>%s/dernier-tirage</loc>
+                <lastmod>%s</lastmod>
                 <changefreq>daily</changefreq>
                 <priority>0.9</priority>
               </url>
             </urlset>
-            """.formatted(BASE_URL, BASE_URL);
+            """.formatted(BASE_URL, lastmod, BASE_URL, lastmod);
+    }
+
+    /**
+     * ✅ Pages statiques (légales / info)
+     * Mets ici tes pages fixes type politique de confidentialité, CGU, etc.
+     */
+    @GetMapping(value = "/sitemap-static.xml", produces = MediaType.APPLICATION_XML_VALUE)
+    @ResponseBody
+    public String sitemapStatic() {
+
+        ZoneId paris = ZoneId.of("Europe/Paris");
+        String lastmod = LocalDate.now(paris).toString();
+
+        return """
+            <?xml version="1.0" encoding="UTF-8"?>
+            <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+              <url>
+                <loc>%s/politique_confidentialite.html</loc>
+                <lastmod>%s</lastmod>
+                <changefreq>yearly</changefreq>
+                <priority>0.3</priority>
+              </url>
+            </urlset>
+            """.formatted(BASE_URL, lastmod);
     }
 
     /**
      * ✅ Pages SEO par date : /tirage/yyyy-MM-dd
      */
-	@GetMapping(value = "/sitemap-tirages.xml", produces = MediaType.APPLICATION_XML_VALUE)
-	@ResponseBody
-	public String sitemapTirages() {
+    @GetMapping(value = "/sitemap-tirages.xml", produces = MediaType.APPLICATION_XML_VALUE)
+    @ResponseBody
+    public String sitemapTirages() {
 
-		List<Historique20Detail> tirages = detailService.getAllTirages();
+        List<Historique20Detail> tirages = detailService.getAllTirages();
 
-		StringBuilder sb = new StringBuilder(512);
-		sb.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
-		sb.append("<urlset xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\">");
+        ZoneId paris = ZoneId.of("Europe/Paris");
+        LocalDate today = LocalDate.now(paris);
 
-		ZoneId paris = ZoneId.of("Europe/Paris");
-		LocalDate today = LocalDate.now(paris);
+        // ✅ Trier du plus récent au plus ancien (meilleur crawl)
+        tirages.sort(Comparator.comparing(Historique20Detail::getDateDeTirage,
+                Comparator.nullsLast(Comparator.naturalOrder())).reversed());
 
-		for (Historique20Detail t : tirages) {
+        StringBuilder sb = new StringBuilder(16_384);
+        sb.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
+        sb.append("<urlset xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\">");
 
-			if (t.getDateDeTirage() == null) continue;
+        for (Historique20Detail t : tirages) {
 
-			LocalDate ld = t.getDateDeTirage()
-					.toInstant()
-					.atZone(paris)
-					.toLocalDate();
+            if (t.getDateDeTirage() == null) continue;
 
-			DayOfWeek day = ld.getDayOfWeek();
+            LocalDate ld = t.getDateDeTirage()
+                    .toInstant()
+                    .atZone(paris)
+                    .toLocalDate();
 
-			// 🔥 Autoriser uniquement Lundi / Mercredi / Samedi
-			if (!(day == DayOfWeek.MONDAY
-					|| day == DayOfWeek.WEDNESDAY
-					|| day == DayOfWeek.SATURDAY)) {
-				continue;
-			}
+            DayOfWeek day = ld.getDayOfWeek();
 
-			String iso = ld.toString();
+            // ✅ Autoriser uniquement Lundi / Mercredi / Samedi
+            if (day != DayOfWeek.MONDAY && day != DayOfWeek.WEDNESDAY && day != DayOfWeek.SATURDAY) {
+                continue;
+            }
 
-			// 🔥 Priorité dynamique : plus récent = plus important
-			long daysOld = java.time.temporal.ChronoUnit.DAYS.between(ld, today);
+            String iso = ld.toString();
+            long daysOld = ChronoUnit.DAYS.between(ld, today);
 
-			String priority;
-			if (daysOld <= 7) {
-				priority = "0.9";
-			} else if (daysOld <= 30) {
-				priority = "0.8";
-			} else {
-				priority = "0.6";
-			}
+            // ✅ Priorité dynamique : plus récent = plus important
+            String priority;
+            if (daysOld <= 7) priority = "0.9";
+            else if (daysOld <= 30) priority = "0.8";
+            else if (daysOld <= 365) priority = "0.7";
+            else priority = "0.6";
 
-			sb.append("<url>");
-			sb.append("<loc>").append(BASE_URL).append("/tirage/").append(iso).append("</loc>");
-			sb.append("<lastmod>").append(iso).append("</lastmod>");
-			sb.append("<changefreq>yearly</changefreq>");
-			sb.append("<priority>").append(priority).append("</priority>");
-			sb.append("</url>");
-		}
+            sb.append("<url>");
+            sb.append("<loc>").append(BASE_URL).append("/tirage/").append(iso).append("</loc>");
+            sb.append("<lastmod>").append(iso).append("</lastmod>");
+            sb.append("<changefreq>never</changefreq>");
+            sb.append("<priority>").append(priority).append("</priority>");
+            sb.append("</url>");
+        }
 
-		sb.append("</urlset>");
-		return sb.toString();
-	}
+        sb.append("</urlset>");
+        return sb.toString();
+    }
 }

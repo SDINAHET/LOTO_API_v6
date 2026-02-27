@@ -69,6 +69,7 @@ public class TirageParDateController {
         model.addAttribute("dateFr", dateFr);
         model.addAttribute("dateIso", date);
         model.addAttribute("startDateIso", startDateIso);
+        model.addAttribute("pageUrl", "https://loto-tracker.fr/tirage/" + date);
 
         // (optionnel) si tu veux les utiliser dans le <head>
         model.addAttribute("seoTitle", "Résultat Loto du " + dateFr + " | Loto Tracker");

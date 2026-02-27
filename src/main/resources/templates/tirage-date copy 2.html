@@ -31,61 +31,21 @@
   <meta property="og:site_name" content="Loto Tracker">
 
   <!-- JSON-LD SEO -->
-  <!-- ✅ JSON-LD SEO : Event + Article (version finale Loto Tracker) -->
   <script type="application/ld+json" th:inline="javascript">
-  [
-    {
-      "@context": "https://schema.org",
-      "@type": "Event",
-      "name": [[${'Résultat Loto Français du ' + dateFr}]],
-      "eventStatus": "https://schema.org/EventCompleted",
-      "startDate": "[[${startDateIso}]]",
-      "eventAttendanceMode": "https://schema.org/OfflineEventAttendanceMode",
-      "location": {
-        "@type": "Place",
-        "name": "France",
-        "address": {
-          "@type": "PostalAddress",
-          "addressCountry": "FR"
-        }
-      },
-      "organizer": {
-        "@type": "Organization",
-        "name": "Loto Tracker",
-        "url": "https://loto-tracker.fr/"
-      },
-      "image": "https://loto-tracker.fr/assets/img/loto_tracker.png",
-      "description": [[${seoDescription}]]
-    },
-    {
-      "@context": "https://schema.org",
-      "@type": "Article",
-      "headline": [[${seoTitle}]],
-      "description": [[${seoDescription}]],
-      "inLanguage": "fr-FR",
-      "datePublished": "[[${startDateIso}]]",
-      "dateModified": "[[${startDateIso}]]",
-      "mainEntityOfPage": {
-        "@type": "WebPage",
-        "@id": [[${pageUrl}]]
-      },
-      "image": [
-        "https://loto-tracker.fr/assets/img/loto_tracker.png"
-      ],
-      "author": {
-        "@type": "Organization",
-        "name": "Loto Tracker"
-      },
-      "publisher": {
-        "@type": "Organization",
-        "name": "Loto Tracker",
-        "logo": {
-          "@type": "ImageObject",
-          "url": "https://loto-tracker.fr/assets/img/loto_tracker.png"
-        }
-      }
+  {
+    "@context": "https://schema.org",
+    "@type": "Event",
+    "name": [[${'Résultat Loto Français du ' + dateFr}]],
+    "eventStatus": "https://schema.org/EventCompleted",
+    "startDate": "[[${startDateIso}]]",
+    "location": { "@type": "Place", "name": "France" },
+    "description": [[${'Résultat officiel du Loto du ' + dateFr}]],
+    "offers": {
+      "@type": "Offer",
+      "priceCurrency": "EUR",
+      "price": [[${details != null ? details.rapportDuRang1 : 0}]]
     }
-  ]
+  }
   </script>
 
   <link rel="stylesheet" th:href="@{/assets/css/dernier-tirage.css}">

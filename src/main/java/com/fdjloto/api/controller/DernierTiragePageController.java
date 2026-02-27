@@ -74,7 +74,8 @@ public class DernierTiragePageController {
         ZonedDateTime startParis = ld.atTime(20, 0).atZone(paris);
         String startDateIso = startParis.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME);
 
-        String seoTitle = "Dernier Résultat du Loto Français (" + dateFr + ") | Loto Tracker";
+        // String seoTitle = "Dernier Résultat du Loto Français - " + dateFr + " | Loto Tracker";
+        String seoTitle = "Résultat Loto du " + dateFr + " - Dernier tirage | Loto Tracker";
         String seoDescription = "Résultat du " + dateFr + " : " + nums + " - Numéro Chance " + tirage.getNumeroChance()
                 + ". Consultez les détails du tirage et l'historique.";
 
@@ -85,6 +86,7 @@ public class DernierTiragePageController {
         model.addAttribute("startDateIso", startDateIso);
         model.addAttribute("seoTitle", seoTitle);
         model.addAttribute("seoDescription", seoDescription);
+        model.addAttribute("pageUrl", "https://loto-tracker.fr/dernier-tirage");
 
         return "dernier-tirage";
     }
