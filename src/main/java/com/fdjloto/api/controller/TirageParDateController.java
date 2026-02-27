@@ -160,8 +160,11 @@ public class TirageParDateController {
         String nextIso = next.map(n -> toIsoDate(n.getDateDeTirage(), paris)).orElse(null);
 
         // 7) Formats d’affichage
-        String dateFr = ldDb.format(DateTimeFormatter.ofPattern("d MMMM yyyy", Locale.FRENCH));
-
+        // String dateFr = ldDb.format(DateTimeFormatter.ofPattern("d MMMM yyyy", Locale.FRENCH));
+        String dateFr = ldDb.format(DateTimeFormatter.ofPattern("EEEE d MMMM yyyy", Locale.FRENCH));
+        if (dateFr != null && !dateFr.isEmpty()) {
+            dateFr = dateFr.substring(0, 1).toUpperCase(Locale.FRENCH) + dateFr.substring(1);
+        }
         // Start date du tirage (20:00 Paris) ISO_OFFSET_DATE_TIME
         String startDateIso = ldDb.atTime(20, 0).atZone(paris).format(DateTimeFormatter.ISO_OFFSET_DATE_TIME);
 
@@ -177,7 +180,8 @@ public class TirageParDateController {
         model.addAttribute("prevIso", prevIso);
         model.addAttribute("nextIso", nextIso);
 
-        model.addAttribute("seoTitle", "Résultat Loto du " + dateFr + " | Loto Tracker");
+        // model.addAttribute("seoTitle", "Résultat Loto du " + dateFr + " | Loto Tracker");
+        model.addAttribute("seoTitle", "Résultat Loto (FDJ) : tirage du " + dateFr + " | Loto Tracker");
         model.addAttribute("seoDescription",
                 "Résultat officiel du Loto du " + dateFr + " : numéros gagnants, numéro Chance et jackpot.");
 

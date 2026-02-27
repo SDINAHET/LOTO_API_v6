@@ -65,7 +65,11 @@ public class DernierTiragePageController {
 
         Optional<Historique20Detail> detailsOpt = detailService.getTirageByDate(dateIso);
 
-        String dateFr = ld.format(DateTimeFormatter.ofPattern("d MMMM yyyy", Locale.FRENCH));
+        // String dateFr = ld.format(DateTimeFormatter.ofPattern("d MMMM yyyy", Locale.FRENCH));
+        String dateFr = ld.format(DateTimeFormatter.ofPattern("EEEE d MMMM yyyy", Locale.FRENCH));
+        if (dateFr != null && !dateFr.isEmpty()) {
+            dateFr = dateFr.substring(0, 1).toUpperCase(Locale.FRENCH) + dateFr.substring(1);
+        }
 
         String nums = tirage.getBoule1() + " " + tirage.getBoule2() + " " + tirage.getBoule3()
                 + " " + tirage.getBoule4() + " " + tirage.getBoule5();
@@ -75,8 +79,12 @@ public class DernierTiragePageController {
         String startDateIso = startParis.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME);
 
         // String seoTitle = "Dernier Résultat du Loto Français - " + dateFr + " | Loto Tracker";
-        String seoTitle = "Résultat Loto du " + dateFr + " - Dernier tirage | Loto Tracker";
-        String seoDescription = "Résultat du " + dateFr + " : " + nums + " - Numéro Chance " + tirage.getNumeroChance()
+        // String seoTitle = "Résultat Loto du " + dateFr + " - Dernier tirage | Loto Tracker";
+        String seoTitle = "Résultat Loto (FDJ) : tirage du " + dateFr + " | Loto Tracker";
+        // String seoDescription = "Résultat du " + dateFr + " : " + nums + " - Numéro Chance " + tirage.getNumeroChance()
+        //         + ". Consultez les détails du tirage et l'historique.";
+        String seoDescription = "Résultat du " + dateFr + " : " + nums
+                + " - Numéro Chance " + tirage.getNumeroChance()
                 + ". Consultez les détails du tirage et l'historique.";
 
         model.addAttribute("tirage", tirage);

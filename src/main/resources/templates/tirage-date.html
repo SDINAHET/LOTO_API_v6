@@ -4,36 +4,33 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <!-- TITLE UNIQUE PAR DATE -->
-  <title th:text="'Résultat Loto du ' + ${dateFr} + ' | Loto Tracker'">
-    Résultat du Loto  des tout dernier résultats avec Loto Tracker
-  </title>
+  <!-- ✅ TITLE -->
+  <title th:text="${seoTitle}">Résultat Loto | Loto Tracker</title>
 
   <link rel="icon" type="image/png" th:href="@{/assets/img/loto_tracker.png}">
 
-  <!-- META DESCRIPTION UNIQUE -->
-  <meta name="description"
-        th:content="'Résultat du Loto du ' + ${dateFr} +
-        ' : numéros gagnants, numéro Chance, jackpot et rapports complets.'">
+  <!-- ✅ META DESCRIPTION -->
+  <meta name="description" th:content="${seoDescription}"
+        content="Résultat du Loto : numéros gagnants, numéro Chance, jackpot et rapports complets.">
 
-  <!-- CANONICAL DYNAMIQUE -->
-  <link rel="canonical"
-        th:href="'https://loto-tracker.fr/tirage/' + ${dateIso}">
-
+  <!-- ✅ CANONICAL -->
+  <link rel="canonical" th:href="${pageUrl}">
   <meta name="robots" content="index, follow">
 
-  <!-- Open Graph -->
-  <meta property="og:title"
-        th:content="'Résultat Loto du ' + ${dateFr}">
-  <meta property="og:description"
-        th:content="'Numéros gagnants et jackpot du ' + ${dateFr}">
-  <meta property="og:url"
-        th:content="'https://loto-tracker.fr/tirage/' + ${dateIso}">
+  <!-- ✅ Open Graph -->
+  <meta property="og:title" th:content="${seoTitle}">
+  <meta property="og:description" th:content="${seoDescription}">
+  <meta property="og:url" th:content="${pageUrl}">
   <meta property="og:type" content="article">
   <meta property="og:site_name" content="Loto Tracker">
+  <meta property="og:locale" content="fr_FR">
 
-  <!-- JSON-LD SEO -->
-  <!-- ✅ JSON-LD SEO : Event + Article (version finale Loto Tracker) -->
+  <!-- ✅ Twitter -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" th:content="${seoTitle}">
+  <meta name="twitter:description" th:content="${seoDescription}">
+
+  <!-- ✅ JSON-LD -->
   <script type="application/ld+json" th:inline="javascript">
   [
     {
@@ -46,16 +43,9 @@
       "location": {
         "@type": "Place",
         "name": "France",
-        "address": {
-          "@type": "PostalAddress",
-          "addressCountry": "FR"
-        }
+        "address": {"@type":"PostalAddress","addressCountry":"FR"}
       },
-      "organizer": {
-        "@type": "Organization",
-        "name": "Loto Tracker",
-        "url": "https://loto-tracker.fr/"
-      },
+      "organizer": {"@type":"Organization","name":"Loto Tracker","url":"https://loto-tracker.fr/"},
       "image": "https://loto-tracker.fr/assets/img/loto_tracker.png",
       "description": [[${seoDescription}]]
     },
@@ -67,24 +57,13 @@
       "inLanguage": "fr-FR",
       "datePublished": [[${startDateIso}]],
       "dateModified": [[${startDateIso}]],
-      "mainEntityOfPage": {
-        "@type": "WebPage",
-        "@id": [[${pageUrl}]]
-      },
-      "image": [
-        "https://loto-tracker.fr/assets/img/loto_tracker.png"
-      ],
-      "author": {
-        "@type": "Organization",
-        "name": "Loto Tracker"
-      },
+      "mainEntityOfPage": {"@type":"WebPage","@id":[[${pageUrl}]]},
+      "image": ["https://loto-tracker.fr/assets/img/loto_tracker.png"],
+      "author": {"@type":"Organization","name":"Loto Tracker"},
       "publisher": {
-        "@type": "Organization",
-        "name": "Loto Tracker",
-        "logo": {
-          "@type": "ImageObject",
-          "url": "https://loto-tracker.fr/assets/img/loto_tracker.png"
-        }
+        "@type":"Organization",
+        "name":"Loto Tracker",
+        "logo":{"@type":"ImageObject","url":"https://loto-tracker.fr/assets/img/loto_tracker.png"}
       }
     }
   ]
