@@ -6,8 +6,10 @@
 
   <!-- TITLE UNIQUE PAR DATE -->
   <title th:text="'Résultat Loto du ' + ${dateFr} + ' | Loto Tracker'">
-    Résultat Loto | Loto Tracker
+    Résultat du Loto  des tout dernier résultats avec Loto Tracker
   </title>
+
+  <link rel="icon" type="image/png" th:href="@{/assets/img/loto_tracker.png}">
 
   <!-- META DESCRIPTION UNIQUE -->
   <meta name="description"
@@ -39,7 +41,7 @@
       "@type": "Event",
       "name": [[${'Résultat Loto Français du ' + dateFr}]],
       "eventStatus": "https://schema.org/EventCompleted",
-      "startDate": "[[${startDateIso}]]",
+      "startDate": [[${startDateIso}]],
       "eventAttendanceMode": "https://schema.org/OfflineEventAttendanceMode",
       "location": {
         "@type": "Place",
@@ -63,8 +65,8 @@
       "headline": [[${seoTitle}]],
       "description": [[${seoDescription}]],
       "inLanguage": "fr-FR",
-      "datePublished": "[[${startDateIso}]]",
-      "dateModified": "[[${startDateIso}]]",
+      "datePublished": [[${startDateIso}]],
+      "dateModified": [[${startDateIso}]],
       "mainEntityOfPage": {
         "@type": "WebPage",
         "@id": [[${pageUrl}]]

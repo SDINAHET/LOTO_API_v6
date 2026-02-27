@@ -6,6 +6,8 @@
 
   <title th:text="${seoTitle}">Dernier Résultat du Loto Français | Loto Tracker</title>
 
+  <link rel="icon" type="image/png" th:href="@{/assets/img/loto_tracker.png}">
+
   <meta name="description"
         th:content="${seoDescription}"
         content="Dernier résultat officiel du Loto Français." />
@@ -37,7 +39,7 @@
       "@type": "Event",
       "name": [[${'Résultat Loto Français du ' + dateFr}]],
       "eventStatus": "https://schema.org/EventCompleted",
-      "startDate": "[[${startDateIso}]]",
+      "startDate": [[${startDateIso}]],
       "eventAttendanceMode": "https://schema.org/OfflineEventAttendanceMode",
       "location": {
         "@type": "Place",
@@ -61,8 +63,8 @@
       "headline": [[${seoTitle}]],
       "description": [[${seoDescription}]],
       "inLanguage": "fr-FR",
-      "datePublished": "[[${startDateIso}]]",
-      "dateModified": "[[${startDateIso}]]",
+      "datePublished": [[${startDateIso}]],
+      "dateModified": [[${startDateIso}]],
       "mainEntityOfPage": {
         "@type": "WebPage",
         "@id": [[${pageUrl}]]
