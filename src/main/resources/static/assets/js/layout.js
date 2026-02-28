@@ -1421,4 +1421,126 @@ function setAdminInBurger(isAdmin) {
 
 
 
+  (function initDrawCalendarSidebar(){
+    // --- DEBUG: confirme que layout.js est bien chargé
+    console.log("[calendar] layout.js chargé ✅");
+
+    const monthLabel = document.getElementById('monthLabel');
+    const daysGrid = document.getElementById('daysGrid');
+    const prevBtn = document.getElementById('prevMonth');
+    const nextBtn = document.getElementById('nextMonth');
+
+    // --- DEBUG: check DOM
+    console.log("[calendar] nodes:", {
+      monthLabel: !!monthLabel,
+      daysGrid: !!daysGrid,
+      prevBtn: !!prevBtn,
+      nextBtn: !!nextBtn
+    });
+
+    if(!monthLabel || !daysGrid || !prevBtn || !nextBtn) {
+      console.warn("[calendar] calendrier non présent sur cette page (ou IDs manquants).");
+      return;
+    }
+
+    const pad2 = n => String(n).padStart(2, '0');
+    const ymd = d => `${d.getFullYear()}-${pad2(d.getMonth()+1)}-${pad2(d.getDate())}`;
+    const MONTHS = ["Janvier","Février","Mars","Avril","Mai","Juin","Juillet","Août","Septembre","Octobre","Novembre","Décembre"];
+
+    function isDrawDay(date){
+      const d = date.getDay();
+      return d === 1 || d === 3 || d === 6; // Lun/Mer/Sam
+    }
+
+    function lastAvailableDrawDateKey(){
+      const now = new Date();
+      let d = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+
+      // si jour de tirage et avant 21h -> on prend le précédent
+      if (isDrawDay(d) && now.getHours() < 21) {
+        d = new Date(d.getFullYear(), d.getMonth(), d.getDate() - 1);
+      }
+
+      for (let i = 0; i < 14; i++) {
+        const tmp = new Date(d.getFullYear(), d.getMonth(), d.getDate() - i);
+        if (isDrawDay(tmp)) return ymd(tmp);
+      }
+      return ymd(d);
+    }
+
+    // ✅ Ouvrir le mois de l’URL /tirage/YYYY-MM-DD sinon mois courant
+    let view = new Date();
+    view.setDate(1);
+
+    const match = location.pathname.match(/\/tirage\/(\d{4})-(\d{2})-(\d{2})/);
+    if (match) {
+      const yy = Number(match[1]);
+      const mm = Number(match[2]) - 1;
+      view = new Date(yy, mm, 1);
+    }
+
+    function renderCalendar(){
+      daysGrid.innerHTML = "";
+
+      const y = view.getFullYear();
+      const m = view.getMonth();
+      monthLabel.textContent = `${MONTHS[m]} ${y}`;
+
+      const first = new Date(y, m, 1);
+      const firstDow = (first.getDay() + 6) % 7; // lundi=0
+      const daysInMonth = new Date(y, m+1, 0).getDate();
+
+      const todayKey = ymd(new Date());
+      const lastKey = lastAvailableDrawDateKey();
+
+      for(let i=0;i<firstDow;i++){
+        const cell = document.createElement('div');
+        cell.className = "day muted";
+        daysGrid.appendChild(cell);
+      }
+
+      for(let day=1; day<=daysInMonth; day++){
+        const d = new Date(y, m, day);
+        const key = ymd(d);
+
+        const cell = document.createElement('div');
+        cell.className = "day";
+        cell.textContent = String(day);
+
+        if(key === todayKey) cell.classList.add('today');
+
+        if(isDrawDay(d)){
+          cell.classList.add('draw');
+
+          const safe = (key > lastKey) ? lastKey : key;
+
+          cell.title = `Ouvrir ${safe}`;
+          cell.addEventListener('click', () => {
+            location.href = `/tirage/${safe}`;
+          });
+        } else {
+          cell.classList.add('muted');
+        }
+
+        daysGrid.appendChild(cell);
+      }
+
+      console.log("[calendar] rendu OK:", monthLabel.textContent);
+    }
+
+    prevBtn.addEventListener('click', () => {
+      view = new Date(view.getFullYear(), view.getMonth()-1, 1);
+      renderCalendar();
+    });
+
+    nextBtn.addEventListener('click', () => {
+      view = new Date(view.getFullYear(), view.getMonth()+1, 1);
+      renderCalendar();
+    });
+
+    // Lance le rendu
+    renderCalendar();
+  })();
+
+
 

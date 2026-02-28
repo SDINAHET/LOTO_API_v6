@@ -1,0 +1,36 @@
+<!-- templates/fragments/calendar.html -->
+<aside class="sidebar" th:fragment="drawCalendar">
+  <section class="calendar-side" aria-label="Calendrier des tirages">
+    <div class="cal-head">
+      <div>
+        <div class="cal-title">Calendrier des tirages</div>
+        <div class="month" id="monthLabel">—</div>
+      </div>
+      <div class="cal-nav">
+        <button class="icon-btn" id="prevMonth" aria-label="Mois précédent">
+          <i class="fa-solid fa-chevron-left"></i>
+        </button>
+        <button class="icon-btn" id="nextMonth" aria-label="Mois suivant">
+          <i class="fa-solid fa-chevron-right"></i>
+        </button>
+      </div>
+    </div>
+
+    <div class="calendar">
+      <div class="dow">
+        <div>L</div><div>M</div><div>M</div><div>J</div><div>V</div><div>S</div><div>D</div>
+      </div>
+      <div class="grid-days" id="daysGrid"></div>
+
+      <div class="legend">
+        <span><span class="dot blue"></span> Jours de tirage (Lun/Mer/Sam)</span>
+        <span><span class="dot red"></span> Aujourd’hui</span>
+      </div>
+    </div>
+
+    <p class="hint">
+      Clique sur un jour en bleu pour ouvrir :
+      <strong>/tirage/YYYY-MM-DD</strong>
+    </p>
+  </section>
+</aside>

@@ -97,7 +97,9 @@
   <div class="card">
 
     <h1>Dernier tirage du Loto Français</h1>
-    <a href="https://loto-tracker.fr" class="btn-close">Fermer</a>
+    <button type="button" class="btn-close" onclick="window.history.back()" aria-label="Fermer la page">
+      Fermer
+    </button>
 
     <p class="subtitle" th:text="'Tirage du ' + ${dateFr}">
       Tirage du --
@@ -197,6 +199,12 @@
         </tbody>
       </table>
 
+      <!-- Joker+ -->
+      <h3>Joker+</h3>
+      <p>
+        Numéro Joker+ :
+        <strong th:text="${details.numeroJokerplus}">--</strong>
+      </p>
 
       <!-- Codes gagnants -->
 

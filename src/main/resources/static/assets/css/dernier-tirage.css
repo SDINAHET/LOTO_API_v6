@@ -224,3 +224,376 @@ a:hover{ text-decoration: underline; }
   justify-content: space-between; /* gauche / droite */
   margin-top: 24px;
 }
+
+
+
+
+
+
+/* ===== Layout 2 colonnes (contenu + sidebar) ===== */
+.page-layout{
+  max-width: 1440px;              /* un peu plus large pour éviter l’impression “zoom” */
+  margin: 0 auto;
+  padding: 14px 14px;             /* moins de padding => tout rentre mieux à 100% */
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 380px;
+  gap: 18px;
+  align-items: start;
+}
+
+.main-col{ min-width: 0; }
+.side-col{ min-width: 0; }
+
+/* ===== Sidebar sticky propre ===== */
+.calendar-side{
+  position: sticky;
+  top: calc(var(--topbar-h, 72px) + 16px); /* tient compte du header fixe */
+  border-radius: 20px;
+  padding: 16px;
+  background: linear-gradient(180deg, rgba(255,255,255,.12), rgba(255,255,255,.06));
+  border: 1px solid rgba(255,255,255,.18);
+  box-shadow:
+    0 18px 55px rgba(0,0,0,.55),
+    inset 0 1px 0 rgba(255,255,255,.10);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+
+/* ===== Header calendrier ===== */
+.cal-head{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  margin-bottom:12px;
+}
+
+.cal-title{
+  font-size: 12px;
+  color: rgba(255,255,255,.85);
+  font-weight: 900;
+  letter-spacing: .25px;
+  text-shadow: 0 1px 10px rgba(0,0,0,.35);
+}
+
+.month{
+  font-weight: 950;
+  font-size: 20px;
+  line-height: 1.1;
+  letter-spacing: .2px;
+  color: rgba(255,255,255,.98);
+  text-shadow:
+    0 2px 14px rgba(59,130,246,.22),
+    0 1px 0 rgba(255,255,255,.10);
+}
+
+/* ===== Boutons navigation (visibles + “tap target” OK) ===== */
+.cal-nav{ display:flex; gap:10px; }
+
+.icon-btn{
+  width:44px;
+  height:44px;
+  border-radius:14px;
+  border: 1px solid rgba(255,255,255,.22);
+  background: rgba(0,0,0,.28);
+  color: rgba(255,255,255,.95);
+  display:grid;
+  place-items:center;
+  cursor:pointer;
+  transition: transform .15s ease, background .15s ease, border-color .15s ease;
+  box-shadow:
+    0 10px 28px rgba(0,0,0,.35),
+    inset 0 1px 0 rgba(255,255,255,.08);
+}
+
+.icon-btn i{
+  font-size: 16px;        /* si FontAwesome chargé */
+  opacity: .95;
+}
+
+.icon-btn:hover{
+  transform: translateY(-1px);
+  background: rgba(255,255,255,.08);
+  border-color: rgba(147,197,253,.55);
+}
+
+.icon-btn:active{
+  transform: translateY(0);
+}
+
+/* ===== Container calendrier ===== */
+.calendar{
+  width:100%;
+  border-radius:16px;
+  border: 1px solid rgba(255,255,255,.16);
+  background: rgba(0,0,0,.34);
+  padding: 12px;
+}
+
+/* Header jours */
+.dow{
+  display:grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap:10px;
+  margin-bottom:10px;
+  color: rgba(255,255,255,.88);
+  font-size: 12px;
+  text-align:center;
+  font-weight: 900;
+  letter-spacing: .45px;
+  text-shadow: 0 1px 10px rgba(0,0,0,.30);
+}
+
+/* Grille des jours */
+.grid-days{
+  display:grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap:10px;
+}
+
+/* Cellule jour */
+.day{
+  height:44px;
+  border-radius:14px;
+  border: 1px solid rgba(255,255,255,.14);
+  background: rgba(255,255,255,.06);
+  color: rgba(255,255,255,.92);
+  display:grid;
+  place-items:center;
+  font-weight: 900;
+  font-size: 13px;
+  position:relative;
+  user-select:none;
+  opacity:.98;
+  transition: transform .12s ease, background .12s ease, border-color .12s ease;
+}
+
+/* Jours non actifs : visibles mais “désactivés” */
+.day.muted{
+  opacity: .40;
+  background: rgba(255,255,255,.03);
+  border-color: rgba(255,255,255,.08);
+  color: rgba(255,255,255,.60);
+}
+
+/* Jour de tirage (bleu) */
+.day.draw{
+  cursor:pointer;
+  background: rgba(59,130,246,.26);
+  border-color: rgba(147,197,253,.62);
+  box-shadow:
+    0 14px 30px rgba(59,130,246,.16),
+    inset 0 1px 0 rgba(255,255,255,.14);
+}
+
+.day.draw:hover{
+  transform: translateY(-1px);
+  background: rgba(59,130,246,.34);
+  border-color: rgba(147,197,253,.82);
+}
+
+/* Barre bleue signature */
+.day.draw::after{
+  content:"";
+  position:absolute;
+  bottom:7px;
+  width:22px;
+  height:4px;
+  border-radius:999px;
+  background: rgba(147,197,253,1);
+  opacity:1;
+}
+
+/* Aujourd’hui : contour rouge plus net */
+.day.today{
+  outline: 2px solid rgba(239,68,68,.55);
+  box-shadow: 0 18px 45px rgba(239,68,68,.12);
+}
+
+/* Légende + hint */
+.legend{
+  margin-top:12px;
+  display:flex;
+  flex-wrap:wrap;
+  gap:12px;
+  font-size:12px;
+  color: rgba(255,255,255,.78);
+  font-weight: 900;
+}
+
+.dot{
+  width:10px;
+  height:10px;
+  border-radius:999px;
+  display:inline-block;
+  margin-right:6px;
+  vertical-align:middle;
+}
+.dot.blue{ background: rgba(147,197,253,1); }
+.dot.red{ background: rgba(239,68,68,1); }
+
+.hint{
+  margin: 12px 0 0;
+  color: rgba(255,255,255,.78);
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+/* ===== Objectif “tout visible à 100% zoom” ===== */
+/* Réduit un peu les paddings / titres du contenu si besoin */
+@media (min-width: 1200px){
+  .container{
+    max-width: 100%;
+  }
+
+  body{
+    padding: 32px 16px 60px; /* espace en bas pour voir la navigation */
+  }
+}
+.page-layout{
+  padding-bottom: 60px;
+}
+.navigation{
+  margin-top: 28px;
+  padding-bottom: 20px;
+}
+
+/* ===== Responsive ===== */
+@media (max-width: 1100px){
+  .page-layout{ grid-template-columns: minmax(0, 1fr) 340px; }
+}
+@media (max-width: 980px){
+  .page-layout{ grid-template-columns: 1fr; }
+  .calendar-side{ position: relative; top: 0; }
+}
+
+
+
+/* ===== Codes gagnants – 10 sur une ligne desktop ===== */
+.codes-grid{
+  display: flex;
+  justify-content: space-between;   /* répartit toute la largeur */
+  align-items: center;
+  gap: 8px;
+  margin-top: 14px;
+  width: 100%;
+  overflow: hidden;                 /* supprime scroll */
+}
+
+/* Chip plus compacte */
+.code-chip{
+  flex: 1;                          /* chaque code prend 1/10 de la ligne */
+  text-align: center;
+  padding: 6px 6px;                 /* padding réduit */
+  font-size: 12px;                  /* texte réduit */
+  font-weight: 800;
+  border-radius: 999px;
+  border: 1px solid rgba(255,153,0,.65);
+  background: rgba(255,153,0,.08);
+  color: #ffb347;
+  white-space: nowrap;
+  letter-spacing: .3px;
+  transition: all .15s ease;
+}
+
+.code-chip:hover{
+  background: rgba(255,153,0,.18);
+  transform: translateY(-1px);
+}
+
+@media (max-width: 768px){
+  .codes-grid{
+    flex-wrap: wrap;
+  }
+
+  .code-chip{
+    flex: unset;
+    padding: 8px 12px;
+    font-size: 13px;
+  }
+}
+
+
+/* =========================================================
+   DESKTOP 100% : même vue que 90% (compact)
+   Colle ce bloc TOUT EN BAS du CSS
+   ========================================================= */
+
+@media (min-width: 1100px){
+
+  /* 1) Card un peu plus compacte */
+  .card{
+    padding: 18px;                 /* au lieu de 24px */
+    border-radius: 16px;
+  }
+
+  /* 2) Titres un peu plus petits */
+  h1{
+    font-size: 30px;               /* avant 34px */
+    margin: 0 0 10px;
+  }
+
+  .subtitle{
+    font-size: 14px;               /* avant 16px */
+    margin: 0 0 16px;
+  }
+
+  .section-title{
+    font-size: 16px;               /* avant 18px */
+    margin: 20px 0 10px;
+  }
+
+  /* 3) Boules un poil plus petites */
+  .ball{
+    width: 48px;
+    height: 48px;
+    font-size: 16px;
+  }
+
+  /* 4) Jackpot un peu plus compact */
+  .jackpot{
+    font-size: 1.05rem;            /* avant 1.2rem */
+    margin-bottom: 8px;
+  }
+
+  /* 5) Tableau + compact + police -2px */
+  .details-table{
+    margin-top: 10px;
+    font-size: 13px;               /* <= -2px environ */
+  }
+
+  .details-table th{
+    font-size: 13px;
+    padding-bottom: 6px;
+  }
+
+  .details-table td{
+    font-size: 13px;
+    padding: 4px 0;                /* avant 6px 0 */
+  }
+
+  .details-table tbody tr{
+    border-top: 1px solid rgba(255,255,255,.05);
+  }
+
+  /* 6) Codes gagnants : un poil plus petits pour respirer */
+  .codes-grid{
+    gap: 6px;
+    margin-top: 12px;
+  }
+
+  .code-chip{
+    font-size: 11px;
+    padding: 6px 8px;
+    border-radius: 999px;
+  }
+
+  /* 7) Navigation bas : un peu moins d’espace */
+  .navigation{
+    margin-top: 18px;
+  }
+}
+
+
+.details-table{ font-size: 12px; }
+.details-table td{ padding: 3px 0; }
