@@ -1,0 +1,987 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>404 — Page introuvable | Tracker du Loto Français</title>
+
+  <!-- ✅ FAVICON (logo) -->
+  <link rel="icon" type="image/png" sizes="32x32" href="/assets/img/loto_tracker.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/assets/img/loto_tracker.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/assets/img/loto_tracker.png">
+  <link rel="shortcut icon" href="/assets/img/loto_tracker.png">
+  <meta name="theme-color" content="#0b1222">
+
+  <!-- Local vendors -->
+  <link rel="stylesheet" href="/assets/vendors/fontawesome/css/all.min.css">
+  <link rel="stylesheet" href="/assets/vendors/bootstrap/bootstrap.min.css">
+
+  <style>
+    :root{
+      --bg0:#070b14;
+      --bg1:#0b1222;
+      --glass: rgba(255,255,255,.07);
+      --glass2: rgba(255,255,255,.10);
+      --stroke: rgba(255,255,255,.14);
+      --text:#eaf0ff;
+      --muted: rgba(234,240,255,.72);
+      --blue:#3b82f6;
+      --blue2:#60a5fa;
+      --red:#ef4444;
+      --shadow: 0 18px 55px rgba(0,0,0,.55);
+    }
+
+    *{ box-sizing:border-box; }
+    html,body{ height:100%; }
+
+    /* ✅ IMPORTANT: on ne bloque plus le scroll vertical en mobile */
+    body{
+      margin:0;
+      color:var(--text);
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial;
+      background:
+        radial-gradient(1200px 700px at 20% 20%, rgba(59,130,246,.22), transparent 60%),
+        radial-gradient(900px 600px at 80% 30%, rgba(96,165,250,.14), transparent 55%),
+        radial-gradient(1200px 900px at 50% 90%, rgba(255,255,255,.05), transparent 60%),
+        linear-gradient(180deg, var(--bg0), var(--bg1));
+
+      overflow-x: hidden;
+      overflow-y: auto;
+
+      /* petit confort sur iOS */
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .grid{
+      position:fixed; inset:-40%;
+      background-image:
+        linear-gradient(rgba(255,255,255,.06) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,.06) 1px, transparent 1px);
+      background-size: 80px 80px;
+      transform: rotate(12deg);
+      opacity:.20;
+      animation: drift 18s linear infinite;
+      pointer-events:none;
+      z-index: 0;
+    }
+    @keyframes drift{
+      from{ transform: translate3d(0,0,0) rotate(12deg); }
+      to  { transform: translate3d(120px,80px,0) rotate(12deg); }
+    }
+
+    canvas#stars{
+      position:fixed; inset:0;
+      pointer-events:none;
+      opacity:.9;
+      z-index: 1;
+    }
+
+    .balls-layer{
+      position:fixed; inset:0;
+      pointer-events:none;
+      z-index:2;
+    }
+
+    .ball{
+      position:absolute;
+      width:56px; height:56px;
+      border-radius:999px;
+      display:grid;
+      place-items:center;
+      font-weight:900;
+      letter-spacing:.2px;
+      color:#0b1222;
+      box-shadow:
+        0 18px 50px rgba(0,0,0,.45),
+        inset 0 6px 12px rgba(255,255,255,.35),
+        inset 0 -10px 16px rgba(0,0,0,.18);
+      border:1px solid rgba(255,255,255,.18);
+      opacity:.95;
+      user-select:none;
+      will-change: transform;
+    }
+
+    .ball.blue{
+      background:
+        radial-gradient(circle at 30% 28%, rgba(255,255,255,.95), rgba(255,255,255,.30) 25%, rgba(255,255,255,0) 45%),
+        radial-gradient(circle at 50% 55%, rgba(96,165,250,.95), rgba(59,130,246,.95));
+    }
+    .ball.red{
+      background:
+        radial-gradient(circle at 30% 28%, rgba(255,255,255,.95), rgba(255,255,255,.30) 25%, rgba(255,255,255,0) 45%),
+        radial-gradient(circle at 50% 55%, rgba(255,90,90,.95), rgba(220,38,38,.95));
+      color:#1a090b;
+    }
+
+    /* ✅ Topbar responsive */
+    .topbar{
+      position:relative;
+      z-index:5;
+      padding:16px 18px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:14px;
+      flex-wrap: wrap; /* ✅ permet de passer à la ligne */
+    }
+
+    .brand{
+      display:flex; align-items:center; gap:12px;
+      user-select:none;
+      min-width: 0;
+      flex: 1 1 320px; /* ✅ évite l’écrasement */
+    }
+
+    .logo{
+      width:44px; height:44px;
+      border-radius:14px;
+      overflow:hidden;
+      border:1px solid rgba(255,255,255,.15);
+      box-shadow: 0 10px 30px rgba(59,130,246,.25);
+      background: rgba(255,255,255,.06);
+      display:grid;
+      place-items:center;
+      flex: 0 0 auto;
+    }
+    .logo img{
+      width:38px; height:38px;
+      object-fit:contain;
+      filter: drop-shadow(0 8px 20px rgba(0,0,0,.35));
+    }
+    .brand .txt{ min-width:0; }
+    .brand h1{
+      margin:0;
+      font-size:15px;
+      font-weight:800;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+    .brand p{ margin:2px 0 0; font-size:12px; color:var(--muted); }
+
+    .btn-glass{
+      appearance:none;
+      border:1px solid rgba(255,255,255,.14);
+      background: rgba(255,255,255,.06);
+      color: var(--text);
+      padding:10px 14px;
+      border-radius:14px;
+      cursor:pointer;
+      transition: transform .15s ease, background .15s ease, border-color .15s ease;
+      display:inline-flex;
+      align-items:center;
+      justify-content: center;
+      gap:10px;
+      backdrop-filter: blur(10px);
+      text-decoration:none;
+      font-weight:700;
+      white-space:nowrap;
+      min-width: 0;
+    }
+    .btn-glass:hover{
+      transform: translateY(-1px);
+      background: rgba(255,255,255,.09);
+      border-color: rgba(96,165,250,.35);
+    }
+    .btn-primary{
+      border-color: rgba(59,130,246,.45);
+      background: linear-gradient(135deg, rgba(59,130,246,.95), rgba(96,165,250,.75));
+      box-shadow: 0 18px 45px rgba(59,130,246,.25);
+    }
+
+    /* ✅ Fix: wrapper scroll-friendly */
+    .wrap{
+      min-height: calc(100vh - 76px);
+      display:flex;
+      justify-content:center;
+      align-items:flex-start; /* ✅ plus de centre qui coupe en bas */
+      padding: 14px;
+      position:relative;
+      z-index:5;
+    }
+
+    .card{
+      width: min(1100px, 100%);
+      border-radius: 22px;
+      background: linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.04));
+      border: 1px solid rgba(255,255,255,.12);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(14px);
+      position:relative;
+      overflow:hidden;
+    }
+
+    .blob{
+      position:absolute;
+      width:520px; height:520px;
+      border-radius:50%;
+      filter: blur(55px);
+      opacity:.33;
+      pointer-events:none;
+    }
+    .blob.one{ background: rgba(59,130,246,.55); top:-260px; left:-240px; animation: floaty 8s ease-in-out infinite; }
+    .blob.two{ background: rgba(96,165,250,.45); bottom:-300px; right:-260px; animation: floaty 10s ease-in-out infinite reverse; }
+    @keyframes floaty{ 0%,100%{ transform: translate3d(0,0,0);} 50%{ transform: translate3d(22px,18px,0);} }
+
+    .content{
+      padding: 26px 22px 18px;
+      display:grid;
+      grid-template-columns: 1.1fr .9fr;
+      gap: 18px;
+      align-items:start;
+      min-width: 0;
+    }
+    @media (max-width: 920px){
+      .content{ grid-template-columns: 1fr; }
+    }
+
+    .num{
+      font-size: clamp(64px, 10vw, 140px);
+      font-weight: 950;
+      letter-spacing: -2px;
+      line-height: 1;
+      margin: 0 0 8px;
+      position:relative;
+      display:inline-block;
+      text-shadow:
+        0 18px 70px rgba(0,0,0,.65),
+        0 0 45px rgba(59,130,246,.28);
+      animation: bob 3.2s ease-in-out infinite;
+    }
+    @keyframes bob{ 0%,100%{ transform: translateY(0);} 50%{ transform: translateY(-10px);} }
+
+    .num::before,
+    .num::after{
+      content: attr(data-text);
+      position:absolute; left:0; top:0;
+      opacity:.55;
+      mix-blend-mode: screen;
+      clip-path: inset(0 0 0 0);
+    }
+    .num::before{ transform: translate(2px,0); color: rgba(96,165,250,.85); animation: glitch 2.2s infinite steps(2,end); }
+    .num::after{ transform: translate(-2px,0); color: rgba(59,130,246,.9); animation: glitch 1.7s infinite steps(2,end) reverse; }
+    @keyframes glitch{
+      0%{ clip-path: inset(0 0 0 0); }
+      10%{ clip-path: inset(12% 0 65% 0); }
+      20%{ clip-path: inset(55% 0 20% 0); }
+      30%{ clip-path: inset(25% 0 45% 0); }
+      40%{ clip-path: inset(70% 0 12% 0); }
+      50%{ clip-path: inset(8% 0 78% 0); }
+      60%{ clip-path: inset(50% 0 30% 0); }
+      70%{ clip-path: inset(78% 0 8% 0); }
+      80%{ clip-path: inset(32% 0 40% 0); }
+      90%{ clip-path: inset(60% 0 18% 0); }
+      100%{ clip-path: inset(0 0 0 0); }
+    }
+
+    .headline{ display:flex; flex-direction:column; gap:8px; margin-bottom: 10px; }
+
+    .notfound{
+      margin:0;
+      font-size: clamp(20px, 2.4vw, 28px);
+      font-weight: 950;
+      padding: 10px 12px;
+      border-radius: 14px;
+      background: rgba(239,68,68,.14);
+      border: 1px solid rgba(239,68,68,.40);
+      box-shadow:
+        0 18px 55px rgba(239,68,68,.12),
+        inset 0 1px 0 rgba(255,255,255,.08);
+      color: rgba(255,255,255,.98);
+      text-shadow: 0 2px 10px rgba(239,68,68,.18);
+      display:inline-flex;
+      align-items:center;
+      gap:10px;
+      width: fit-content;
+      max-width: 100%;
+      min-width: 0;
+    }
+    .notfound i{
+      color: rgba(255,230,230,1);
+      filter: drop-shadow(0 6px 14px rgba(239,68,68,.22));
+    }
+
+    .lead{
+      margin: 0 0 14px;
+      color: var(--muted);
+      line-height: 1.55;
+      font-size: 14px;
+      overflow-wrap: anywhere;
+    }
+
+    .pill-row{
+      display:flex;
+      flex-wrap:wrap;
+      gap:10px;
+      margin: 12px 0 16px;
+      min-width: 0;
+    }
+    .pill{
+      border: 1px solid rgba(255,255,255,.14);
+      background: rgba(255,255,255,.06);
+      padding: 8px 10px;
+      border-radius: 999px;
+      font-size: 12px;
+      color: rgba(234,240,255,.85);
+      backdrop-filter: blur(10px);
+      max-width: 100%;
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .pill strong{ color: var(--text); }
+
+    .actions{
+      display:flex;
+      flex-wrap:wrap;
+      gap:10px;
+      align-items:center;
+      margin-top: 6px;
+    }
+    /* ✅ boutons actions responsives */
+    .actions > *{
+      flex: 1 1 220px;
+      min-width: 0;
+    }
+
+    .side{
+      padding: 18px;
+      border-radius: 18px;
+      background: rgba(0,0,0,.18);
+      border: 1px solid rgba(255,255,255,.10);
+      position:relative;
+      overflow:hidden;
+      min-width: 0;
+    }
+
+    .cal-head{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      margin-bottom:10px;
+      min-width: 0;
+    }
+
+    .month{
+      font-weight: 950;
+      letter-spacing: .2px;
+      color: rgba(255,255,255,.96);
+      text-shadow:
+        0 2px 12px rgba(59,130,246,.25),
+        0 1px 0 rgba(255,255,255,.10);
+      overflow:hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      max-width: 100%;
+    }
+
+    .cal-nav{ display:flex; gap:8px; }
+    .icon-btn{
+      width:40px; height:40px;
+      border-radius:12px;
+      border:1px solid rgba(255,255,255,.14);
+      background: rgba(255,255,255,.06);
+      color: var(--text);
+      display:grid;
+      place-items:center;
+      cursor:pointer;
+      transition: transform .15s ease, background .15s ease, border-color .15s ease;
+      flex: 0 0 auto;
+    }
+    .icon-btn:hover{ transform: translateY(-1px); background: rgba(255,255,255,.09); border-color: rgba(96,165,250,.35); }
+
+    .calendar{
+      width:100%;
+      border-radius:16px;
+      border:1px solid rgba(255,255,255,.12);
+      background: linear-gradient(135deg, rgba(255,255,255,.06), rgba(255,255,255,.02));
+      padding: 12px;
+      min-width: 0;
+    }
+    .dow{
+      display:grid;
+      grid-template-columns: repeat(7, minmax(0, 1fr)); /* ✅ anti overflow */
+      gap:8px;
+      margin-bottom:8px;
+      color: rgba(255,255,255,.78);
+      font-size: 12px;
+      text-align:center;
+      font-weight:800;
+    }
+    .grid-days{
+      display:grid;
+      grid-template-columns: repeat(7, minmax(0, 1fr)); /* ✅ anti overflow */
+      gap:8px;
+      min-width: 0;
+    }
+    .day{
+      height:40px;
+      border-radius:12px;
+      border:1px solid rgba(255,255,255,.10);
+      background: rgba(255,255,255,.04);
+      color: rgba(234,240,255,.90);
+      display:grid;
+      place-items:center;
+      font-weight:900;
+      font-size:13px;
+      position:relative;
+      user-select:none;
+      opacity:.95;
+      min-width: 0;
+    }
+    .day.muted{ opacity:.30; }
+    .day.draw{
+      cursor:pointer;
+      background: rgba(59,130,246,.14);
+      border-color: rgba(96,165,250,.35);
+      box-shadow: 0 14px 30px rgba(59,130,246,.12);
+      opacity:1;
+    }
+    .day.draw:hover{
+      transform: translateY(-1px);
+      transition: transform .12s ease;
+    }
+    .day.draw::after{
+      content:"";
+      position:absolute;
+      bottom:6px;
+      width:18px;
+      height:4px;
+      border-radius:999px;
+      background: rgba(96,165,250,.95);
+      opacity:.95;
+    }
+    .day.today{
+      outline: 2px solid rgba(239,68,68,.35);
+      box-shadow: 0 18px 45px rgba(239,68,68,.10);
+    }
+    .legend{
+      margin-top:10px;
+      display:flex;
+      flex-wrap:wrap;
+      gap:10px;
+      font-size:12px;
+      color: rgba(255,255,255,.72);
+      font-weight:700;
+    }
+    .dot{
+      width:10px; height:10px; border-radius:999px; display:inline-block; margin-right:6px;
+      vertical-align:middle;
+    }
+    .dot.blue{ background: rgba(96,165,250,.95); }
+    .dot.red{ background: rgba(239,68,68,.95); }
+
+    .hint{
+      margin: 12px 0 0;
+      color: rgba(255,255,255,.78);
+      font-size: 13px;
+      line-height: 1.45;
+      overflow-wrap: anywhere;
+    }
+
+    .footer{
+      padding: 0 18px 14px;
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:12px;
+      color: rgba(234,240,255,.55);
+      font-size: 12px;
+      border-top: 1px solid rgba(255,255,255,.08);
+      flex-wrap: wrap; /* ✅ footer mobile */
+    }
+    .footer a{ color: rgba(96,165,250,.9); text-decoration:none; }
+    .footer a:hover{ text-decoration:underline; }
+
+    /* ✅ Mobile tuning */
+    @media (max-width: 520px){
+      .btn-glass{ padding:10px 12px; border-radius: 12px; }
+      .topbar{ padding:14px 12px; }
+      .wrap{ padding: 10px; }
+      .content{ padding: 18px 14px 14px; }
+
+      /* actions en colonne */
+      .actions > *{ flex: 1 1 100%; }
+
+      /* topbar buttons full width si ça wrap */
+      .topbar > div:last-child{
+        width: 100%;
+        display:flex;
+        gap:10px;
+        flex-wrap: wrap;
+      }
+      .topbar > div:last-child > *{
+        flex: 1 1 140px;
+      }
+
+      .ball{ width:48px; height:48px; }
+      .day{ height:38px; }
+    }
+
+    @media (prefers-reduced-motion: reduce){
+      .grid, .num, .num::before, .num::after, .blob { animation: none !important; }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="grid" aria-hidden="true"></div>
+  <canvas id="stars" aria-hidden="true"></canvas>
+  <div class="balls-layer" id="ballsLayer" aria-hidden="true"></div>
+
+  <header class="topbar">
+    <div class="brand">
+      <div class="logo" aria-hidden="true">
+        <img src="/assets/img/loto_tracker.png" alt="">
+      </div>
+      <div class="txt">
+        <h1>Tracker du Loto Français</h1>
+        <p>Erreur 404 — page introuvable</p>
+      </div>
+    </div>
+
+    <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+      <button class="btn-glass" type="button" id="goBack" aria-label="Retour">
+        <i class="fa-solid fa-arrow-left"></i> Retour
+      </button>
+      <a class="btn-glass btn-primary" href="/" aria-label="Revenir à l'accueil">
+        <i class="fa-solid fa-house"></i> Accueil
+      </a>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <section class="card" role="region" aria-label="Page 404">
+      <div class="blob one" aria-hidden="true"></div>
+      <div class="blob two" aria-hidden="true"></div>
+
+      <div class="content">
+        <!-- LEFT -->
+        <div>
+          <h2 class="num" data-text="404">404</h2>
+
+          <div class="headline">
+            <p class="notfound">
+              <i class="fa-solid fa-triangle-exclamation"></i>
+              Cette page n’existe pas.
+            </p>
+          </div>
+
+          <p class="lead">
+            Le lien est peut-être incorrect, ou la page a été déplacée / supprimée.
+            Choisis une date (Lun/Mer/Sam) dans le calendrier ou ouvre le dernier tirage.
+          </p>
+
+          <div class="pill-row" aria-label="Informations de diagnostic">
+            <span class="pill"><i class="fa-solid fa-location-dot"></i> Chemin : <strong id="path">/</strong></span>
+            <span class="pill"><i class="fa-solid fa-triangle-exclamation"></i> Code : <strong>404</strong></span>
+            <span class="pill"><i class="fa-solid fa-magnifying-glass"></i> Statut : <strong>Introuvable</strong></span>
+          </div>
+
+          <div class="actions">
+            <a class="btn-glass btn-primary" href="/" aria-label="Revenir à l'accueil">
+              <i class="fa-solid fa-house"></i> Revenir à l’accueil
+            </a>
+
+            <a class="btn-glass" href="/dernier-tirage.html" id="btnLastDraw" aria-label="Aller au dernier tirage">
+              <i class="fa-solid fa-ticket"></i> Dernier tirage
+            </a>
+
+            <button class="btn-glass" type="button" id="copyLink" aria-label="Copier le lien actuel">
+              <i class="fa-regular fa-copy"></i> Copier le lien
+            </button>
+          </div>
+
+          <p class="hint" id="lastDrawHint">
+            Si “/dernier-tirage” n’est pas routé, un fallback API tentera de trouver la date.
+          </p>
+        </div>
+
+        <!-- RIGHT -->
+        <aside class="side">
+          <div class="cal-head">
+            <div>
+              <div style="font-size:12px; color: rgba(255,255,255,.78); font-weight:800;">
+                Calendrier des tirages
+              </div>
+              <div class="month" id="monthLabel">—</div>
+            </div>
+            <div class="cal-nav">
+              <button class="icon-btn" id="prevMonth" aria-label="Mois précédent"><i class="fa-solid fa-chevron-left"></i></button>
+              <button class="icon-btn" id="nextMonth" aria-label="Mois suivant"><i class="fa-solid fa-chevron-right"></i></button>
+            </div>
+          </div>
+
+          <div class="calendar">
+            <div class="dow">
+              <div>L</div><div>M</div><div>M</div><div>J</div><div>V</div><div>S</div><div>D</div>
+            </div>
+            <div class="grid-days" id="daysGrid"></div>
+
+            <div class="legend">
+              <span><span class="dot blue"></span> Jours de tirage (Lun/Mer/Sam)</span>
+              <span><span class="dot red"></span> Aujourd’hui</span>
+            </div>
+          </div>
+
+          <p class="hint">
+            Clique sur un jour en bleu pour ouvrir :
+            <strong>/tirage/YYYY-MM-DD</strong>
+          </p>
+        </aside>
+      </div>
+
+      <div class="footer">
+        <span>© <span id="year"></span> SDINAHET</span>
+        <span>
+          <a href="/mentions_legales.html">Mentions légales</a>
+          ·
+          <a href="/politique_confidentialite.html">Confidentialité</a>
+        </span>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    // ---------- helpers ----------
+    const pad2 = n => String(n).padStart(2, '0');
+    const ymd = (d) => `${d.getFullYear()}-${pad2(d.getMonth()+1)}-${pad2(d.getDate())}`;
+    function rand(min,max){ return Math.floor(Math.random()*(max-min+1))+min; }
+
+    // ---------- draw day logic ----------
+    function isDrawDay(date){
+      const d = date.getDay();
+      return d === 1 || d === 3 || d === 6; // Mon Wed Sat
+    }
+
+    // Dernier jour de tirage "disponible"
+    // Si aujourd'hui est jour de tirage mais avant 21h => on prend le tirage précédent
+    function lastAvailableDrawDateKey(){
+      const now = new Date();
+      let d = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+
+      if (isDrawDay(d) && now.getHours() < 21) {
+        d = new Date(d.getFullYear(), d.getMonth(), d.getDate() - 1);
+      }
+
+      for (let i = 0; i < 14; i++) {
+        const tmp = new Date(d.getFullYear(), d.getMonth(), d.getDate() - i);
+        if (isDrawDay(tmp)) return ymd(tmp);
+      }
+      return ymd(d);
+    }
+
+    // ---------- basic info ----------
+    document.getElementById('year').textContent = new Date().getFullYear();
+    document.getElementById('path').textContent = location.pathname || "/";
+
+    document.getElementById('goBack').addEventListener('click', () => {
+      if (history.length > 1) history.back();
+      else location.href = "/";
+    });
+
+    document.getElementById('copyLink').addEventListener('click', async () => {
+      try{
+        await navigator.clipboard.writeText(location.href);
+        toast("Lien copié ✅");
+      }catch(e){
+        toast("Impossible de copier ❌");
+      }
+    });
+
+    function toast(msg){
+      const t = document.createElement('div');
+      t.textContent = msg;
+      t.style.cssText = `
+        position:fixed; left:50%; bottom:26px; transform:translateX(-50%);
+        background: rgba(0,0,0,.55);
+        border: 1px solid rgba(255,255,255,.14);
+        color: rgba(234,240,255,.95);
+        padding: 10px 12px;
+        border-radius: 14px;
+        backdrop-filter: blur(10px);
+        box-shadow: 0 18px 50px rgba(0,0,0,.45);
+        z-index:9999;
+        font-size: 13px;
+      `;
+      document.body.appendChild(t);
+      setTimeout(()=>{ t.style.opacity = "0"; t.style.transition="opacity .25s ease"; }, 1100);
+      setTimeout(()=> t.remove(), 1450);
+    }
+
+    // ---------- stars canvas ----------
+    const canvas = document.getElementById('stars');
+    const ctx = canvas.getContext('2d');
+    let w, h, dpr;
+
+    function resizeCanvas(){
+      dpr = Math.max(1, Math.min(2, window.devicePixelRatio || 1));
+      w = canvas.width  = Math.floor(innerWidth  * dpr);
+      h = canvas.height = Math.floor(innerHeight * dpr);
+      canvas.style.width = innerWidth + "px";
+      canvas.style.height = innerHeight + "px";
+    }
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
+
+    const prefersReduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const N = prefersReduced ? 40 : 120;
+
+    const stars = Array.from({length:N}, () => ({
+      x: Math.random()*w,
+      y: Math.random()*h,
+      r: (Math.random()*1.6 + 0.4) * dpr,
+      vx: (Math.random()*0.25 + 0.05) * dpr,
+      vy: (Math.random()*0.18 + 0.03) * dpr,
+      a: Math.random()*0.6 + 0.15
+    }));
+
+    function tickStars(){
+      ctx.clearRect(0,0,w,h);
+      const g = ctx.createRadialGradient(w*0.55, h*0.35, 0, w*0.55, h*0.35, Math.max(w,h)*0.6);
+      g.addColorStop(0, 'rgba(96,165,250,0.07)');
+      g.addColorStop(1, 'rgba(0,0,0,0)');
+      ctx.fillStyle = g;
+      ctx.fillRect(0,0,w,h);
+
+      for(const s of stars){
+        s.x += s.vx; s.y += s.vy;
+        if(s.x > w+10) s.x = -10;
+        if(s.y > h+10) s.y = -10;
+        ctx.beginPath();
+        ctx.arc(s.x, s.y, s.r, 0, Math.PI*2);
+        ctx.fillStyle = `rgba(234,240,255,${s.a})`;
+        ctx.fill();
+      }
+      if(!prefersReduced) requestAnimationFrame(tickStars);
+    }
+    tickStars();
+
+    // ---------- Lottery balls animation ----------
+    const layer = document.getElementById('ballsLayer');
+
+    // ✅ Taille dynamique selon viewport (cohérent avec ton CSS @media)
+    const BALL_SIZE = (window.matchMedia && window.matchMedia("(max-width: 520px)").matches) ? 48 : 56;
+
+    const DECOR_COUNT = 10;
+
+    function makeBall(isRed=false, number=null){
+      const el = document.createElement('div');
+      el.className = 'ball ' + (isRed ? 'red' : 'blue');
+      el.textContent = number ?? rand(1,49);
+      layer.appendChild(el);
+
+      const x = Math.random()*(window.innerWidth - BALL_SIZE);
+      const y = Math.random()*(window.innerHeight - BALL_SIZE);
+      const speed = (Math.random()*0.9 + 0.7);
+      const angle = Math.random()*Math.PI*2;
+
+      return { el, x, y, vx: Math.cos(angle)*speed, vy: Math.sin(angle)*speed, targetX:null, targetY:null };
+    }
+
+    const decor = [];
+    for(let i=0;i<DECOR_COUNT;i++) decor.push(makeBall(i % 8 === 0, null));
+
+    const drawNums = Array.from({length:5}, ()=>rand(1,49)).concat([rand(1,10)]);
+    const drawBalls = drawNums.map((n, idx) => makeBall(idx===5, n));
+
+    let mode = 'roam';
+    let phaseEnd = performance.now() + 2500;
+    let showUntil = performance.now() + 60000;
+
+    function setTargetsCircle(){
+      const cx = innerWidth/2, cy = innerHeight/2 + 40;
+      const radius = Math.min(220, Math.max(140, innerWidth*0.18));
+      drawBalls.forEach((b,i)=>{
+        const a = (i / drawBalls.length) * Math.PI*2;
+        b.targetX = (cx + Math.cos(a)*radius) - BALL_SIZE/2;
+        b.targetY = (cy + Math.sin(a)*radius) - BALL_SIZE/2;
+      });
+    }
+    function setTargetsLine(){
+      const cx = innerWidth/2, cy = innerHeight/2 + 90;
+      const gap = 70;
+      const startX = cx - gap*2.5;
+      drawBalls.forEach((b,i)=>{
+        b.targetX = (startX + i*gap) - BALL_SIZE/2;
+        b.targetY = cy - BALL_SIZE/2;
+      });
+    }
+    function clearTargets(){ drawBalls.forEach(b => { b.targetX = null; b.targetY = null; }); }
+
+    function nextPhase(now){
+      if(now > showUntil){
+        mode = 'roam';
+        clearTargets();
+        phaseEnd = now + 999999;
+        return;
+      }
+      if(mode === 'roam'){ mode = 'mix'; setTargetsCircle(); phaseEnd = now + 2400; }
+      else if(mode === 'mix'){ mode = 'reveal'; setTargetsLine(); phaseEnd = now + 2400; }
+      else { mode = 'roam'; clearTargets(); phaseEnd = now + 4200; }
+    }
+
+    function stepBalls(now){
+      if(prefersReduced) return;
+      if(now > phaseEnd) nextPhase(now);
+
+      const width = innerWidth, height = innerHeight;
+      const all = decor.concat(drawBalls);
+
+      for(const b of all){
+        const inDraw = (b.targetX !== null);
+
+        if(inDraw){
+          const dx = b.targetX - b.x;
+          const dy = b.targetY - b.y;
+          const k = mode === 'mix' ? 0.020 : 0.018;
+          b.vx += dx * k; b.vy += dy * k;
+          b.vx *= 0.88;  b.vy *= 0.88;
+        } else {
+          b.vx *= 0.996; b.vy *= 0.996;
+          const boost = (now < showUntil) ? 0.045 : 0.022;
+          b.vx += (Math.random()-0.5)*boost;
+          b.vy += (Math.random()-0.5)*boost;
+        }
+
+        b.x += b.vx; b.y += b.vy;
+
+        if(b.x < 0){ b.x=0; b.vx*=-1; }
+        if(b.y < 0){ b.y=0; b.vy*=-1; }
+        if(b.x > width - BALL_SIZE){ b.x = width - BALL_SIZE; b.vx*=-1; }
+        if(b.y > height - BALL_SIZE){ b.y = height - BALL_SIZE; b.vy*=-1; }
+
+        b.el.style.transform = `translate3d(${b.x}px, ${b.y}px, 0)`;
+      }
+
+      requestAnimationFrame(stepBalls);
+    }
+    requestAnimationFrame(stepBalls);
+
+    window.addEventListener('resize', () => {
+      resizeCanvas();
+      if(mode === 'mix') setTargetsCircle();
+      if(mode === 'reveal') setTargetsLine();
+    });
+
+    // ---------- Calendar ----------
+    const monthLabel = document.getElementById('monthLabel');
+    const daysGrid = document.getElementById('daysGrid');
+    const prevBtn = document.getElementById('prevMonth');
+    const nextBtn = document.getElementById('nextMonth');
+
+    const MONTHS = ["Janvier","Février","Mars","Avril","Mai","Juin","Juillet","Août","Septembre","Octobre","Novembre","Décembre"];
+    let view = new Date(); view.setDate(1);
+
+    function renderCalendar(){
+      daysGrid.innerHTML = "";
+
+      const y = view.getFullYear();
+      const m = view.getMonth();
+      monthLabel.textContent = `${MONTHS[m]} ${y}`;
+
+      const first = new Date(y, m, 1);
+      const firstDow = (first.getDay() + 6) % 7; // Mon-first
+      const daysInMonth = new Date(y, m+1, 0).getDate();
+
+      const today = new Date();
+      const todayKey = ymd(today);
+
+      const lastKey = lastAvailableDrawDateKey();
+
+      for(let i=0;i<firstDow;i++){
+        const cell = document.createElement('div');
+        cell.className = "day muted";
+        daysGrid.appendChild(cell);
+      }
+
+      for(let day=1; day<=daysInMonth; day++){
+        const d = new Date(y, m, day);
+        const cell = document.createElement('div');
+        cell.className = "day";
+        cell.textContent = day;
+
+        const key = ymd(d);
+        if(key === todayKey) cell.classList.add('today');
+
+        if(isDrawDay(d)){
+          cell.classList.add('draw');
+
+          const safe = (key > lastKey) ? lastKey : key;
+          cell.title = `Ouvrir ${safe}`;
+
+          cell.addEventListener('click', () => {
+            location.href = `/tirage/${safe}`;
+          });
+        } else {
+          cell.classList.add('muted');
+        }
+
+        daysGrid.appendChild(cell);
+      }
+    }
+
+    prevBtn.addEventListener('click', () => {
+      view = new Date(view.getFullYear(), view.getMonth()-1, 1);
+      renderCalendar();
+    });
+    nextBtn.addEventListener('click', () => {
+      view = new Date(view.getFullYear(), view.getMonth()+1, 1);
+      renderCalendar();
+    });
+
+    renderCalendar();
+
+    // ---------- Last draw fallback (API then computed date) ----------
+    (function lastDrawFallback(){
+      const hint = document.getElementById('lastDrawHint');
+      const btn = document.getElementById('btnLastDraw');
+
+      btn.addEventListener('click', async (e) => {
+        e.preventDefault();
+
+        const endpoints = [
+          "/api/tirages/last",
+          "/api/tirages/dernier",
+          "/api/tirages/latest",
+          "/api/historique/last",
+          "/api/historique/last1",
+          "/api/historique/last20"
+        ];
+
+        for(const url of endpoints){
+          try{
+            const res = await fetch(url, { headers: { "Accept": "application/json" } });
+            if(!res.ok) continue;
+
+            const data = await res.json();
+            const draw = Array.isArray(data) ? data[0] : data;
+            if(!draw) continue;
+
+            const date =
+              draw.date || draw.drawDate || draw.date_tirage || draw.tirageDate ||
+              draw.datetime || draw.createdAt;
+
+            if(!date) continue;
+
+            const parsed = new Date(date);
+            const key = isNaN(parsed.getTime()) ? String(date).slice(0,10) : ymd(parsed);
+
+            hint.innerHTML = `Redirection vers <strong>/tirage/${key}</strong> (via <strong>${url}</strong>)`;
+            location.href = `/tirage/${key}`;
+            return;
+          }catch(err){
+            // continue
+          }
+        }
+
+        const key = lastAvailableDrawDateKey();
+        hint.innerHTML = `API indisponible. Redirection vers <strong>/tirage/${key}</strong>`;
+        location.href = `/tirage/${key}`;
+      });
+    })();
+  </script>
+</body>
+</html>

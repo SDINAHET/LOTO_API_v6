@@ -8,17 +8,27 @@
 
   <link rel="icon" type="image/png" th:href="@{/assets/img/loto_tracker.png}">
 
+  <!--/*
+  ==================================================
+  SECTION SEO
+  Page optimisée pour requête :
+  "Résultat Loto mercredi 25 février 2026"
+  ==================================================
+*/-->
+
   <meta name="description"
         th:content="${seoDescription}"
-        content="Dernier résultat officiel du Loto Français." />
+        content="Dernier résultat FDJ du Loto Français." />
 
-  <link rel="canonical" href="https://loto-tracker.fr/dernier-tirage">
+  <!--/* <link rel="canonical" href="https://loto-tracker.fr/dernier-tirage"> */-->
+  <link rel="canonical" th:href="${pageUrl}">
   <meta name="robots" content="index, follow">
 
   <!-- Open Graph -->
   <meta property="og:title" th:content="${seoTitle}">
   <meta property="og:description" th:content="${seoDescription}">
-  <meta property="og:url" content="https://loto-tracker.fr/dernier-tirage">
+  <!--/*  <meta property="og:url" content="https://loto-tracker.fr/dernier-tirage"> */-->
+  <meta property="og:url" th:content="${pageUrl}">
   <meta property="og:type" content="article">
   <meta property="og:site_name" content="Loto Tracker">
   <meta property="og:locale" content="fr_FR">
@@ -96,7 +106,9 @@
 <div class="container">
   <div class="card">
 
-    <h1>Dernier tirage du Loto Français</h1>
+    <h1 th:text="'Résultat Loto (FDJ) : tirage du ' + ${dateFr}">
+      Résultat Loto (FDJ) : tirage du --
+    </h1>
     <a href="https://loto-tracker.fr" class="btn-close">Fermer</a>
 
     <p class="subtitle" th:text="'Tirage du ' + ${dateFr}">
