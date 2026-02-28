@@ -138,6 +138,10 @@
             <span class="code-chip" th:each="c : ${codes}" th:text="${#strings.trim(c)}"></span>
           </div>
         </div>
+        <div class="footer-link">
+          Retrouvez l’historique complet sur
+          <a href="https://loto-tracker.fr/">Loto Tracker</a>.
+        </div>
 
       </div>
 
@@ -146,6 +150,7 @@
         <a th:if="${nextIso != null}" th:href="@{'/tirage/' + ${nextIso}}">Tirage suivant →</a>
       </div>
     </div>
+
   </main>
 
   <!-- ✅ COLONNE CALENDRIER -->
