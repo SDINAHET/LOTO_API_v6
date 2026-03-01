@@ -1423,27 +1423,37 @@ function setAdminInBurger(isAdmin) {
 
 
 
-(function initDrawCalendarSidebar(){
-  const monthLabel = document.getElementById('monthLabel');
-  const daysGrid   = document.getElementById('daysGrid');
-  const prevBtn    = document.getElementById('prevMonth');
-  const nextBtn    = document.getElementById('nextMonth');
+(function initDrawCalendarSidebar() {
+  const monthLabel = document.getElementById("monthLabel");
+  const daysGrid = document.getElementById("daysGrid");
+  const prevBtn = document.getElementById("prevMonth");
+  const nextBtn = document.getElementById("nextMonth");
 
-  if(!monthLabel || !daysGrid || !prevBtn || !nextBtn) return;
+  // (optionnels si tu ajoutes les <select>)
+  const monthSelect = document.getElementById("monthSelect");
+  const yearSelect = document.getElementById("yearSelect");
 
-  const pad2 = n => String(n).padStart(2, '0');
-  const ymd  = d => `${d.getFullYear()}-${pad2(d.getMonth()+1)}-${pad2(d.getDate())}`;
-  const MONTHS = ["Janvier","Février","Mars","Avril","Mai","Juin","Juillet","Août","Septembre","Octobre","Novembre","Décembre"];
+  if (!monthLabel || !daysGrid || !prevBtn || !nextBtn) return;
 
-  function isDrawDay(date){
+  const pad2 = (n) => String(n).padStart(2, "0");
+  const ymd = (d) =>
+    `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`;
+
+  const MONTHS = [
+    "Janvier","Février","Mars","Avril","Mai","Juin",
+    "Juillet","Août","Septembre","Octobre","Novembre","Décembre"
+  ];
+
+  function isDrawDay(date) {
     const d = date.getDay();
     return d === 1 || d === 3 || d === 6; // Lun/Mer/Sam
   }
 
-  function lastAvailableDrawDateKey(){
+  function lastAvailableDrawDateKey() {
     const now = new Date();
     let d = new Date(now.getFullYear(), now.getMonth(), now.getDate());
 
+    // si jour de tirage et avant 21h -> précédent tirage
     if (isDrawDay(d) && now.getHours() < 21) {
       d = new Date(d.getFullYear(), d.getMonth(), d.getDate() - 1);
     }
@@ -1459,7 +1469,7 @@ function setAdminInBurger(isAdmin) {
   const match = location.pathname.match(/\/tirage\/(\d{4}-\d{2}-\d{2})(?:\/)?$/);
   const selectedKeyRaw = match ? match[1] : null;
 
-  // --- view month from URL or current
+  // Mois affiché = celui de l’URL sinon mois courant
   let view = new Date();
   view.setDate(1);
   if (selectedKeyRaw) {
@@ -1467,11 +1477,18 @@ function setAdminInBurger(isAdmin) {
     view = new Date(yy, mm - 1, 1);
   }
 
-  function clearSelected(){
-    daysGrid.querySelectorAll('.day.selected').forEach(el => el.classList.remove('selected'));
+  function clearSelected() {
+    daysGrid.querySelectorAll(".day.selected").forEach((el) =>
+      el.classList.remove("selected")
+    );
   }
 
-  function renderCalendar(){
+  function syncSelects() {
+    if (monthSelect) monthSelect.value = String(view.getMonth());
+    if (yearSelect) yearSelect.value = String(view.getFullYear());
+  }
+
+  function renderCalendar() {
     daysGrid.innerHTML = "";
 
     const y = view.getFullYear();
@@ -1483,14 +1500,15 @@ function setAdminInBurger(isAdmin) {
     const daysInMonth = new Date(y, m + 1, 0).getDate();
 
     const todayKey = ymd(new Date());
-    const lastKey  = lastAvailableDrawDateKey();
+    const lastKey = lastAvailableDrawDateKey();
 
-    // ✅ clé sélectionnée “réelle” = même logique que safe (évite dates futures)
+    // ✅ clé sélectionnée : même logique que "safe" (pas de future date)
     const safeSelectedKey =
-      selectedKeyRaw ? ((selectedKeyRaw > lastKey) ? lastKey : selectedKeyRaw) : null;
+      selectedKeyRaw ? (selectedKeyRaw > lastKey ? lastKey : selectedKeyRaw) : null;
 
+    // padding début de mois
     for (let i = 0; i < firstDow; i++) {
-      const cell = document.createElement('div');
+      const cell = document.createElement("div");
       cell.className = "day muted";
       daysGrid.appendChild(cell);
     }
@@ -1499,48 +1517,79 @@ function setAdminInBurger(isAdmin) {
       const d = new Date(y, m, day);
       const key = ymd(d);
 
-      const cell = document.createElement('div');
+      const cell = document.createElement("div");
       cell.className = "day";
       cell.textContent = String(day);
 
-      if (key === todayKey) cell.classList.add('today');
+      if (key === todayKey) cell.classList.add("today");
 
       if (isDrawDay(d)) {
-        cell.classList.add('draw');
+        cell.classList.add("draw");
 
-        // ✅ violet auto si URL correspond
+        // ✅ violet auto si URL correspond AU JOUR DE TIRAGE
         if (safeSelectedKey && key === safeSelectedKey) {
-          cell.classList.add('selected');
+          cell.classList.add("selected");
         }
 
-        const safe = (key > lastKey) ? lastKey : key;
+        const safe = key > lastKey ? lastKey : key;
 
         cell.title = `Ouvrir ${safe}`;
-        cell.addEventListener('click', () => {
-          // ✅ feedback violet immédiat
+        cell.addEventListener("click", () => {
+          // feedback violet immédiat
           clearSelected();
-          cell.classList.add('selected');
-
+          cell.classList.add("selected");
           location.href = `/tirage/${safe}`;
         });
-
       } else {
-        cell.classList.add('muted');
+        cell.classList.add("muted");
       }
 
       daysGrid.appendChild(cell);
     }
+
+    syncSelects();
   }
 
-  prevBtn.addEventListener('click', () => {
+  prevBtn.addEventListener("click", () => {
     view = new Date(view.getFullYear(), view.getMonth() - 1, 1);
     renderCalendar();
   });
 
-  nextBtn.addEventListener('click', () => {
+  nextBtn.addEventListener("click", () => {
     view = new Date(view.getFullYear(), view.getMonth() + 1, 1);
     renderCalendar();
   });
 
+  // ✅ (optionnel) Select mois/année
+  function initMonthYearSelects() {
+    if (!monthSelect || !yearSelect) return;
+
+    // mois
+    monthSelect.innerHTML = MONTHS.map(
+      (name, idx) => `<option value="${idx}">${name}</option>`
+    ).join("");
+
+    // années (ex : 2019 -> année+1)
+    const nowY = new Date().getFullYear();
+    const minY = 2019;
+    const maxY = nowY + 1;
+
+    yearSelect.innerHTML = Array.from({ length: (maxY - minY + 1) }, (_, i) => {
+      const yy = minY + i;
+      return `<option value="${yy}">${yy}</option>`;
+    }).join("");
+
+    monthSelect.addEventListener("change", () => {
+      view = new Date(view.getFullYear(), Number(monthSelect.value), 1);
+      renderCalendar();
+    });
+
+    yearSelect.addEventListener("change", () => {
+      view = new Date(Number(yearSelect.value), view.getMonth(), 1);
+      renderCalendar();
+    });
+  }
+
+  initMonthYearSelects();
   renderCalendar();
 })();

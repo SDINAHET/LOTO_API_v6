@@ -641,3 +641,62 @@ a:hover{ text-decoration: underline; }
 .day.draw.selected::after{
   background: #8b5cf6 !important; /* barre violette */
 }
+
+.cal-select{
+  height: 44px;
+  border-radius: 14px;
+  border: 1px solid rgba(255,255,255,.22);
+  background: rgba(0,0,0,.28);
+  color: rgba(255,255,255,.95);
+  padding: 0 10px;
+  font-weight: 800;
+  outline: none;
+}
+
+.cal-select:hover{
+  border-color: rgba(147,197,253,.55);
+}
+
+
+/* =========================
+   Select mois / année DARK
+   ========================= */
+
+.cal-select{
+  height: 44px;
+  border-radius: 14px;
+  border: 1px solid rgba(255,255,255,.22);
+  background: rgba(15,23,42,0.95); /* plus sombre */
+  color: #ffffff;
+  padding: 0 14px;
+  font-weight: 800;
+  font-size: 14px;
+  outline: none;
+  cursor: pointer;
+  transition: all .15s ease;
+}
+
+/* Hover */
+.cal-select:hover{
+  border-color: rgba(147,197,253,.75);
+  background: rgba(30,41,59,0.95);
+}
+
+/* Focus */
+.cal-select:focus{
+  border-color: #8b5cf6;
+  box-shadow: 0 0 0 2px rgba(139,92,246,.35);
+}
+
+/* Options du menu déroulant */
+.cal-select option{
+  background: #0f172a;   /* fond sombre */
+  color: #ffffff;        /* texte blanc */
+  font-weight: 600;
+}
+
+/* Option sélectionnée */
+.cal-select option:checked{
+  background: #2563eb;   /* bleu propre */
+  color: #ffffff;
+}
