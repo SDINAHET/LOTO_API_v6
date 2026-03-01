@@ -5,6 +5,8 @@
   --muted: rgba(233,238,252,0.75);
   --accent: #ff7a18;
   --border: rgba(255,255,255,0.12);
+  /* 👇 NOUVELLE COULEUR */
+  --selected: #8b5cf6; /* Violet moderne */
 }
 
 *{ box-sizing: border-box; }
@@ -597,3 +599,45 @@ a:hover{ text-decoration: underline; }
 
 .details-table{ font-size: 12px; }
 .details-table td{ padding: 3px 0; }
+
+
+
+/* =========================
+   Jour sélectionné (violet)
+   ========================= */
+
+.day.selected{
+  background: rgba(139,92,246,.30);
+  border-color: rgba(139,92,246,.80);
+  color: #ffffff;
+  box-shadow:
+    0 14px 30px rgba(139,92,246,.25),
+    inset 0 1px 0 rgba(255,255,255,.15);
+  transform: translateY(-1px);
+}
+
+/* Petite barre signature violette */
+.day.selected::after{
+  content:"";
+  position:absolute;
+  bottom:7px;
+  width:22px;
+  height:4px;
+  border-radius:999px;
+  background: var(--selected);
+}
+
+.day.selected.draw::after{
+  background: var(--selected) !important;
+}
+
+/* ✅ sélection violet (doit gagner sur .day.draw) */
+.day.draw.selected{
+  background: rgba(139,92,246,.45) !important;
+  border-color: rgba(139,92,246,.95) !important;
+  box-shadow: 0 16px 38px rgba(139,92,246,.35) !important;
+}
+
+.day.draw.selected::after{
+  background: #8b5cf6 !important; /* barre violette */
+}
