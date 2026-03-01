@@ -51,6 +51,7 @@
       "eventStatus": "https://schema.org/EventCompleted",
       "startDate": [[${startDateIso}]],
       "eventAttendanceMode": "https://schema.org/OfflineEventAttendanceMode",
+
       "location": {
         "@type": "Place",
         "name": "France",
@@ -59,14 +60,26 @@
           "addressCountry": "FR"
         }
       },
+
       "organizer": {
         "@type": "Organization",
         "name": "Loto Tracker",
         "url": "https://loto-tracker.fr/"
       },
+
+      "isAccessibleForFree": true,
+      "offers": {
+        "@type": "Offer",
+        "url": [[${pageUrl}]],
+        "price": "0",
+        "priceCurrency": "EUR",
+        "availability": "https://schema.org/InStock"
+      },
+
       "image": "https://loto-tracker.fr/assets/img/loto_tracker.png",
       "description": [[${seoDescription}]]
     },
+
     {
       "@context": "https://schema.org",
       "@type": "Article",
