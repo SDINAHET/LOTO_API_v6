@@ -405,12 +405,147 @@ a:hover{ text-decoration: underline; }
   background: rgba(147,197,253,1);
   opacity:1;
 }
+/* =========================================
+   AUJOURD'HUI — ROUGE ↔ BLEU (SUPER VISIBLE)
+   ========================================= */
 
-/* Aujourd’hui : contour rouge plus net */
 .day.today{
-  outline: 2px solid rgba(239,68,68,.55);
-  box-shadow: 0 18px 45px rgba(239,68,68,.12);
+  position: relative;
+  border: 2px solid #ff2a2a !important;
+  background: rgba(255,42,42,.16) !important;
+
+  box-shadow:
+    0 0 0 2px rgba(255,42,42,.55),
+    0 0 18px rgba(255,42,42,.65),
+    0 0 40px rgba(255,42,42,.35),
+    inset 0 1px 0 rgba(255,255,255,.18) !important;
+
+  animation: todayRedBluePulse 2.4s ease-in-out infinite;
 }
+
+/* Si aujourd’hui est aussi draw */
+.day.draw.today{
+  animation: todayRedBluePulse 2.4s ease-in-out infinite;
+}
+
+/* Rouge -> rouge soft -> bleu -> bleu soft -> rouge */
+@keyframes todayRedBluePulse{
+
+  /* ROUGE FORT */
+  0%{
+    transform: translateY(0) scale(1);
+    background: rgba(255,42,42,.20);
+    border-color: #ff2a2a;
+    box-shadow:
+      0 0 0 2px rgba(255,42,42,.65),
+      0 0 22px rgba(255,42,42,.85),
+      0 0 55px rgba(255,42,42,.45),
+      inset 0 1px 0 rgba(255,255,255,.18);
+  }
+
+  /* ROUGE SOFT */
+  25%{
+    transform: translateY(-1px) scale(1.02);
+    background: rgba(255,42,42,.10);
+    border-color: rgba(255,42,42,.55);
+    box-shadow:
+      0 0 0 2px rgba(255,42,42,.35),
+      0 0 14px rgba(255,42,42,.45),
+      0 0 30px rgba(255,42,42,.20),
+      inset 0 1px 0 rgba(255,255,255,.12);
+  }
+
+  /* BLEU FORT */
+  50%{
+    transform: translateY(0) scale(1.03);
+    background: rgba(59,130,246,.20);
+    border-color: #3b82f6;
+    box-shadow:
+      0 0 0 2px rgba(59,130,246,.65),
+      0 0 22px rgba(59,130,246,.90),
+      0 0 55px rgba(59,130,246,.45),
+      inset 0 1px 0 rgba(255,255,255,.18);
+  }
+
+  /* BLEU SOFT */
+  75%{
+    transform: translateY(-1px) scale(1.01);
+    background: rgba(59,130,246,.10);
+    border-color: rgba(59,130,246,.55);
+    box-shadow:
+      0 0 0 2px rgba(59,130,246,.35),
+      0 0 14px rgba(59,130,246,.45),
+      0 0 30px rgba(59,130,246,.20),
+      inset 0 1px 0 rgba(255,255,255,.12);
+  }
+
+  /* RETOUR ROUGE */
+  100%{
+    transform: translateY(0) scale(1);
+    background: rgba(255,42,42,.20);
+    border-color: #ff2a2a;
+    box-shadow:
+      0 0 0 2px rgba(255,42,42,.65),
+      0 0 22px rgba(255,42,42,.85),
+      0 0 55px rgba(255,42,42,.45),
+      inset 0 1px 0 rgba(255,255,255,.18);
+  }
+}
+.day.today{
+  font-weight: 950;
+  color: #fff !important;
+}
+/* =========================================
+   Flash rouge toutes les 10s (AUJOURD'HUI)
+   ========================================= */
+
+.day.today{
+  position: relative;
+  overflow: hidden;
+}
+
+/* Couche rouge animée */
+.day.today::after{
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 14px;
+  background: rgba(255, 0, 0, 0.45);
+  opacity: 0;
+  pointer-events: none;
+  animation: todayFlash10s 4s ease-in-out infinite;
+}
+
+/* Animation */
+@keyframes todayFlash10s{
+
+  /* 0-85% rien */
+  0%, 85%{
+    opacity: 0.15;
+  }
+
+  /* montée rouge */
+  88%{
+    opacity: .6;
+  }
+
+  /* pic rouge */
+  92%{
+    opacity: .80;
+  }
+
+  /* redescend */
+  96%{
+    opacity: .6;
+  }
+
+  /* disparaît */
+  100%{
+    opacity: 0.15;
+  }
+}
+
+
 
 /* Légende + hint */
 .legend{
