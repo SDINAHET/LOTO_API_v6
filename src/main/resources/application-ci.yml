@@ -15,7 +15,12 @@ spring:
   jpa:
     hibernate:
       ddl-auto: update
-    open-in-view: false
+    # open-in-view: false
+    open-in-view: true
+    properties:
+      hibernate:
+        jdbc:
+          time_zone: Europe/Paris
 
   flyway:
     enabled: false   # mets true si tu utilises Flyway et que tes migrations sont prêtes

@@ -269,6 +269,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/historique/last20").permitAll()
                         .requestMatchers("/api/predictions/generate", "/api/generate", "/api/predictions/latest").permitAll()
                         .requestMatchers("/api/historique/last20/Detail/**").permitAll()
+                        .requestMatchers("/api/historique/last20/detail/**").permitAll()
                         .requestMatchers("/api/tirages", "/api/tirages/**").permitAll()
                         .requestMatchers("/api/gains/calculate", "/api/gains","/api/gains/**").hasAnyRole("ADMIN", "USER") // 🔥 PUT accessible aux admins et utilisateurs
                         // .requestMatchers("/api/users/**", "/api/users").authenticated()  // Protégé par JWT

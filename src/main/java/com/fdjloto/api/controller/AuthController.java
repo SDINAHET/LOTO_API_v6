@@ -303,16 +303,27 @@ public class AuthController {
                     @ApiResponse(responseCode = "500", description = "Internal server error")
             }
     )
+//     @GetMapping("/token")
+//     public ResponseEntity<Map<String, String>> getJwtFromCookie(
+//             @Parameter(name = "jwtToken", required = false, in = ParameterIn.COOKIE)
+//             @CookieValue(name = JWT_COOKIE_NAME, required = false) String jwtToken
+//     ) {
+//         if (jwtToken == null || jwtToken.isBlank()) {
+//             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("message", "JWT manquant"));
+//         }
+//         return ResponseEntity.ok(Map.of("jwtToken", jwtToken));
+//     }
     @GetMapping("/token")
-    public ResponseEntity<Map<String, String>> getJwtFromCookie(
-            @Parameter(name = "jwtToken", required = false, in = ParameterIn.COOKIE)
-            @CookieValue(name = JWT_COOKIE_NAME, required = false) String jwtToken
-    ) {
-        if (jwtToken == null || jwtToken.isBlank()) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("message", "JWT manquant"));
+        public ResponseEntity<Map<String, Object>> tokenStatus(
+                @CookieValue(name = JWT_COOKIE_NAME, required = false) String jwtToken
+        ) {
+        boolean present = jwtToken != null && !jwtToken.isBlank();
+        boolean valid = present && jwtUtils.validateAccessToken(jwtToken);
+        return ResponseEntity.ok(Map.of(
+                "present", present,
+                "valid", valid
+        ));
         }
-        return ResponseEntity.ok(Map.of("jwtToken", jwtToken));
-    }
 
     @Operation(summary = "Get authenticated user info", description = "Retrieves user details based on JWT token.")
     @ApiResponses({

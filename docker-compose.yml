@@ -72,6 +72,10 @@ services:
     environment:
       SPRING_PROFILES_ACTIVE: ci
 
+      # Timezone container + JVM
+      TZ: Europe/Paris
+      JAVA_TOOL_OPTIONS: "-Duser.timezone=Europe/Paris"
+
       # Mongo
       SPRING_DATA_MONGODB_URI: mongodb://mongodb:27017/lotodb
 
@@ -93,9 +97,10 @@ services:
     image: mongo:latest
     restart: always
     ports:
-      - "27017:27017"
+      - "27018:27017"
     environment:
       MONGO_INITDB_DATABASE: lotodb
+      TZ: Europe/Paris
     volumes:
       - mongodb_data:/data/db
 
@@ -104,11 +109,13 @@ services:
     # image: ghcr.io/SDINAHET/loto_api_v4_postgres:14
     restart: always
     ports:
-      - "5432:5432"
+      - "5434:5432"
     environment:
       POSTGRES_DB: lotodb
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
+      TZ: Europe/Paris
+      PGTZ: Europe/Paris
     # volumes:
     #   - postgres_data:/var/lib/postgresql/data
     volumes:
