@@ -1,59 +1,134 @@
-# version: '3.8'
+# # version: '3.8'
+
+# # services:
+# #   postgres:
+# #     image: postgres:14
+# #     container_name: loto-postgres
+# #     environment:
+# #       POSTGRES_DB: ${POSTGRES_DB:-lotodb}
+# #       POSTGRES_USER: ${POSTGRES_USER:-postgres}
+# #       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+# #     ports:
+# #       - "${POSTGRES_PORT:-5432}:5432"
+# #     volumes:
+# #       - postgres_data:/var/lib/postgresql/data
+# #     networks:
+# #       - loto-network
+
+# #   mongodb:
+# #     image: mongo:latest
+# #     container_name: loto-mongodb
+# #     environment:
+# #       MONGO_INITDB_ROOT_USERNAME: ${MONGODB_USER:-lotouser}
+# #       MONGO_INITDB_ROOT_PASSWORD: ${MONGODB_PASSWORD:-lotopass}
+# #       MONGO_INITDB_DATABASE: ${MONGODB_DATABASE:-lotodb}
+# #     ports:
+# #       - "${MONGODB_PORT:-27017}:27017"
+# #     volumes:
+# #       - mongodb_data:/data/db
+# #     networks:
+# #       - loto-network
+
+# #   loto-api:
+# #     build:
+# #       context: .
+# #       dockerfile: Dockerfile
+# #     container_name: loto-api_v4
+# #     environment:
+# #       - SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE:-prod}
+# #       - POSTGRES_HOST=postgres
+# #       - MONGODB_HOST=mongodb
+# #     ports:
+# #       - "${SERVER_PORT:-8082}:8082"
+# #     depends_on:
+# #       - postgres
+# #       - mongodb
+# #     networks:
+# #       - loto-network
+
+# # networks:
+# #   loto-network:
+# #     driver: bridge
+
+# # volumes:
+# #   postgres_data:
+# #   mongodb_data:
+
+
+# version: "3.8"
 
 # services:
-#   postgres:
-#     image: postgres:14
-#     container_name: loto-postgres
-#     environment:
-#       POSTGRES_DB: ${POSTGRES_DB:-lotodb}
-#       POSTGRES_USER: ${POSTGRES_USER:-postgres}
-#       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+#   backend:
+#     build:
+#       context: .
+#       dockerfile: Dockerfile.backend
 #     ports:
-#       - "${POSTGRES_PORT:-5432}:5432"
-#     volumes:
-#       - postgres_data:/var/lib/postgresql/data
-#     networks:
-#       - loto-network
+#       - "8082:8082"
+#     depends_on:
+#       postgres:
+#         condition: service_healthy
+#       mongodb:
+#         condition: service_started
+#     environment:
+#       SPRING_PROFILES_ACTIVE: ci
+
+#       # Timezone container + JVM
+#       TZ: Europe/Paris
+#       JAVA_TOOL_OPTIONS: "-Duser.timezone=Europe/Paris"
+
+#       # Mongo
+#       SPRING_DATA_MONGODB_URI: mongodb://mongodb:27017/lotodb
+
+#       # Postgres
+#       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/lotodb
+#       SPRING_DATASOURCE_USERNAME: postgres
+#       SPRING_DATASOURCE_PASSWORD: postgres
+
+#   frontend:
+#     build:
+#       context: .
+#       dockerfile: Dockerfile.frontend
+#     ports:
+#       - "5500:5500"
+#     depends_on:
+#       - backend
 
 #   mongodb:
 #     image: mongo:latest
-#     container_name: loto-mongodb
-#     environment:
-#       MONGO_INITDB_ROOT_USERNAME: ${MONGODB_USER:-lotouser}
-#       MONGO_INITDB_ROOT_PASSWORD: ${MONGODB_PASSWORD:-lotopass}
-#       MONGO_INITDB_DATABASE: ${MONGODB_DATABASE:-lotodb}
+#     restart: always
 #     ports:
-#       - "${MONGODB_PORT:-27017}:27017"
+#       - "27018:27017"
+#     environment:
+#       MONGO_INITDB_DATABASE: lotodb
+#       TZ: Europe/Paris
 #     volumes:
 #       - mongodb_data:/data/db
-#     networks:
-#       - loto-network
 
-#   loto-api:
-#     build:
-#       context: .
-#       dockerfile: Dockerfile
-#     container_name: loto-api_v4
-#     environment:
-#       - SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE:-prod}
-#       - POSTGRES_HOST=postgres
-#       - MONGODB_HOST=mongodb
+#   postgres:
+#     image: postgres:14
+#     # image: ghcr.io/SDINAHET/loto_api_v4_postgres:14
+#     restart: always
 #     ports:
-#       - "${SERVER_PORT:-8082}:8082"
-#     depends_on:
-#       - postgres
-#       - mongodb
-#     networks:
-#       - loto-network
-
-# networks:
-#   loto-network:
-#     driver: bridge
+#       - "5434:5432"
+#     environment:
+#       POSTGRES_DB: lotodb
+#       POSTGRES_USER: postgres
+#       POSTGRES_PASSWORD: postgres
+#       TZ: Europe/Paris
+#       PGTZ: Europe/Paris
+#     # volumes:
+#     #   - postgres_data:/var/lib/postgresql/data
+#     volumes:
+#       - ./docker/postgres/init:/docker-entrypoint-initdb.d
+#     healthcheck:
+#       test: ["CMD-SHELL", "pg_isready -U postgres -d lotodb"]
+#       interval: 10s
+#       timeout: 5s
+#       retries: 20
 
 # volumes:
-#   postgres_data:
 #   mongodb_data:
-
+#   postgres_data:
 
 version: "3.8"
 
@@ -71,8 +146,6 @@ services:
         condition: service_started
     environment:
       SPRING_PROFILES_ACTIVE: ci
-
-      # Timezone container + JVM
       TZ: Europe/Paris
       JAVA_TOOL_OPTIONS: "-Duser.timezone=Europe/Paris"
 
@@ -106,7 +179,6 @@ services:
 
   postgres:
     image: postgres:14
-    # image: ghcr.io/SDINAHET/loto_api_v4_postgres:14
     restart: always
     ports:
       - "5434:5432"
@@ -116,16 +188,73 @@ services:
       POSTGRES_PASSWORD: postgres
       TZ: Europe/Paris
       PGTZ: Europe/Paris
-    # volumes:
-    #   - postgres_data:/var/lib/postgresql/data
     volumes:
       - ./docker/postgres/init:/docker-entrypoint-initdb.d
+      # (optionnel) persistance réelle :
+      # - postgres_data:/var/lib/postgresql/data
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres -d lotodb"]
       interval: 10s
       timeout: 5s
       retries: 20
 
+  # =========================
+  # AI SERVICE (OPTIONNEL)
+  # =========================
+  ai:
+    image: python:3.11-slim
+    profiles: ["ai"]   # ✅ ne démarre pas par défaut
+    restart: unless-stopped
+    working_dir: /app
+    volumes:
+      - ./ai.py:/app/ai.py:ro
+    environment:
+      TZ: Europe/Paris
+
+      # Mongo
+      MONGO_URI: mongodb://mongodb:27017
+      MONGO_DB: lotodb
+      MONGO_COL: historique
+
+      # Ollama
+      OLLAMA_BASE: http://ollama:11434
+
+      # ✅ IMPORTANT: modèle léger pour 8 Go
+      # Très bon compromis :
+      OLLAMA_MODEL: llama3.1:8b
+      # Très bon compromis :
+      # OLLAMA_MODEL: llama3.2:3b
+      # Alternative légère :
+      # OLLAMA_MODEL: phi3:mini
+
+      # ✅ évite les longues phrases qui explosent:
+      MAX_MESSAGE_LEN: "900"
+      OLLAMA_TIMEOUT_SEC: "360"
+
+      # (optionnel) si tu ajoutes une logique AI_ENABLED dans ai.py plus tard
+      # AI_ENABLED: "1"
+    command: >
+      sh -c "pip install --no-cache-dir fastapi uvicorn httpx pymongo &&
+             uvicorn ai:app --host 0.0.0.0 --port 8091"
+    ports:
+      - "8091:8091"
+    depends_on:
+      - mongodb
+      - ollama
+
+  ollama:
+    image: ollama/ollama:latest
+    profiles: ["ai"]   # ✅ ne démarre pas par défaut
+    restart: unless-stopped
+    ports:
+      - "11435:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+    # ✅ Limites mémoire: "deploy:" n'est pas appliqué par docker compose classique.
+    # Utilise plutôt mem_limit.
+    mem_limit: 8g
+
 volumes:
   mongodb_data:
   postgres_data:
+  ollama_data:
