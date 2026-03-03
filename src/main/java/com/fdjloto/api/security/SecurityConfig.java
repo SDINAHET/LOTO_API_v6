@@ -197,10 +197,30 @@ public class SecurityConfig {
                         //     "/admin-180.png",
                         //     "/admin.png"
                         // ).permitAll()
-                        .requestMatchers(HttpMethod.GET, "/dernier-tirage", "/dernier-tirage/").permitAll()
-                        .requestMatchers("/tirage/**").permitAll()
-                        .requestMatchers("/css/**", "/js/**", "/images/**").permitAll()
-                        .requestMatchers("/sitemap.xml", "/robots.txt").permitAll()
+                        // .requestMatchers(HttpMethod.GET, "/dernier-tirage", "/dernier-tirage/").permitAll()
+                        // .requestMatchers("/tirage/**").permitAll()
+                        // .requestMatchers("/css/**", "/js/**", "/images/**").permitAll()
+                        // .requestMatchers("/sitemap.xml", "/robots.txt").permitAll()
+                        // =====================
+                        // 🔓 PAGES SEO PUBLIQUES
+                        // =====================
+                        .requestMatchers(
+                                "/dernier-tirage",
+                                "/dernier-tirage/",
+                                "/tirage/**",
+                                "/sitemap.xml",
+                                "/robots.txt"
+                        ).permitAll()
+
+                        // =====================
+                        // 🔓 RESSOURCES STATIQUES
+                        // =====================
+                        .requestMatchers(
+                                "/css/**",
+                                "/js/**",
+                                "/images/**",
+                                "/assets/**"
+                        ).permitAll()
 
 
                         // ✅ CORS preflight
