@@ -202,25 +202,23 @@ public class SecurityConfig {
                         // .requestMatchers("/css/**", "/js/**", "/images/**").permitAll()
                         // .requestMatchers("/sitemap.xml", "/robots.txt").permitAll()
                         // =====================
-                        // 🔓 PAGES SEO PUBLIQUES
                         // =====================
-                        .requestMatchers(
-                                "/dernier-tirage",
-                                "/dernier-tirage/",
-                                "/tirage/**",
-                                "/sitemap.xml",
-                                "/robots.txt"
-                        ).permitAll()
+                        // 🔓 PAGES SEO PUBLIQUES (GET + HEAD)
+                        // =====================
+                        .requestMatchers(HttpMethod.GET,  "/dernier-tirage/**").permitAll()
+                        .requestMatchers(HttpMethod.HEAD, "/dernier-tirage/**").permitAll()
+
+                        .requestMatchers(HttpMethod.GET,  "/tirage/**").permitAll()
+                        .requestMatchers(HttpMethod.HEAD, "/tirage/**").permitAll()
+
+                        .requestMatchers(HttpMethod.GET,  "/sitemap.xml", "/robots.txt").permitAll()
+                        .requestMatchers(HttpMethod.HEAD, "/sitemap.xml", "/robots.txt").permitAll()
 
                         // =====================
-                        // 🔓 RESSOURCES STATIQUES
+                        // 🔓 RESSOURCES STATIQUES (GET + HEAD)
                         // =====================
-                        .requestMatchers(
-                                "/css/**",
-                                "/js/**",
-                                "/images/**",
-                                "/assets/**"
-                        ).permitAll()
+                        .requestMatchers(HttpMethod.GET,  "/css/**", "/js/**", "/images/**", "/assets/**").permitAll()
+                        .requestMatchers(HttpMethod.HEAD, "/css/**", "/js/**", "/images/**", "/assets/**").permitAll()
 
 
                         // ✅ CORS preflight
