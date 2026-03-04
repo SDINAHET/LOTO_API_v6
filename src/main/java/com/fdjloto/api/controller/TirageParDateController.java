@@ -114,82 +114,96 @@ public class TirageParDateController {
         this.detailService = detailService;
     }
 
-    @GetMapping("/tirage/{date}")
-    public String tirageParDate(@PathVariable String date, Model model) {
+@GetMapping("/tirage/{date}")
+public String tirageParDate(@PathVariable String date, Model model) {
 
-        // 1) Valider le format URL
-        LocalDate ldFromUrl;
-        try {
-            ldFromUrl = LocalDate.parse(date); // yyyy-MM-dd
-        } catch (Exception e) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Format attendu : yyyy-MM-dd");
-        }
+    ZoneId paris = ZoneId.of("Europe/Paris");
 
-        // 2) Charger les données (par la date demandée)
-        Optional<Historique20Detail> detailsOpt = detailService.getTirageByDate(date);
-        if (detailsOpt.isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
-        }
+    // 1) Valider format
+    LocalDate ld;
+    try {
+        ld = LocalDate.parse(date); // yyyy-MM-dd
+    } catch (Exception e) {
+        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Format attendu : yyyy-MM-dd");
+    }
 
-        Historique20Detail details = detailsOpt.get();
-        if (details.getDateDeTirage() == null) {
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Date de tirage manquante");
-        }
+    // 2) Autoriser uniquement Lundi/Mercredi/Samedi
+    DayOfWeek day = ld.getDayOfWeek();
+    boolean isDrawDay = (day == DayOfWeek.MONDAY || day == DayOfWeek.WEDNESDAY || day == DayOfWeek.SATURDAY);
+    if (!isDrawDay) throw new ResponseStatusException(HttpStatus.NOT_FOUND);
 
-        // 3) Canonicaliser la date depuis la DB en Europe/Paris (évite +1/-1 jour)
-        ZoneId paris = ZoneId.of("Europe/Paris");
-        LocalDate ldDb = details.getDateDeTirage().toInstant().atZone(paris).toLocalDate();
-        String isoDb = ldDb.format(DateTimeFormatter.ISO_LOCAL_DATE);
+    // 3) Chercher en base
+    Optional<Historique20Detail> detailsOpt = detailService.getTirageByDate(date);
 
-        // 4) Vérifier jour autorisé (sur la vraie date DB)
-        DayOfWeek day = ldDb.getDayOfWeek();
-        if (day != DayOfWeek.MONDAY && day != DayOfWeek.WEDNESDAY && day != DayOfWeek.SATURDAY) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
-        }
+    // Helpers prev/next (calendrier pur, marche même sans DB)
+    String prevIso = previousDrawDay(ld).toString();
+    String nextIso = nextDrawDay(ld).toString();
 
-        // 5) Si l’URL ne correspond pas à la date DB -> redirect vers l’URL canonique (SEO + cohérence)
-        if (!isoDb.equals(date)) {
-            return "redirect:/tirage/" + isoDb;
-        }
+    // Formats affichage
+    String dateFr = ld.format(DateTimeFormatter.ofPattern("EEEE d MMMM yyyy", Locale.FRENCH));
+    dateFr = dateFr.substring(0, 1).toUpperCase(Locale.FRENCH) + dateFr.substring(1);
+    String startDateIso = ld.atTime(20, 0).atZone(paris).format(DateTimeFormatter.ISO_OFFSET_DATE_TIME);
+    String pageUrl = "https://loto-tracker.fr/tirage/" + date;
 
-        // 6) Prev/Next basés sur la date DB (pas sur l’URL)
-        Optional<Historique20Detail> prev = detailService.getTiragePrecedent(ldDb);
-        Optional<Historique20Detail> next = detailService.getTirageSuivant(ldDb);
+    // 4) Cas FUTUR / pas en base => 200 + page "en attente"
+    if (detailsOpt.isEmpty()) {
+        model.addAttribute("details", null);
+        model.addAttribute("isPending", true);
 
-        String prevIso = prev.map(p -> toIsoDate(p.getDateDeTirage(), paris)).orElse(null);
-        String nextIso = next.map(n -> toIsoDate(n.getDateDeTirage(), paris)).orElse(null);
-
-        // 7) Formats d’affichage
-        // String dateFr = ldDb.format(DateTimeFormatter.ofPattern("d MMMM yyyy", Locale.FRENCH));
-        String dateFr = ldDb.format(DateTimeFormatter.ofPattern("EEEE d MMMM yyyy", Locale.FRENCH));
-        if (dateFr != null && !dateFr.isEmpty()) {
-            dateFr = dateFr.substring(0, 1).toUpperCase(Locale.FRENCH) + dateFr.substring(1);
-        }
-        // Start date du tirage (20:00 Paris) ISO_OFFSET_DATE_TIME
-        String startDateIso = ldDb.atTime(20, 0).atZone(paris).format(DateTimeFormatter.ISO_OFFSET_DATE_TIME);
-
-        // 8) Model
-        model.addAttribute("details", details);
         model.addAttribute("dateFr", dateFr);
-        model.addAttribute("dateIso", isoDb);
+        model.addAttribute("dateIso", date);
         model.addAttribute("startDateIso", startDateIso);
-        model.addAttribute("pageUrl", "https://loto-tracker.fr/tirage/" + isoDb);
+        model.addAttribute("pageUrl", pageUrl);
 
-        model.addAttribute("prev", prev.orElse(null));
-        model.addAttribute("next", next.orElse(null));
         model.addAttribute("prevIso", prevIso);
         model.addAttribute("nextIso", nextIso);
 
-        // model.addAttribute("seoTitle", "Résultat Loto du " + dateFr + " | Loto Tracker");
         model.addAttribute("seoTitle", "Résultat Loto (FDJ) : tirage du " + dateFr + " | Loto Tracker");
         model.addAttribute("seoDescription",
-                "Résultat officiel du Loto du " + dateFr + " : numéros gagnants, numéro Chance et jackpot.");
+                "Résultat du Loto du " + dateFr + " : tirage prévu à 20h35. Les numéros gagnants et rapports seront publiés dès l’annonce officielle.");
 
-        return "tirage-date";
+        return "tirage-date"; // ✅ HTTP 200
     }
 
-    private String toIsoDate(Date date, ZoneId zone) {
-        if (date == null) return null;
-        return date.toInstant().atZone(zone).toLocalDate().format(DateTimeFormatter.ISO_LOCAL_DATE);
+    // 5) Cas OK (en base)
+    Historique20Detail details = detailsOpt.get();
+    model.addAttribute("details", details);
+    model.addAttribute("isPending", false);
+
+    model.addAttribute("dateFr", dateFr);
+    model.addAttribute("dateIso", date);
+    model.addAttribute("startDateIso", startDateIso);
+    model.addAttribute("pageUrl", pageUrl);
+
+    // (optionnel) tu peux garder ton prev/next DB si tu préfères,
+    // mais ces dates "calendrier" fonctionnent toujours.
+    model.addAttribute("prevIso", prevIso);
+    model.addAttribute("nextIso", nextIso);
+
+    model.addAttribute("seoTitle", "Résultat Loto (FDJ) : tirage du " + dateFr + " | Loto Tracker");
+    model.addAttribute("seoDescription",
+            "Résultat officiel du Loto du " + dateFr + " : numéros gagnants, numéro Chance et jackpot.");
+
+    return "tirage-date";
+}
+
+private LocalDate nextDrawDay(LocalDate d) {
+    LocalDate x = d.plusDays(1);
+    while (x.getDayOfWeek() != DayOfWeek.MONDAY
+            && x.getDayOfWeek() != DayOfWeek.WEDNESDAY
+            && x.getDayOfWeek() != DayOfWeek.SATURDAY) {
+        x = x.plusDays(1);
     }
+    return x;
+}
+
+private LocalDate previousDrawDay(LocalDate d) {
+    LocalDate x = d.minusDays(1);
+    while (x.getDayOfWeek() != DayOfWeek.MONDAY
+            && x.getDayOfWeek() != DayOfWeek.WEDNESDAY
+            && x.getDayOfWeek() != DayOfWeek.SATURDAY) {
+        x = x.minusDays(1);
+    }
+    return x;
+}
 }

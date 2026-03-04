@@ -38,7 +38,7 @@
       "@context": "https://schema.org",
       "@type": "Event",
       "name": [[${'Résultat Loto Français du ' + dateFr}]],
-      "eventStatus": [[${isPending}]] ? "https://schema.org/EventScheduled" : "https://schema.org/EventCompleted",
+      "eventStatus": "https://schema.org/EventCompleted",
       "startDate": [[${startDateIso}]],
       "eventAttendanceMode": "https://schema.org/OfflineEventAttendanceMode",
 
@@ -101,88 +101,67 @@
 
         <p class="subtitle" th:text="'Tirage du ' + ${dateFr}"></p>
 
-        <!-- ✅ Tirage en attente (page 200 même si pas en base) -->
-        <div th:if="${isPending}" class="pending-box">
-          <h2 class="section-title">⏳ Tirage en attente</h2>
-          <p>
-            Le tirage du <strong th:text="${dateFr}">—</strong> est prévu à <strong>20h35</strong>.
-            Les résultats seront publiés automatiquement dès l’annonce officielle.
-          </p>
+        <!-- RESULTATS -->
+        <h2 class="section-title">Numéros gagnants</h2>
 
-          <!-- (optionnel) placeholders pour garder le design -->
-          <h2 class="section-title">Numéros gagnants</h2>
-          <div class="balls">
-            <div class="ball">--</div>
-            <div class="ball">--</div>
-            <div class="ball">--</div>
-            <div class="ball">--</div>
-            <div class="ball">--</div>
-            <div class="ball chance">--</div>
-          </div>
+        <div class="balls">
+          <div class="ball" th:text="${details.boule1}">--</div>
+          <div class="ball" th:text="${details.boule2}">--</div>
+          <div class="ball" th:text="${details.boule3}">--</div>
+          <div class="ball" th:text="${details.boule4}">--</div>
+          <div class="ball" th:text="${details.boule5}">--</div>
+          <div class="ball chance" th:text="${details.numeroChance}">--</div>
         </div>
 
-        <!-- ✅ Résultats (uniquement si tirage dispo) -->
-        <div th:if="${!isPending}">
+        <!-- JACKPOT -->
+        <p class="jackpot">
+          <strong>Jackpot annoncé :</strong>
+          <span th:text="${#numbers.formatDecimal(details.rapportDuRang1, 1, 'WHITESPACE', 2, 'COMMA')} + ' €'"></span>
+        </p>
 
-          <!-- RESULTATS -->
-          <h2 class="section-title">Numéros gagnants</h2>
+        <!-- TABLEAU -->
+        <h3>Rapports du tirage principal</h3>
 
-          <div class="balls">
-            <div class="ball" th:text="${details.boule1}">--</div>
-            <div class="ball" th:text="${details.boule2}">--</div>
-            <div class="ball" th:text="${details.boule3}">--</div>
-            <div class="ball" th:text="${details.boule4}">--</div>
-            <div class="ball" th:text="${details.boule5}">--</div>
-            <div class="ball chance" th:text="${details.numeroChance}">--</div>
+        <table class="details-table">
+          <thead>
+            <tr>
+              <th>Rang</th>
+              <th>Gagnants</th>
+              <th>Gain (€)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td>1</td><td th:text="${details.nombreDeGagnantAuRang1}">--</td><td th:text="${#numbers.formatDecimal(details.rapportDuRang1, 1, 'WHITESPACE', 2, 'COMMA')} + ' €'">--</td></tr>
+            <tr><td>2</td><td th:text="${details.nombreDeGagnantAuRang2}">--</td><td th:text="${#numbers.formatDecimal(details.rapportDuRang2, 1, 'WHITESPACE', 2, 'COMMA')} + ' €'">--</td></tr>
+            <tr><td>3</td><td th:text="${details.nombreDeGagnantAuRang3}">--</td><td th:text="${#numbers.formatDecimal(details.rapportDuRang3, 1, 'WHITESPACE', 2, 'COMMA')} + ' €'">--</td></tr>
+            <tr><td>4</td><td th:text="${details.nombreDeGagnantAuRang4}">--</td><td th:text="${#numbers.formatDecimal(details.rapportDuRang4, 1, 'WHITESPACE', 2, 'COMMA')} + ' €'">--</td></tr>
+            <tr><td>5</td><td th:text="${details.nombreDeGagnantAuRang5}">--</td><td th:text="${#numbers.formatDecimal(details.rapportDuRang5, 1, 'WHITESPACE', 2, 'COMMA')} + ' €'">--</td></tr>
+            <tr><td>6</td><td th:text="${details.nombreDeGagnantAuRang6}">--</td><td th:text="${#numbers.formatDecimal(details.rapportDuRang6, 1, 'WHITESPACE', 2, 'COMMA')} + ' €'">--</td></tr>
+            <tr><td>7</td><td th:text="${details.nombreDeGagnantAuRang7}">--</td><td th:text="${#numbers.formatDecimal(details.rapportDuRang7, 1, 'WHITESPACE', 2, 'COMMA')} + ' €'">--</td></tr>
+            <tr><td>8</td><td th:text="${details.nombreDeGagnantAuRang8}">--</td><td th:text="${#numbers.formatDecimal(details.rapportDuRang8, 1, 'WHITESPACE', 2, 'COMMA')} + ' €'">--</td></tr>
+            <tr><td>9</td><td th:text="${details.nombreDeGagnantAuRang9}">--</td><td th:text="${#numbers.formatDecimal(details.rapportDuRang9, 1, 'WHITESPACE', 2, 'COMMA')} + ' €'">--</td></tr>
+          </tbody>
+        </table>
+
+        <!-- CODES -->
+        <div th:if="${details.codesGagnants != null}">
+          <h3>Codes gagnants</h3>
+
+          <div class="codes-grid" th:with="codes=${#strings.arraySplit(details.codesGagnants, ',')}">
+            <span class="code-chip" th:each="c : ${codes}" th:text="${#strings.trim(c)}"></span>
           </div>
-
-          <!-- JACKPOT -->
-          <p class="jackpot">
-            <strong>Jackpot annoncé :</strong>
-            <span th:text="${#numbers.formatDecimal(details.rapportDuRang1, 1, 'WHITESPACE', 2, 'COMMA')} + ' €'"></span>
-          </p>
-
-          <!-- TABLEAU -->
-          <h3>Rapports du tirage principal</h3>
-
-          <table class="details-table">
-            <thead>
-              <tr>
-                <th>Rang</th>
-                <th>Gagnants</th>
-                <th>Gain (€)</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr><td>1</td><td th:text="${details.nombreDeGagnantAuRang1}">--</td><td th:text="${#numbers.formatDecimal(details.rapportDuRang1, 1, 'WHITESPACE', 2, 'COMMA')} + ' €'">--</td></tr>
-              <tr><td>2</td><td th:text="${details.nombreDeGagnantAuRang2}">--</td><td th:text="${#numbers.formatDecimal(details.rapportDuRang2, 1, 'WHITESPACE', 2, 'COMMA')} + ' €'">--</td></tr>
-              <tr><td>3</td><td th:text="${details.nombreDeGagnantAuRang3}">--</td><td th:text="${#numbers.formatDecimal(details.rapportDuRang3, 1, 'WHITESPACE', 2, 'COMMA')} + ' €'">--</td></tr>
-              <tr><td>4</td><td th:text="${details.nombreDeGagnantAuRang4}">--</td><td th:text="${#numbers.formatDecimal(details.rapportDuRang4, 1, 'WHITESPACE', 2, 'COMMA')} + ' €'">--</td></tr>
-              <tr><td>5</td><td th:text="${details.nombreDeGagnantAuRang5}">--</td><td th:text="${#numbers.formatDecimal(details.rapportDuRang5, 1, 'WHITESPACE', 2, 'COMMA')} + ' €'">--</td></tr>
-              <tr><td>6</td><td th:text="${details.nombreDeGagnantAuRang6}">--</td><td th:text="${#numbers.formatDecimal(details.rapportDuRang6, 1, 'WHITESPACE', 2, 'COMMA')} + ' €'">--</td></tr>
-              <tr><td>7</td><td th:text="${details.nombreDeGagnantAuRang7}">--</td><td th:text="${#numbers.formatDecimal(details.rapportDuRang7, 1, 'WHITESPACE', 2, 'COMMA')} + ' €'">--</td></tr>
-              <tr><td>8</td><td th:text="${details.nombreDeGagnantAuRang8}">--</td><td th:text="${#numbers.formatDecimal(details.rapportDuRang8, 1, 'WHITESPACE', 2, 'COMMA')} + ' €'">--</td></tr>
-              <tr><td>9</td><td th:text="${details.nombreDeGagnantAuRang9}">--</td><td th:text="${#numbers.formatDecimal(details.rapportDuRang9, 1, 'WHITESPACE', 2, 'COMMA')} + ' €'">--</td></tr>
-            </tbody>
-          </table>
-
-          <!-- CODES -->
-          <div th:if="${details.codesGagnants != null}">
-            <h3>Codes gagnants</h3>
-
-            <div class="codes-grid" th:with="codes=${#strings.arraySplit(details.codesGagnants, ',')}">
-              <span class="code-chip" th:each="c : ${codes}" th:text="${#strings.trim(c)}"></span>
-            </div>
-          </div>
-
         </div>
+        <div class="footer-link">
+          Retrouvez l’historique complet sur
+          <a href="https://loto-tracker.fr/">Loto Tracker</a>.
+        </div>
+
       </div>
 
       <div class="navigation">
         <a th:if="${prevIso != null}" th:href="@{'/tirage/' + ${prevIso}}">← Tirage précédent</a>
         <a th:if="${nextIso != null}" th:href="@{'/tirage/' + ${nextIso}}">Tirage suivant →</a>
       </div>
-
     </div>
 
   </main>
