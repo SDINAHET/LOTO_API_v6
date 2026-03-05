@@ -878,3 +878,4 @@ pip install "fastapi[standard]" uvicorn httpx pymongo python-dotenv
 git clone -b clean3 https://github.com/SDINAHET/LOTO_API_v6.git
 git clone -b clean8 https://github.com/SDINAHET/LOTO_API_v6.git
 
+git clone -b fix5_migration https://github.com/SDINAHET/LOTO_API_v6.git
