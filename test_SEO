@@ -1,0 +1,94 @@
+echo "=============================="
+echo "TEST STATUS PAGE"
+echo "=============================="
+curl -I http://localhost:8082/tirage/2026-03-28
+
+echo ""
+echo "=============================="
+echo "TEST TITLE"
+echo "=============================="
+curl -s http://localhost:8082/tirage/2026-03-28 | grep -i "<title>"
+
+echo ""
+echo "=============================="
+echo "TEST META DESCRIPTION"
+echo "=============================="
+curl -s http://localhost:8082/tirage/2026-03-28 | grep -i "meta name=\"description\""
+
+echo ""
+echo "=============================="
+echo "TEST CANONICAL"
+echo "=============================="
+curl -s http://localhost:8082/tirage/2026-03-28 | grep -i canonical
+
+echo ""
+echo "=============================="
+echo "TEST H1"
+echo "=============================="
+curl -s http://localhost:8082/tirage/2026-03-28 | grep "<h1"
+
+echo ""
+echo "=============================="
+echo "TEST BALISE TIME"
+echo "=============================="
+curl -s http://localhost:8082/tirage/2026-03-28 | grep "<time"
+
+echo ""
+echo "=============================="
+echo "TEST JSON-LD"
+echo "=============================="
+curl -s http://localhost:8082/tirage/2026-03-28 | grep -n "schema.org" -A 10
+
+echo ""
+echo "=============================="
+echo "TEST SITEMAP"
+echo "=============================="
+curl -s http://localhost:8082/sitemap.xml | head
+
+echo ""
+echo "=============================="
+echo "TEST SITEMAP TIRAGES"
+echo "=============================="
+curl -s http://localhost:8082/sitemap-tirages.xml | grep "<loc>" | head
+
+echo ""
+echo "=============================="
+echo "TEST PAGE SEO RESULTAT"
+echo "=============================="
+curl -I http://localhost:8082/resultat-loto-2026-03-28
+
+echo ""
+echo "=============================="
+echo "TEST PAGE SEO JOUR"
+echo "=============================="
+curl -I http://localhost:8082/tirage-loto-samedi-2026-03-28
+
+echo ""
+echo "=============================="
+echo "TEST PAGE FUTURE"
+echo "=============================="
+curl -I http://localhost:8082/tirage/2026-04-01
+
+echo ""
+echo "=============================="
+echo "TEST PAGE AUJOURD'HUI"
+echo "=============================="
+curl -I http://localhost:8082/resultat-loto-aujourdhui
+
+echo ""
+echo "=============================="
+echo "TEST PAGE HIER"
+echo "=============================="
+curl -I http://localhost:8082/resultat-loto-hier
+
+echo ""
+echo "=============================="
+echo "TEST PAGE PROCHAIN TIRAGE"
+echo "=============================="
+curl -I http://localhost:8082/prochain-tirage-loto
+
+echo ""
+echo "=============================="
+echo "TEST HTML PAGE"
+echo "=============================="
+curl -s http://localhost:8082/tirage/2026-03-28 | head -n 40

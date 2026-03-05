@@ -344,3 +344,19 @@ docker stats
 docker-compose avec Nginx LB (solution A),
 ![alt text](<ChatGPT Image 3 mars 2026, 17_26_13.png>)
 ![alt text](<ChatGPT Image 3 mars 2026, 17_26_00.png>)
+
+
+
+root@UID7E:/mnt/d/Users/steph/Documents/6ème trimestre/LOTO_API_v6# ss -ltnp | grep 8091
+sudo lsof -nP -iTCP:8091 -sTCP:LISTEN
+LISTEN 0      2048          0.0.0.0:8091       0.0.0.0:*    users:(("python3",pid=4993,fd=16))
+COMMAND  PID USER   FD   TYPE DEVICE SIZE/OFF NODE NAME
+python3 4993 root   16u  IPv4  46736      0t0  TCP *:8091 (LISTEN)
+root@UID7E:/mnt/d/Users/steph/Documents/6ème trimestre/LOTO_API_v6# sudo kill 4993
+root@UID7E:/mnt/d/Users/steph/Documents/6ème trimestre/LOTO_API_v6# ss -ltnp | grep 8091 || echo "8091 libre"
+8091 libre
+root@UID7E:/mnt/d/Users/steph/Documents/6ème trimestre/LOTO_API_v6# sudo kill 4993
+kill: (4993): No such process
+root@UID7E:/mnt/d/Users/steph/Documents/6ème trimestre/LOTO_API_v6# ss -ltnp | grep 8091 || echo "8091 libre"
+8091 libre
+root@UID7E:/mnt/d/Users/steph/Documents/6ème trimestre/LOTO_API_v6#

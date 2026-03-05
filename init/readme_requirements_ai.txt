@@ -11,7 +11,13 @@ pip install pymongo
 # python -m uvicorn ai:app --host 0.0.0.0 --port 8090
 
 pip install "fastapi[standard]" uvicorn httpx pymongo python-dotenv
-python -m uvicorn ai:app --host 0.0.0.0 --port 8090
+python3 -m uvicorn ai:app --host 0.0.0.0 --port 8090
+
+root@UID7E:/mnt/d/Users/steph/Documents/6ème trimestre/LOTO_API_v6# OLLAMA_BASE="http://127.0.0.1:11434" MONGO_URI="mongodb://127.0.0.1:27017" uvicorn ai:app --host 0.0.0.0 --port 8091 --reload
+http://localhost:8091/ai/latest-draw
+http://172.18.71.179:8091/ai/latest-draw
+
+
 
 http://localhost:8091/
 curl -i http://localhost:8091/

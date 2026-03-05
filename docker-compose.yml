@@ -252,7 +252,7 @@ services:
       - ollama_data:/root/.ollama
     # ✅ Limites mémoire: "deploy:" n'est pas appliqué par docker compose classique.
     # Utilise plutôt mem_limit.
-    mem_limit: 8g
+    mem_limit: 20g
 
 volumes:
   mongodb_data:

@@ -32,15 +32,18 @@
   <meta name="twitter:description" th:content="${seoDescription}">
 
   <!-- ✅ JSON-LD -->
-  <script type="application/ld+json" th:inline="javascript">
+  <!-- <script type="application/ld+json" th:inline="javascript"> -->
+  <script type="application/ld+json"
+        th:attr="nonce=${cspNonce}"
+        th:inline="javascript">
   [
     {
       "@context": "https://schema.org",
       "@type": "Event",
-      "name": [[${'Résultat Loto Français du ' + dateFr}]],
-      "eventStatus": [[${isPending}]] ? "https://schema.org/EventScheduled" : "https://schema.org/EventCompleted",
+      "name": [[${'Résultat Loto Français du ' + dateFrSeo}]],
+      "eventStatus": [[${eventStatusUrl}]],
       "startDate": [[${startDateIso}]],
-      "eventAttendanceMode": "https://schema.org/OfflineEventAttendanceMode",
+      "eventAttendanceMode": "https://schema.org/OnlineEventAttendanceMode",
 
       "location": {
         "@type": "Place",
@@ -61,7 +64,7 @@
       },
 
       "image": "https://loto-tracker.fr/assets/img/loto_tracker.png",
-      "description": [[${seoDescription}]]
+      "description": "[[${seoDescription}]]"
     },
     {
       "@context": "https://schema.org",
@@ -95,11 +98,16 @@
     <div class="container">
       <div class="card">
 
-        <h1 th:text="'Résultat Loto du ' + ${dateFr}">Résultat Loto</h1>
 
-        <a href="/dernier-tirage" class="btn-close">Dernier tirage</a>
+        <!-- ✅ H1 simple (facile à détecter par tous les checkers) -->
+        <h1 th:text="${seoH1}">
+          Résultat Loto (FDJ) : tirage du --
+        </h1>
 
-        <p class="subtitle" th:text="'Tirage du ' + ${dateFr}"></p>
+        <!-- ✅ On garde le time tag pour le SEO sémantique, mais hors H1 -->
+        <p class="subtitle">
+          Tirage du <time th:datetime="${dateIso}" th:text="${dateFr}"></time>
+        </p>
 
         <!-- ✅ Tirage en attente (page 200 même si pas en base) -->
         <div th:if="${isPending}" class="pending-box">

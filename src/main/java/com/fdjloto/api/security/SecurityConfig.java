@@ -25,6 +25,13 @@ import org.springframework.security.config.annotation.web.configurers.HeadersCon
 // import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+
+// import main.java.com.fdjloto.api.security.CspNonceFilter;
+
+// import main.java.com.fdjloto.api.security.CspNonceFilter;
+// import com.fdjloto.api.security.CspNonceFilter;
+import com.fdjloto.api.security.CspNonceFilter;
+
 import java.util.Arrays;
 import java.util.List;
 
@@ -32,6 +39,8 @@ import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 import org.springframework.security.web.csrf.CsrfTokenRequestAttributeHandler;
 
 import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
+
+import org.springframework.security.web.header.HeaderWriterFilter;
 
 
 @Configuration
@@ -67,41 +76,71 @@ public class SecurityConfig {
                 // .headers(headers -> headers
                 //         .frameOptions(HeadersConfigurer.FrameOptionsConfig::sameOrigin)
                 // )
+                // .headers(headers -> headers
+                //     // Autoriser iframe seulement même origine (utile si tu embed swagger/admin)
+                //     .frameOptions(HeadersConfigurer.FrameOptionsConfig::sameOrigin)
+
+                //     // Empêche le MIME sniffing
+                //     .contentTypeOptions(Customizer.withDefaults())
+
+                //     // Referrer policy (évite fuite d’URL sensibles)
+                //     .referrerPolicy(ref -> ref.policy(
+                //         org.springframework.security.web.header.writers.ReferrerPolicyHeaderWriter.ReferrerPolicy.NO_REFERRER
+                //     ))
+
+                //     // CSP (anti-XSS / anti-script externe)
+                //     .contentSecurityPolicy(csp -> csp.policyDirectives(
+                //         "default-src 'self'; " +
+                //         // "script-src 'self'; " +
+                //         "script-src 'self' 'nonce-{nonce}'; " +
+                //         // "script-src 'self' 'unsafe-inline'; " +
+                //         "style-src 'self' 'unsafe-inline'; " +
+                //         // "style-src 'self'; " +
+                //         "img-src 'self' data:; " +
+                //         "font-src 'self'; " +
+                //         // "connect-src 'self' https://stephanedinahet.fr https://www.stephanedinahet.fr http://localhost:8082; " +
+                //         "connect-src 'self' http://localhost:8082 http://127.0.0.1:8082 https://stephanedinahet.fr https://www.stephanedinahet.fr https://loto-tracker.fr https://www.loto-tracker.fr; " +
+                //         "frame-ancestors 'self'; " +
+                //         "base-uri 'self'; " +
+                //         "form-action 'self'"
+                //     ))
                 .headers(headers -> headers
-                    // Autoriser iframe seulement même origine (utile si tu embed swagger/admin)
                     .frameOptions(HeadersConfigurer.FrameOptionsConfig::sameOrigin)
-
-                    // Empêche le MIME sniffing
                     .contentTypeOptions(Customizer.withDefaults())
-
-                    // Referrer policy (évite fuite d’URL sensibles)
                     .referrerPolicy(ref -> ref.policy(
                         org.springframework.security.web.header.writers.ReferrerPolicyHeaderWriter.ReferrerPolicy.NO_REFERRER
                     ))
+                    .addHeaderWriter((request, response) -> {
+                        String nonce = (String) request.getAttribute(CspNonceFilter.ATTR_NAME);
+                        if (nonce == null) return;
 
-                    // CSP (anti-XSS / anti-script externe)
-                    .contentSecurityPolicy(csp -> csp.policyDirectives(
-                        "default-src 'self'; " +
-                        "script-src 'self'; " +
-                        // "script-src 'self' 'unsafe-inline'; " +
-                        "style-src 'self' 'unsafe-inline'; " +
-                        // "style-src 'self'; " +
-                        "img-src 'self' data:; " +
-                        "font-src 'self'; " +
-                        // "connect-src 'self' https://stephanedinahet.fr https://www.stephanedinahet.fr http://localhost:8082; " +
-                        "connect-src 'self' http://localhost:8082 http://127.0.0.1:8082 https://stephanedinahet.fr https://www.stephanedinahet.fr https://loto-tracker.fr https://www.loto-tracker.fr; " +
-                        "frame-ancestors 'self'; " +
-                        "base-uri 'self'; " +
-                        "form-action 'self'"
-                    ))
+                        String csp =
+                            "default-src 'self'; " +
+                            "script-src 'self' 'nonce-" + nonce + "'; " +
+                            "style-src 'self' 'unsafe-inline'; " +
+                            "img-src 'self' data:; " +
+                            "font-src 'self'; " +
+                            "connect-src 'self' http://localhost:8082 http://127.0.0.1:8082 https://stephanedinahet.fr https://www.stephanedinahet.fr https://loto-tracker.fr https://www.loto-tracker.fr; " +
+                            "frame-ancestors 'self'; " +
+                            "base-uri 'self'; " +
+                            "form-action 'self'";
 
-                    // HSTS (uniquement si tu es en HTTPS en prod)
+                        response.setHeader("Content-Security-Policy", csp);
+                    })
                     .httpStrictTransportSecurity(hsts -> hsts
                         .includeSubDomains(true)
                         .preload(true)
                         .maxAgeInSeconds(31536000)
                     )
                 )
+
+                    // HSTS (uniquement si tu es en HTTPS en prod)
+                    // .httpStrictTransportSecurity(hsts -> hsts
+                    //     .includeSubDomains(true)
+                    //     .preload(true)
+                    //     .maxAgeInSeconds(31536000)
+                    // )
+
 
                 // .headers(headers -> headers
                 //     .frameOptions(frame -> frame.sameOrigin()) // ✅ Autoriser les iframes depuis la même origine
@@ -205,14 +244,56 @@ public class SecurityConfig {
                         // =====================
                         // 🔓 PAGES SEO PUBLIQUES (GET + HEAD)
                         // =====================
+                        // .requestMatchers(HttpMethod.GET,  "/dernier-tirage/**").permitAll()
+                        // .requestMatchers(HttpMethod.HEAD, "/dernier-tirage/**").permitAll()
+
+                        // .requestMatchers(HttpMethod.GET,  "/tirage/**").permitAll()
+                        // .requestMatchers(HttpMethod.HEAD, "/tirage/**").permitAll()
+
+                        // .requestMatchers(HttpMethod.GET,  "/sitemap.xml", "/robots.txt").permitAll()
+                        // .requestMatchers(HttpMethod.HEAD, "/sitemap.xml", "/robots.txt").permitAll()
+                        // =====================
+                        // 🔓 PAGES SEO PUBLIQUES (GET + HEAD)
+                        // =====================
                         .requestMatchers(HttpMethod.GET,  "/dernier-tirage/**").permitAll()
                         .requestMatchers(HttpMethod.HEAD, "/dernier-tirage/**").permitAll()
 
                         .requestMatchers(HttpMethod.GET,  "/tirage/**").permitAll()
                         .requestMatchers(HttpMethod.HEAD, "/tirage/**").permitAll()
 
+                        // ✅ SITEMAPS COMPLETS (il te manquait ceux-là)
                         .requestMatchers(HttpMethod.GET,  "/sitemap.xml", "/robots.txt").permitAll()
                         .requestMatchers(HttpMethod.HEAD, "/sitemap.xml", "/robots.txt").permitAll()
+
+                        .requestMatchers(HttpMethod.GET,  "/sitemap-tirages.xml", "/sitemap-pages.xml", "/sitemap-static.xml").permitAll()
+                        .requestMatchers(HttpMethod.HEAD, "/sitemap-tirages.xml", "/sitemap-pages.xml", "/sitemap-static.xml").permitAll()
+
+                        // ✅ URLS SEO “alias” (il te manquait celles-là)
+                        .requestMatchers(HttpMethod.GET,  "/resultat-loto-*").permitAll()
+                        .requestMatchers(HttpMethod.HEAD, "/resultat-loto-*").permitAll()
+
+                        .requestMatchers(HttpMethod.GET,  "/tirage-loto-*").permitAll()
+                        .requestMatchers(HttpMethod.HEAD, "/tirage-loto-*").permitAll()
+
+                        // ✅ Pages SEO “dynamiques”
+                        .requestMatchers(HttpMethod.GET,  "/resultat-loto-aujourdhui", "/resultat-loto-hier", "/prochain-tirage-loto").permitAll()
+                        .requestMatchers(HttpMethod.HEAD, "/resultat-loto-aujourdhui", "/resultat-loto-hier", "/prochain-tirage-loto").permitAll()
+
+                        // ✅ Variantes avec slash
+                        .requestMatchers(HttpMethod.GET,  "/tirage-loto/**").permitAll()
+                        .requestMatchers(HttpMethod.HEAD, "/tirage-loto/**").permitAll()
+
+                        // ✅ Si tu as des alias du type /tirage-loto-samedi/2026-03-28
+                        .requestMatchers(HttpMethod.GET,  "/tirage-loto-*/**").permitAll()
+                        .requestMatchers(HttpMethod.HEAD, "/tirage-loto-*/**").permitAll()
+
+                        // ✅ Si tu as des alias du type /resultat-loto-YYYY-MM-DD/... (au cas où)
+                        .requestMatchers(HttpMethod.GET,  "/resultat-loto-*/**").permitAll()
+                        .requestMatchers(HttpMethod.HEAD, "/resultat-loto-*/**").permitAll()
+
+                        // ✅ Si tu as /prochain-tirage (tu le testes)
+                        .requestMatchers(HttpMethod.GET,  "/prochain-tirage", "/prochain-tirage/**").permitAll()
+                        .requestMatchers(HttpMethod.HEAD, "/prochain-tirage", "/prochain-tirage/**").permitAll()
 
                         // =====================
                         // 🔓 RESSOURCES STATIQUES (GET + HEAD)
@@ -220,6 +301,9 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET,  "/css/**", "/js/**", "/images/**", "/assets/**").permitAll()
                         .requestMatchers(HttpMethod.HEAD, "/css/**", "/js/**", "/images/**", "/assets/**").permitAll()
 
+                        .requestMatchers(HttpMethod.GET, "/ai/**").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/ai/**").permitAll()
+                        .requestMatchers(HttpMethod.OPTIONS, "/ai/**").permitAll()
 
                         // ✅ CORS preflight
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
@@ -324,6 +408,7 @@ public class SecurityConfig {
                 // .oauth2ResourceServer(oauth2 -> oauth2.jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationConverter())));
                 // .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) // 🔴 JWT = stateless
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)  // 🔐 Ajoute le filtre JWT
+                .addFilterBefore(new CspNonceFilter(), HeaderWriterFilter.class)
                 // .httpBasic(httpBasic -> {})   // ✅ Active HTTP Basic (popup login/mdp du navigateur)
                 .build();
     }

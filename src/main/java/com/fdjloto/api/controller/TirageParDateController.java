@@ -114,6 +114,47 @@ public class TirageParDateController {
         this.detailService = detailService;
     }
 
+
+@GetMapping("/resultat-loto-{date}")
+public String resultatLotoSeo(@PathVariable String date, Model model) {
+    // ex: /resultat-loto-2026-03-04
+    return tirageParDate(date, model);
+}
+
+@GetMapping("/tirage-loto-{jour}-{date}")
+public String tirageLotoJourSeo(
+        @PathVariable String jour,
+        @PathVariable String date,
+        Model model) {
+
+    // ex: /tirage-loto-samedi-2026-03-07
+    // On accepte aussi sans vérifier le slug "jour" pour éviter les 404 inutiles SEO
+    // (ou tu peux le valider si tu veux être strict)
+    return tirageParDate(date, model);
+}
+
+@GetMapping("/resultat-loto-aujourdhui")
+public String resultatLotoAujourdhui(Model model) {
+    LocalDate d = effectiveTodayForDraws();
+    LocalDate draw = nearestDrawOnOrAfter(d);
+    return tirageParDate(draw.toString(), model);
+}
+
+@GetMapping("/resultat-loto-hier")
+public String resultatLotoHier(Model model) {
+    LocalDate d = effectiveTodayForDraws().minusDays(1);
+    LocalDate draw = nearestDrawOnOrBefore(d);
+    return tirageParDate(draw.toString(), model);
+}
+
+@GetMapping("/prochain-tirage-loto")
+public String prochainTirage(Model model) {
+    LocalDate d = effectiveTodayForDraws();
+    LocalDate draw = nearestDrawOnOrAfter(d);
+    return tirageParDate(draw.toString(), model);
+}
+
+
 @GetMapping("/tirage/{date}")
 public String tirageParDate(@PathVariable String date, Model model) {
 
@@ -145,12 +186,23 @@ public String tirageParDate(@PathVariable String date, Model model) {
     String startDateIso = ld.atTime(20, 0).atZone(paris).format(DateTimeFormatter.ISO_OFFSET_DATE_TIME);
     String pageUrl = "https://loto-tracker.fr/tirage/" + date;
 
+    // ✅ Date SEO courte (sans le jour)
+    String dateFrSeo = ld.format(DateTimeFormatter.ofPattern("d MMMM yyyy", Locale.FRENCH));
+
+    // ✅ Event status prêt pour le JSON-LD
+    String eventStatusUrl = detailsOpt.isEmpty()
+            ? "https://schema.org/EventScheduled"
+            : "https://schema.org/EventCompleted";
+
     // 4) Cas FUTUR / pas en base => 200 + page "en attente"
     if (detailsOpt.isEmpty()) {
         model.addAttribute("details", null);
         model.addAttribute("isPending", true);
 
         model.addAttribute("dateFr", dateFr);
+        model.addAttribute("dateFrSeo", dateFrSeo);          // ✅ AJOUT
+        model.addAttribute("eventStatusUrl", eventStatusUrl); // ✅ AJOUT
+
         model.addAttribute("dateIso", date);
         model.addAttribute("startDateIso", startDateIso);
         model.addAttribute("pageUrl", pageUrl);
@@ -171,6 +223,8 @@ public String tirageParDate(@PathVariable String date, Model model) {
     model.addAttribute("isPending", false);
 
     model.addAttribute("dateFr", dateFr);
+    model.addAttribute("dateFrSeo", dateFrSeo);           // ✅ AJOUT
+    model.addAttribute("eventStatusUrl", eventStatusUrl); // ✅ AJOUT
     model.addAttribute("dateIso", date);
     model.addAttribute("startDateIso", startDateIso);
     model.addAttribute("pageUrl", pageUrl);
@@ -206,4 +260,35 @@ private LocalDate previousDrawDay(LocalDate d) {
     }
     return x;
 }
+
+
+
+private LocalDate effectiveTodayForDraws() {
+    // ✅ après 20h35 (heure officielle), on considère que "aujourd'hui" SEO devient demain
+    ZoneId paris = ZoneId.of("Europe/Paris");
+    LocalDate today = LocalDate.now(paris);
+    LocalTime now = LocalTime.now(paris);
+    if (now.isAfter(LocalTime.of(20, 35))) {
+        return today.plusDays(1);
+    }
+    return today;
+}
+
+private boolean isDrawDay(LocalDate d) {
+    DayOfWeek day = d.getDayOfWeek();
+    return day == DayOfWeek.MONDAY || day == DayOfWeek.WEDNESDAY || day == DayOfWeek.SATURDAY;
+}
+
+private LocalDate nearestDrawOnOrAfter(LocalDate start) {
+    LocalDate d = start;
+    while (!isDrawDay(d)) d = d.plusDays(1);
+    return d;
+}
+
+private LocalDate nearestDrawOnOrBefore(LocalDate start) {
+    LocalDate d = start;
+    while (!isDrawDay(d)) d = d.minusDays(1);
+    return d;
+}
+
 }

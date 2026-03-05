@@ -22,7 +22,8 @@ public class CspNonceFilter extends OncePerRequestFilter {
         // nonce = base64 (sans caractères chelous)
         byte[] bytes = new byte[16];
         RNG.nextBytes(bytes);
-        String nonce = Base64.getEncoder().encodeToString(bytes);
+        // String nonce = Base64.getEncoder().encodeToString(bytes);
+        String nonce = Base64.getUrlEncoder().withoutPadding().encodeToString(bytes);
 
         request.setAttribute(ATTR_NAME, nonce);
 

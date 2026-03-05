@@ -20,6 +20,7 @@ import logging
 from logging.handlers import RotatingFileHandler
 
 
+
 # -----------------------------
 # Config
 # -----------------------------
@@ -128,12 +129,14 @@ allow_origins = [
     "http://localhost:5500",
     "http://127.0.0.1:5500",
     "https://stephanedinahet.fr",
+    "https://loto-tracker.fr",
+    "https://www.loto-tracker.fr",
 ]
 
 app.add_middleware(
     CORSMiddleware,
     allow_origins=allow_origins,
-    allow_credentials=True,   # ✅ requis si ton front envoie credentials: "include"
+    allow_credentials=True,   # ✅ TRUE requis si ton front envoie credentials: "include"
     allow_methods=["*"],
     allow_headers=["*"],
 )

@@ -16,7 +16,8 @@
     (() => {
     const HOST = location.hostname;
 
-    const PROD_DOMAINS = ["stephanedinahet.fr", "loto-tracker.fr"];
+    // const PROD_DOMAINS = ["stephanedinahet.fr", "loto-tracker.fr"];
+    const PROD_DOMAINS = ["loto-tracker.fr"];
 
     const IS_PROD = PROD_DOMAINS.some(d =>
       HOST === d || HOST === `www.${d}` || HOST.endsWith(`.${d}`)

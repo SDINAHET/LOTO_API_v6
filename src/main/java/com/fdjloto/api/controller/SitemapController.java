@@ -888,6 +888,8 @@ public class SitemapController {
                     changefreq,
                     priority
             );
+            // ✅ AJOUT : pages SEO alias
+            appendSeoAliasesForDate(sb, iso, iso, changefreq, priority);
 
             pastAdded++;
             if (pastAdded >= MAX_PAST_DRAWS_IN_SITEMAP) break;
@@ -913,6 +915,8 @@ public class SitemapController {
                     "daily",
                     "0.8"
             );
+            // ✅ AJOUT : pages SEO alias (future)
+            appendSeoAliasesForDate(sb, iso, today.toString(), "daily", "0.8");
 
             futureAdded++;
         }
@@ -929,6 +933,38 @@ public class SitemapController {
         DayOfWeek day = ld.getDayOfWeek();
         return day == DayOfWeek.MONDAY || day == DayOfWeek.WEDNESDAY || day == DayOfWeek.SATURDAY;
     }
+
+
+    private String daySlugFr(LocalDate d) {
+        // slugs simples qui rankent bien
+        return switch (d.getDayOfWeek()) {
+            case MONDAY -> "lundi";
+            case WEDNESDAY -> "mercredi";
+            case SATURDAY -> "samedi";
+            default -> "jour";
+        };
+    }
+
+    private void appendSeoAliasesForDate(StringBuilder sb, String isoDate, String lastmod, String changefreq, String priority) {
+
+        // ✅ Alias 1 : "resultat loto yyyy-mm-dd"
+        appendUrl(sb,
+                BASE_URL + "/resultat-loto-" + isoDate,
+                lastmod,
+                changefreq,
+                priority
+        );
+
+        // ✅ Alias 2 (optionnel) : "tirage loto samedi yyyy-mm-dd"
+        String slug = daySlugFr(LocalDate.parse(isoDate));
+        appendUrl(sb,
+                BASE_URL + "/tirage-loto-" + slug + "-" + isoDate,
+                lastmod,
+                changefreq,
+                priority
+        );
+    }
+
 
     private void appendUrl(StringBuilder sb, String loc, String lastmod, String changefreq, String priority) {
         sb.append("<url>");
