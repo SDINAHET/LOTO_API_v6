@@ -17,7 +17,12 @@ root@UID7E:/mnt/d/Users/steph/Documents/6ème trimestre/LOTO_API_v6# OLLAMA_BASE
 http://localhost:8091/ai/latest-draw
 http://172.18.71.179:8091/ai/latest-draw
 
-
+Dépannage demarrage service Ai apres une erreur 500:
+```bash
+OLLAMA_BASE="http://127.0.0.1:11434"\
+MONGO_URI="mongodb://127.0.0.1:27017" \
+uvicorn ai:app --host 0.0.0.0 --port 8091 --reload
+```
 
 http://localhost:8091/
 curl -i http://localhost:8091/
